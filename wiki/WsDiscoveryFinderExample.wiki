@@ -1,0 +1,59 @@
+{{{
+public class discovery_using_finder {
+    public static void main(String[] args)
+            throws InterruptedException, WsDiscoveryNetworkException, WsDiscoveryException {
+
+        // Create new finder instance. 
+        System.out.println("Creating new finder-instance...");
+        WsDiscoveryFinder finder = new WsDiscoveryFinder();
+
+        /**
+         * Search for a specific service
+         */
+        {
+            // Describe the port type of the service we are looking for. Namespace is optional.
+            QName myPortType = new QName("http://calculator.me.org/", "CalculatorService");
+
+            // Search for with 5 second timeout...
+            System.out.println("Searching for service with port type \"" + myPortType.toString() + "\"");
+            WsDiscoveryServiceDirectory result = finder.find(myPortType, 5000);
+
+            // Display the results.
+            {
+                System.out.println("** Discovered services: **");
+
+                for (int i = 0; i < result.size(); i++) {
+                    // Print service info
+                    System.out.println(result.get(i).toString());
+
+                    System.out.println("---");
+                }
+            }
+        }
+
+         /** 
+         * Search for any service
+         */
+
+        {
+            System.out.println("Searching for all services (2 sec).");
+            WsDiscoveryServiceDirectory result = finder.findAll(2000);
+
+            // Display the results.
+            {
+                System.out.println("** Discovered services: **");
+
+                for (int i = 0; i < result.size(); i++) {
+                    // Print service info
+                    System.out.println(result.get(i).toString());
+
+                    System.out.println("---");
+                }
+            }
+        }
+
+        // Stop finder 
+        finder.done();
+    }
+}
+}}}
