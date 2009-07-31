@@ -49,7 +49,7 @@ public class discovery_using_finder {
          */
         {
             // Describe the port type of the service we are looking for. Namespace is optional.
-            QName myPortType = new QName("http://calculator.me.org/", "CalculatorService");
+            QName myPortType = new QName("http://calculatorservice.examples.wsdiscovery.ms.com/", "CalculatorService");
 
             // Search for with 5 second timeout...
             System.out.println("Searching for service with port type \"" + myPortType.toString() + "\"");
