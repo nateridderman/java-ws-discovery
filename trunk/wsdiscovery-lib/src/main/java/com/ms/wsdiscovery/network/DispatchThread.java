@@ -604,7 +604,9 @@ public class DispatchThread extends Thread {
         try {
             m = soapBuilder.createWsdSOAPMessage(message.getMessage());
         } catch (WsDiscoveryXMLException ex) {
-            throw new WsDiscoveryNetworkException("Unable to create WS-Discovery SOAP message.");
+            WsDiscoveryNetworkException wex = new WsDiscoveryNetworkException("Unable to create WS-Discovery SOAP message.");
+            wex.initCause(ex);
+            throw wex;
         }             
         
         // Return if the message was from us

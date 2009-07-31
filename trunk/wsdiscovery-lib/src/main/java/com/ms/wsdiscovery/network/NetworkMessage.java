@@ -21,7 +21,6 @@ package com.ms.wsdiscovery.network;
 import java.net.InetAddress;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.nio.ByteBuffer;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.xml.soap.WsdSOAPMessage;
@@ -103,7 +102,7 @@ public class NetworkMessage {
      * @param dstPort Destination port
      */
     public NetworkMessage(String message, InetAddress srcAddress, int srcPort, InetAddress dstAddress, int dstPort) {
-        this(WsDiscoveryConstants.defaultEncoding.encode(message).array(), 
+        this(message.getBytes(WsDiscoveryConstants.defaultEncoding),
              srcAddress, srcPort, dstAddress, dstPort);
     }
     
@@ -117,7 +116,7 @@ public class NetworkMessage {
      * @param message String representing the payload. The string will be converted to an array of bytes with the encoding specified in WsDiscoveryConstants.defaultEncoding.
      */
     public NetworkMessage(String message) {
-        this(WsDiscoveryConstants.defaultEncoding.encode(message).array(), 
+        this(message.getBytes(WsDiscoveryConstants.defaultEncoding),
              null, 0, WsDiscoveryConstants.multicastAddress, WsDiscoveryConstants.multicastPort);
     }
     
@@ -174,7 +173,7 @@ public class NetworkMessage {
      * @return String representation of payload
      */
     public String getMessage() {
-        return new String(WsDiscoveryConstants.defaultEncoding.decode(ByteBuffer.wrap(payload)).array());
+        return new String(payload, 0, payloadLen, WsDiscoveryConstants.defaultEncoding);
     }        
     
     /**
@@ -184,7 +183,7 @@ public class NetworkMessage {
      * @param newMessage Payload represented as a string.
      */
     public synchronized void setMessage(String newMessage) {
-        payload = WsDiscoveryConstants.defaultEncoding.encode(newMessage).array();
+        setPayload(newMessage.getBytes(WsDiscoveryConstants.defaultEncoding));
     }
     
     /**
@@ -287,10 +286,8 @@ public class NetworkMessage {
         } catch (NoSuchAlgorithmException ex) {
             throw new WsDiscoveryNetworkException("Unable to create instance of MD5 message digest.");
         }
-        
-        digest.update(payload, 0, payloadLen);
 
-        return digest.digest();
+        return digest.digest(payload);
     }
     
     /**
