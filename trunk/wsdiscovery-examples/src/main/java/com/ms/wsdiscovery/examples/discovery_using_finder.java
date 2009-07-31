@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.examples;
 
-import com.ms.wsdiscovery.WsDiscoveryConstants;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryFinder;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
