@@ -150,9 +150,9 @@ public class WsdXMLBuilder extends ObjectFactory {
         
         if ((er.getPortType() != null) && (er.getPortType().getValue() != null))
             endpointReference.setPortType(createAttributedQName(
-                                new QName(endpointReference.getPortType().getValue().getNamespaceURI(),
-                                    endpointReference.getPortType().getValue().getLocalPart(),
-                                    endpointReference.getPortType().getValue().getPrefix())));
+                                new QName(er.getPortType().getValue().getNamespaceURI(),
+                                    er.getPortType().getValue().getLocalPart(),
+                                    er.getPortType().getValue().getPrefix())));
         
         if ((er.getReferenceParameters() != null) && (er.getReferenceParameters().getAny() != null)) {
             ReferenceParametersType rp = new ReferenceParametersType();
@@ -167,7 +167,10 @@ public class WsdXMLBuilder extends ObjectFactory {
         
         if ((er.getServiceName() != null)) {
             ServiceNameType sn = new ServiceNameType();
-            sn.setPortName(er.getServiceName().getPortName());
+
+            if (er.getServiceName().getPortName() != null)
+                sn.setPortName(er.getServiceName().getPortName());
+
             if (er.getServiceName().getValue() != null)
                 sn.setValue(new QName(er.getServiceName().getValue().getNamespaceURI(),
                         er.getServiceName().getValue().getLocalPart(),
@@ -175,6 +178,8 @@ public class WsdXMLBuilder extends ObjectFactory {
             
             if (er.getServiceName().getOtherAttributes() != null)
                 sn.getOtherAttributes().putAll(er.getServiceName().getOtherAttributes());
+
+            endpointReference.setServiceName(sn);
         }   
         
         return endpointReference;
