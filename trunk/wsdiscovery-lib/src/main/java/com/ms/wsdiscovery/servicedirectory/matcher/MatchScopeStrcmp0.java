@@ -21,6 +21,7 @@ package com.ms.wsdiscovery.servicedirectory.matcher;
 
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
+import java.net.URI;
 
 /**
  * Match scope against target service using the string comparison.
@@ -40,6 +41,19 @@ public class MatchScopeStrcmp0 implements IMatchScope {
             return true;
         
         // "Using a case-sensitive comparison, the string representation of S1 and S2 is the same"        
-        return target.getScopesValues().containsAll(probeScopes.getValue());
+        boolean found = false;
+        for (String s : probeScopes.getValue()) {
+            found = false;
+            for (URI u : target.getScopesValues())
+                if (u.toString().equals(s)) {
+                    found = true;
+                    continue;
+                }
+            if (!found)
+                break;
+        }
+
+
+        return found;
     }
 }
