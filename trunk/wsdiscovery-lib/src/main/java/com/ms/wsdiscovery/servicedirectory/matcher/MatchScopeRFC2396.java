@@ -68,18 +68,21 @@ public class MatchScopeRFC2396 implements IMatchScope {
      */
     protected boolean matchURIByRFC2396(URI target, URI probe) {
         // See WsDiscovery, section 5.1 for details
-        if (target.getScheme().toUpperCase().equals(probe.getScheme().toUpperCase())) // Compare scheme
+        if (((target != null) && (probe != null)) && // Fail if one or both of the parameters are null
+            ((target.getScheme() != null) && (probe.getScheme() != null)) && // Fail if the scheme is not set
+            (target.getScheme().toUpperCase().equals(probe.getScheme().toUpperCase()))) // Compare scheme
                 if (target.getAuthority().toUpperCase().equals(probe.getAuthority().toUpperCase())) { // Compare server (authority)
                     String[] targetsegments = target.getPath().split("/"); // Split path into segments
-                    String[] probesegments = target.getPath().split("/");
+                    String[] probesegments = probe.getPath().split("/");
                     
                     if (probesegments.length <= targetsegments.length) { // If probe has more segments than target, a match is not possible
-                        for (int i = 0; i < probesegments.length-1; i++) // Check if each segment in probe matches a segment in target
+                        for (int i = 0; i < probesegments.length; i++) // Check if each segment in probe matches a segment in target
                             if (!probesegments[i].equals(targetsegments[i])) 
                                 return false;
                             // I.e http://example.com/abc matches http://example.com/abc/def, 
                             // but http://example.com/a does not.
-                    }
+                    } else
+                        return false;
                     
                     // If we get here, all tests are ok - return true
                     return true;
