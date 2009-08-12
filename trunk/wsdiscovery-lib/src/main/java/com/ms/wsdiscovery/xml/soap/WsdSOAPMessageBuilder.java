@@ -35,7 +35,8 @@ import com.ms.wsdiscovery.xml.jaxb_generated.ResolveMatchesType;
 import com.ms.wsdiscovery.xml.jaxb_generated.ResolveType;
 
 /**
- * Helper methods for WS-Discovery SOAP message building.
+ * Helper methods for WS-Discovery SOAP message building. This method is not static
+ * because it has to extend the automatically generated ObjectFactory.
  * 
  * @author Magnus Skjegstad
  */
