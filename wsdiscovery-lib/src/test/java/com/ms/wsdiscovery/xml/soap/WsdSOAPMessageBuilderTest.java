@@ -6,7 +6,6 @@
 package com.ms.wsdiscovery.xml.soap;
 
 import com.ms.wsdiscovery.WsDiscoveryBuilder;
-import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.xml.jaxb_generated.EndpointReferenceType;
 import com.ms.wsdiscovery.xml.jaxb_generated.HelloType;
