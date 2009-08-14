@@ -21,6 +21,8 @@ package com.ms.wsdiscovery;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
@@ -54,7 +56,7 @@ public class WsDiscoveryServer extends DispatchThread {
      * @throws WsDiscoveryServiceDirectoryException on failure to store service in the service directory.
      */
     public void publish(WsDiscoveryService service) throws WsDiscoveryServiceDirectoryException {
-        getLocalServices().store(service);
+        getLocalServiceDirectory().store(service);
         synchronized (this) {
             sendHello(service);
         }
@@ -78,7 +80,7 @@ public class WsDiscoveryServer extends DispatchThread {
      * @param address Endpoint address.
      */
     public void unpublish(String address) {
-        unpublish(getLocalServices().findService(address));        
+        unpublish(getLocalServiceDirectory().findService(address));
     }
     
     /**
@@ -90,7 +92,7 @@ public class WsDiscoveryServer extends DispatchThread {
         synchronized (this) {
             sendBye(service);
         }
-        getLocalServices().remove(service);
+        getLocalServiceDirectory().remove(service);
     }
     
     /**
@@ -168,7 +170,7 @@ public class WsDiscoveryServer extends DispatchThread {
             try {
                 enableProxyAnnouncements();
             } catch (WsDiscoveryServiceDirectoryException ex) {
-                throw new WsDiscoveryException("Unable to initialize proxy service.");
+                throw new WsDiscoveryException("Unable to initialize proxy service.", ex);
             }
         }
     }
@@ -189,9 +191,13 @@ public class WsDiscoveryServer extends DispatchThread {
      * Unpublish all services and stop.
      */
     @Override
-    public void done() {
-        for (int i = 0; i < getLocalServices().size(); i++)
-            unpublish(getLocalServices().get(i));
+    public void done() throws WsDiscoveryException {
+        try {
+            for (WsDiscoveryService service : getLocalServiceDirectory().matchAll())
+                unpublish(service);
+        } catch (WsDiscoveryServiceDirectoryException ex) {
+            throw new WsDiscoveryException("Unable to unpublish all services.", ex);
+        }
         super.done(); 
     }
 }

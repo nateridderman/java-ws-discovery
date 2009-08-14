@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.network.transport;
 
+import com.ms.wsdiscovery.network.transport.interfaces.ITransportType;
 import com.ms.wsdiscovery.network.transport.soapudp.SOAPOverUDP;
 import com.ms.wsdiscovery.network.transport.soapudp.zlib.SOAPOverUDPzlib;
 

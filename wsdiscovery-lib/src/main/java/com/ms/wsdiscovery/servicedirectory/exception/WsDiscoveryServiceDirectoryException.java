@@ -19,12 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.servicedirectory.exception;
 
+import com.ms.wsdiscovery.exception.WsDiscoveryException;
+
 /**
  * Base class for exceptions in the servicedirectory package.
  * 
  * @author Magnus Skjegstad
  */
-public class WsDiscoveryServiceDirectoryException extends Exception {
+public class WsDiscoveryServiceDirectoryException extends WsDiscoveryException {
 
     /**
      * Creates a new instance of <code>WsDiscoveryServiceDirectoryException</code> without detail message.
@@ -39,5 +41,14 @@ public class WsDiscoveryServiceDirectoryException extends Exception {
      */
     public WsDiscoveryServiceDirectoryException(String msg) {
         super(msg);
+    }
+
+    /**
+     * Constructs an instance of <code>WsDiscoveryServiceDirectoryException</code> with the specified detail message.
+     * @param msg the detail message.
+     * @param cause the throwable that caused the exception.
+     */
+    public WsDiscoveryServiceDirectoryException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 }

@@ -28,8 +28,9 @@ import javax.xml.ws.Service;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 
 /**
@@ -96,10 +97,11 @@ public class WsDiscoveryFinder {
     
     /**
      * Stops the running WS-Discovery thread.
-     * @throws InterruptedException Thrown when interrupted while waiting for 
+     * @throws InterruptedException when interrupted while waiting for 
      * server thread to exit.
+     * @throws WsDiscoveryException if an error occures during shutdown of the main thread.
      */
-    protected void stopServer() throws InterruptedException {
+    protected void stopServer() throws InterruptedException, WsDiscoveryException {
         if (wsd != null) {
             try {
                 wsd.done(); 
@@ -125,12 +127,12 @@ public class WsDiscoveryFinder {
      * @throws InterruptedException Thrown if interrupted while waiting
      * @throws WsDiscoveryException on failure.
      */
-    public WsDiscoveryServiceDirectory find(List<QName> portTypes, List<URI> scopes, 
+    public IWsDiscoveryServiceCollection find(List<QName> portTypes, List<URI> scopes,
             MatchBy matchBy, int timeoutInMs) throws InterruptedException, WsDiscoveryException {
         // Search in remote services first
-        WsDiscoveryServiceDirectory sd = null;
+        IWsDiscoveryServiceCollection sd = null;
         try {
-            sd = wsd.getRemoteServices().
+            sd = wsd.getRemoteServiceDirectory().
                     matchBy(portTypes, scopes, matchBy);
         } catch (WsDiscoveryServiceDirectoryException ex) {
             throw new WsDiscoveryException("An error occured while trying to " +
@@ -148,7 +150,7 @@ public class WsDiscoveryFinder {
         // Wait for results
         while (sd.size() == 0) {
             try {
-                sd = wsd.getRemoteServices().matchBy(portTypes, scopes, matchBy);
+                sd = wsd.getRemoteServiceDirectory().matchBy(portTypes, scopes, matchBy);
             } catch (WsDiscoveryServiceDirectoryException ex) {
                 throw new WsDiscoveryException("Unable to search remote service directory.");
             }
@@ -174,7 +176,7 @@ public class WsDiscoveryFinder {
      * @throws InterruptedException Thrown if interrupted while waiting.
      * @throws WsDiscoveryException 
      */
-    public WsDiscoveryServiceDirectory find(List<QName> portTypes, 
+    public IWsDiscoveryServiceCollection find(List<QName> portTypes,
             List<URI> scopes) throws InterruptedException, WsDiscoveryException {
         return find(portTypes, scopes, null, 0);
     }
@@ -192,7 +194,7 @@ public class WsDiscoveryFinder {
      * @throws InterruptedException Thrown if interrupted while waiting
      * @throws WsDiscoveryException 
      */
-    public WsDiscoveryServiceDirectory find(QName portType, URI scope, 
+    public IWsDiscoveryServiceCollection find(QName portType, URI scope,
             int timeoutInMs) throws InterruptedException, WsDiscoveryException {
         List<QName> ports = new ArrayList<QName>();
         ports.add(portType);
@@ -217,7 +219,7 @@ public class WsDiscoveryFinder {
      * @throws InterruptedException Thrown if interrupted while waiting
      * @throws WsDiscoveryException 
      */
-    public WsDiscoveryServiceDirectory find(QName portType, URI scope) 
+    public IWsDiscoveryServiceCollection find(QName portType, URI scope)
             throws InterruptedException, WsDiscoveryException {
         return find(portType, scope, 0);
     }
@@ -233,7 +235,7 @@ public class WsDiscoveryFinder {
      * @throws InterruptedException Thrown if interrupted while waiting
      * @throws WsDiscoveryException 
      */
-    public WsDiscoveryServiceDirectory find(WsDiscoveryService service, int timeoutInMs) 
+    public IWsDiscoveryServiceCollection find(WsDiscoveryService service, int timeoutInMs)
             throws InterruptedException, WsDiscoveryException {
         
         return find(service.getTypes(), service.getScopesValues(), 
@@ -249,7 +251,7 @@ public class WsDiscoveryFinder {
      * @throws InterruptedException Thrown if interrupted while waiting
      * @throws WsDiscoveryException 
      */
-    public WsDiscoveryServiceDirectory find(WsDiscoveryService service) 
+    public IWsDiscoveryServiceCollection find(WsDiscoveryService service)
             throws InterruptedException, WsDiscoveryException {
         return find(service, 0);
     }
@@ -267,7 +269,7 @@ public class WsDiscoveryFinder {
      * @throws WsDiscoveryException 
      * @see WsDiscoveryBuilder#createService(javax.xml.ws.Service)
      */
-    public WsDiscoveryServiceDirectory find(Service service, int timeoutInMs) 
+    public IWsDiscoveryServiceCollection find(Service service, int timeoutInMs)
             throws InterruptedException, WsDiscoveryException {
         return find(WsDiscoveryBuilder.createService(service), timeoutInMs);
     }
@@ -285,7 +287,7 @@ public class WsDiscoveryFinder {
      * @throws Exception 
      * @see WsDiscoveryBuilder#createService(javax.xml.ws.Service)
      */
-    public WsDiscoveryServiceDirectory find(Service service) 
+    public IWsDiscoveryServiceCollection find(Service service)
             throws InterruptedException, IOException, Exception {
         return find(service, 0);
     }
@@ -298,7 +300,7 @@ public class WsDiscoveryFinder {
      * @throws InterruptedException Thrown if interrupted while waiting
      * @throws WsDiscoveryException 
      */
-    public WsDiscoveryServiceDirectory find(QName portType) 
+    public IWsDiscoveryServiceCollection find(QName portType)
             throws InterruptedException, WsDiscoveryException {
         return find(portType, null);
     }
@@ -312,7 +314,7 @@ public class WsDiscoveryFinder {
      * @throws InterruptedException Thrown if interrupted while waiting
      * @throws WsDiscoveryException 
      */
-    public WsDiscoveryServiceDirectory find(QName portType, int timeoutInMs) 
+    public IWsDiscoveryServiceCollection find(QName portType, int timeoutInMs)
             throws InterruptedException, WsDiscoveryException {
         return find(portType, null, timeoutInMs);
     }
@@ -321,22 +323,23 @@ public class WsDiscoveryFinder {
      * Probe for all services and wait for the result.
      * 
      * @param timeoutInMs Time to wait before returning with result.
-     * @return Service directory with all services that was detected.
+     * @return Service collection with all services that was detected.
      * @throws java.lang.InterruptedException if interrupted while waiting.
      */
-    public WsDiscoveryServiceDirectory findAll(int timeoutInMs) 
-            throws InterruptedException {
+    public IWsDiscoveryServiceCollection findAll(int timeoutInMs)
+            throws InterruptedException, WsDiscoveryServiceDirectoryException {
         wsd.probe();
         Thread.sleep(timeoutInMs);
-        return wsd.getRemoteServices();
+        return wsd.getRemoteServiceDirectory().matchAll();
     }        
     
     /**
      * Stops the background WS-Discovery server (if it was created by this instance). 
      * 
-     * @throws java.lang.InterruptedException Thrown if interrupted while waiting for the thread to complete.
+     * @throws java.lang.InterruptedException if interrupted while waiting for the thread to complete.
+     * @throws WsDiscoveryException if an error occured while the shutting down the thread.
      */
-    public void done() throws InterruptedException {
+    public void done() throws InterruptedException, WsDiscoveryException {
         if (stopServerOnExit) 
             stopServer();
     }
