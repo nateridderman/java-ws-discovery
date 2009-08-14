@@ -21,13 +21,10 @@ package com.ms.wsdiscovery.servicedirectory;
 
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryBuilder;
 import com.ms.wsdiscovery.logger.WsdLogger;
@@ -193,7 +190,8 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
                 service.setMetadataVersion(foundService.getMetadataVersion()+1);
 
             // Update service
-            this.update(service);
+            if (!services.update(service))
+                throw new WsDiscoveryServiceDirectoryException("Unable to update service. Update failed.");
             
         } finally {
             w.unlock();
