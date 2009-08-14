@@ -27,8 +27,9 @@ import java.util.List;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryBuilder;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
+import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.logger.WsdLogger;
-import com.ms.wsdiscovery.network.transport.ITransportType;
+import com.ms.wsdiscovery.network.transport.interfaces.ITransportType;
 import com.ms.wsdiscovery.xml.WsdXMLBuilder;
 import com.ms.wsdiscovery.xml.jaxb_generated.ByeType;
 import com.ms.wsdiscovery.xml.jaxb_generated.HelloType;
@@ -43,6 +44,8 @@ import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 import com.ms.wsdiscovery.xml.exception.WsDiscoveryXMLException;
 import com.ms.wsdiscovery.xml.soap.WsdSOAPMessage;
@@ -116,7 +119,7 @@ public class DispatchThread extends Thread {
      * Get local services.
      * @return Service directory containing local services.
      */
-    public WsDiscoveryServiceDirectory getLocalServices() {
+    public IWsDiscoveryServiceDirectory getLocalServiceDirectory() {
         return localServices;
     }
 
@@ -124,7 +127,7 @@ public class DispatchThread extends Thread {
      * Get remote services. Services can be discovered with <code>sendProbe</code>
      * @return Service directory containing remote services.
      */
-    public WsDiscoveryServiceDirectory getRemoteServices() {
+    public IWsDiscoveryServiceDirectory getRemoteServiceDirectory() {
         return remoteServices; 
     }
     
@@ -363,19 +366,19 @@ public class DispatchThread extends Thread {
            
             // See if we have the service
             // If we are running in proxy mode, search local services first, then remote
-            int i = localServices.findServiceIndex(((ResolveType)m.getJAXBBody()).getEndpointReference());
-            if (i > -1) {
+            WsDiscoveryService match = localServices.findService(((ResolveType)m.getJAXBBody()).getEndpointReference());
+            if (match != null) {
                 logger.finer("Service found (local). Sending resolve match.");
 
                 // Service found, send resolve match
-                sendResolveMatch(localServices.get(i), m, 
+                sendResolveMatch(match, m,
                         originalMessage.getSrcAddress(), originalMessage.getSrcPort());
             } else {
                 if (isProxy) { // We are running in proxy mode. Check remote services as well
-                    int j = remoteServices.findServiceIndex(((ResolveType)m.getJAXBBody()).getEndpointReference());
-                    if (j > -1) {
+                    match = remoteServices.findService(((ResolveType)m.getJAXBBody()).getEndpointReference());
+                    if (match != null) {
                         logger.finer("Service found (remote). Sending resolve match.");
-                        sendResolveMatch(remoteServices.get(i), m, 
+                        sendResolveMatch(match, m,
                                 originalMessage.getSrcAddress(), originalMessage.getSrcPort());
                     } else // Remote service was not found
                         logger.finer("Service not found remote or locally (in proxy mode). No reply sent.");
@@ -402,7 +405,7 @@ public class DispatchThread extends Thread {
             ProbeType probe = (ProbeType)m.getJAXBBody();
             
             // Match local services first
-            WsDiscoveryServiceDirectory totalMatches;
+            IWsDiscoveryServiceCollection totalMatches;
             try {
                 totalMatches = localServices.matchBy(probe.getTypes(), probe.getScopes());
             } catch (WsDiscoveryServiceDirectoryException ex) {
@@ -548,7 +551,7 @@ public class DispatchThread extends Thread {
      * @param dstAddress Destination address.
      * @param dstPort Destination port.
      */
-    private void sendProbeMatch(WsDiscoveryServiceDirectory matches, 
+    private void sendProbeMatch(IWsDiscoveryServiceCollection matches,
             WsdSOAPMessage originalMessage, InetAddress dstAddress, int dstPort)  {        
         
         // Create probe match
@@ -562,9 +565,8 @@ public class DispatchThread extends Thread {
             m.setWsaTo(jaxbBuilder.createAttributedURI(originalMessage.getWsaReplyTo().getAddress().getValue()));
         else
             m.setWsaTo(WsDiscoveryConstants.anonymousTo);
-        
-        for (int i = 0; i < matches.size(); i++) {
-            WsDiscoveryService service = matches.get(i);
+
+        for (WsDiscoveryService service : matches) {
             ProbeMatchType match = new ProbeMatchType();
             
             match.setEndpointReference(service.createEndpointReferenceObject());
@@ -671,7 +673,8 @@ public class DispatchThread extends Thread {
     /**
      * End main loop and stop thread.
      */
-    public void done() {
+    public void done()
+            throws WsDiscoveryException { // The exception is actually thrown from descendant WsDiscoveryServer, so this is a bit ugly...
         threadDone = true;
     }
     

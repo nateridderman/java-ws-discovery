@@ -39,4 +39,13 @@ public class WsDiscoveryException extends Exception {
     public WsDiscoveryException(String msg) {
         super(msg);
     }
+
+    /**
+     * Constructs an instance of <code>WsDiscoveryException</code> with the specified detail message and cause.
+     * @param msg the detail message.
+     * @param cause the throwable that caused the exception.
+     */
+    public WsDiscoveryException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }

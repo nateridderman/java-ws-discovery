@@ -23,7 +23,7 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 import com.ms.wsdiscovery.network.NetworkMessage;
-import com.ms.wsdiscovery.network.transport.ITransportType;
+import com.ms.wsdiscovery.network.transport.interfaces.ITransportType;
 import com.ms.wsdiscovery.network.transport.exception.WsDiscoveryTransportException;
 import com.ms.wsdiscovery.network.transport.soapudp.SOAPOverUDP;
 

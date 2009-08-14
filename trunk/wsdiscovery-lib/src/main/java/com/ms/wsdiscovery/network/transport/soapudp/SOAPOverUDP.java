@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.ms.wsdiscovery.network.transport.soapudp;
 
-import com.ms.wsdiscovery.network.transport.ITransportType;
+import com.ms.wsdiscovery.network.transport.interfaces.ITransportType;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
