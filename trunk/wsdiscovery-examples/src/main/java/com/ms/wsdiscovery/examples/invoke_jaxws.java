@@ -23,7 +23,7 @@ import java.net.URL;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryFinder;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 
 /**
  * invoke_jaxws.java
@@ -50,13 +50,11 @@ public class invoke_jaxws {
             //while (true) {
                 Thread.sleep(5000);
                 System.out.println("Searching for " + myService);
-                WsDiscoveryServiceDirectory sd = finder.find(myService, 5000);
+                IWsDiscoveryServiceCollection serviceCollection = finder.find(myService, 5000);
                 
-                System.out.println(sd.size() + " services found.");
+                System.out.println(serviceCollection.size() + " services found.");
                 
-                for (int i = 0; i < sd.size(); i++) {                
-                    WsDiscoveryService wsdservice = sd.get(i);
-                                                            
+                for (WsDiscoveryService wsdservice : serviceCollection) {
                     URL serviceurl = new URL(wsdservice.getXAddrs().get(0));
                     com.ms.wsdiscovery.examples.calculatorservice.CalculatorService service =
                             new com.ms.wsdiscovery.examples.calculatorservice.CalculatorService(

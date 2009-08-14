@@ -23,7 +23,8 @@ import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryFinder;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
-import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
+import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 
 /**
  * An example demonstrating how to use the WsDiscoveryFinder() to find a specific
@@ -53,18 +54,16 @@ public class discovery_using_finder {
 
             // Search for with 5 second timeout...
             System.out.println("Searching for service with port type \"" + myPortType.toString() + "\"");
-            WsDiscoveryServiceDirectory result = finder.find(myPortType, 5000);
+            IWsDiscoveryServiceCollection result = finder.find(myPortType, 5000);
 
             // Display the results.
-            {
-                System.out.println("** Discovered services: **");
+            System.out.println("** Discovered services: **");
 
-                for (int i = 0; i < result.size(); i++) {
-                    // Print service info
-                    System.out.println(result.get(i).toString());                
+            for (WsDiscoveryService service : result) {
+                // Print service info
+                System.out.println(service.toString());
 
-                    System.out.println("---");
-                }
+                System.out.println("---");
             }
         }
         
@@ -74,19 +73,17 @@ public class discovery_using_finder {
 
         {
             System.out.println("Searching for all services (2 sec).");
-            WsDiscoveryServiceDirectory result = finder.findAll(2000);
+            IWsDiscoveryServiceCollection result = finder.findAll(2000);
         
             // Display the results.
-            {
-                System.out.println("** Discovered services: **");
+            System.out.println("** Discovered services: **");
 
-                for (int i = 0; i < result.size(); i++) {
-                    // Print service info
-                    System.out.println(result.get(i).toString());                              
+            for (WsDiscoveryService service : result) {
+                // Print service info
+                System.out.println(service.toString());
 
-                    System.out.println("---");
-                }
-            }        
+                System.out.println("---");
+            }
         }
         
         // Stop finder 
