@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.ms.wsdiscovery.gui;
 
+import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -41,6 +44,8 @@ import com.ms.wsdiscovery.WsDiscoveryServer;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
 
 
 /**
@@ -86,10 +91,10 @@ public class WSDiscoveryGUIView extends FrameView {
         return row;
     }
     
-    public void addServicesToTable(DefaultTableModel model, WsDiscoveryServiceDirectory services) {        
+    public void addServicesToTable(DefaultTableModel model, IWsDiscoveryServiceCollection services) {
         // Add or update all rows
-        for (int i = 0; i < services.size(); i++) {
-            String[] row = serviceToRow(services.get(i));
+        for (WsDiscoveryService service : services) {
+            String[] row = serviceToRow(service);
             int j = findRowByUUID(model, row[0]);
             if (j > -1)
                 updateRow(model, j, row);
@@ -100,7 +105,7 @@ public class WSDiscoveryGUIView extends FrameView {
         // Find rows to delete
         List<Integer> deleteRows = new ArrayList<Integer>();        
         for (int i = 0; i < model.getRowCount(); i++)
-            if (services.findServiceIndex((String)model.getValueAt(i, 0)) == -1)
+            if (!services.contains((String)model.getValueAt(i, 0)))
                 deleteRows.add(i);
         
         // Delete rows from bottom to top
@@ -117,17 +122,25 @@ public class WSDiscoveryGUIView extends FrameView {
             public void actionPerformed(ActionEvent e) {
                 if ((wsdiscovery != null) && (wsdiscovery.isAlive())) {
                     DefaultTableModel model;
-                    WsDiscoveryServiceDirectory services;
+                    IWsDiscoveryServiceCollection services;
 
                     // Local services
-                    services = wsdiscovery.getLocalServices();
-                    model = (DefaultTableModel) tableLocalServices.getModel();
-                    addServicesToTable(model, services);
+                    try {
+                        services = wsdiscovery.getLocalServiceDirectory().matchAll();
+                        model = (DefaultTableModel) tableLocalServices.getModel();
+                        addServicesToTable(model, services);
+                    } catch (WsDiscoveryServiceDirectoryException ex) {
+                        JOptionPane.showMessageDialog(null, "alert", ex.getMessage(),  JOptionPane.ERROR_MESSAGE);
+                    }
                     
                     // Remote services
-                    services = wsdiscovery.getRemoteServices();
-                    model = (DefaultTableModel) tableRemoteServices.getModel();
-                    addServicesToTable(model, services);
+                    try {
+                        services = wsdiscovery.getRemoteServiceDirectory().matchAll();
+                        model = (DefaultTableModel) tableRemoteServices.getModel();
+                        addServicesToTable(model, services);
+                    } catch (WsDiscoveryServiceDirectoryException ex) {
+                        JOptionPane.showMessageDialog(null, "alert", ex.getMessage(),  JOptionPane.ERROR_MESSAGE);
+                    }
                     
                     buttonStop.setEnabled(true);
                     buttonStart.setEnabled(false);
@@ -228,7 +241,7 @@ public class WSDiscoveryGUIView extends FrameView {
     }
 
     @Action
-    public void stopWsDiscovery() {
+    public void stopWsDiscovery() throws WsDiscoveryException {
         wsdiscovery.done();
         buttonStop.setEnabled(false);
         buttonStart.setEnabled(true);

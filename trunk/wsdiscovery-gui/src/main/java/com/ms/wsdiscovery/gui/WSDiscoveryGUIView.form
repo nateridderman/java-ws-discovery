@@ -13,11 +13,11 @@
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jScrollPane1" alignment="0" pref="762" max="32767" attributes="2"/>
-                      <Component id="jScrollPane2" alignment="0" pref="762" max="32767" attributes="0"/>
+                      <Component id="jScrollPane1" alignment="0" pref="790" max="32767" attributes="2"/>
+                      <Component id="jScrollPane2" alignment="0" pref="790" max="32767" attributes="0"/>
                       <Group type="102" alignment="1" attributes="0">
                           <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="276" max="32767" attributes="0"/>
+                          <EmptySpace pref="304" max="32767" attributes="0"/>
                           <Component id="buttonStart" min="-2" max="-2" attributes="1"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="buttonStop" min="-2" pref="99" max="-2" attributes="1"/>
@@ -51,7 +51,7 @@
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       </Group>
                   </Group>
-                  <Component id="jScrollPane1" pref="131" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" pref="143" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="buttonAddLocalService" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -60,7 +60,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jScrollPane2" pref="136" max="32767" attributes="2"/>
+                  <Component id="jScrollPane2" pref="147" max="32767" attributes="2"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="buttonProbe" min="-2" pref="23" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
@@ -72,7 +72,7 @@
         <Component class="javax.swing.JButton" name="buttonStart">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="com.ms.wsdiscovery.gui.WSDiscoveryGUIView" id="startWsDiscovery" methodName="startWsDiscovery"/>
+              <action/>
             </Property>
             <Property name="text" type="java.lang.String" resourceKey="buttonStart.text"/>
             <Property name="name" type="java.lang.String" value="buttonStart" noResource="true"/>
@@ -81,7 +81,7 @@
         <Component class="javax.swing.JButton" name="buttonStop">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="com.ms.wsdiscovery.gui.WSDiscoveryGUIView" id="stopWsDiscovery" methodName="stopWsDiscovery"/>
+              <action/>
             </Property>
             <Property name="text" type="java.lang.String" resourceKey="buttonStop.text"/>
             <Property name="name" type="java.lang.String" value="buttonStop" noResource="true"/>
@@ -90,7 +90,7 @@
         <Component class="javax.swing.JButton" name="buttonAddLocalService">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="com.ms.wsdiscovery.gui.WSDiscoveryGUIView" id="showAddServiceDialog" methodName="showAddServiceDialog"/>
+              <action/>
             </Property>
             <Property name="text" type="java.lang.String" resourceKey="buttonAddLocalService.text"/>
             <Property name="name" type="java.lang.String" value="buttonAddLocalService" noResource="true"/>
@@ -136,7 +136,7 @@
         <Component class="javax.swing.JButton" name="buttonProbe">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="com.ms.wsdiscovery.gui.WSDiscoveryGUIView" id="sendProbe" methodName="sendProbe"/>
+              <action/>
             </Property>
             <Property name="text" type="java.lang.String" resourceKey="buttonProbe.text"/>
             <Property name="name" type="java.lang.String" value="buttonProbe" noResource="true"/>
@@ -170,7 +170,7 @@
         <Component class="javax.swing.JButton" name="buttonProxy">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="com.ms.wsdiscovery.gui.WSDiscoveryGUIView" id="toggleProxyMode" methodName="toggleProxyMode"/>
+              <action/>
             </Property>
             <Property name="text" type="java.lang.String" resourceKey="buttonProxy.text"/>
             <Property name="name" type="java.lang.String" value="buttonProxy" noResource="true"/>
@@ -200,7 +200,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="exitMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.jdesktop.application.Application" id="quit" methodName="quit"/>
+                  <action/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="exitMenuItem" noResource="true"/>
               </Properties>
@@ -224,7 +224,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="aboutMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="com.ms.wsdiscovery.gui.WSDiscoveryGUIView" id="showAboutBox" methodName="showAboutBox"/>
+                  <action/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="aboutMenuItem" noResource="true"/>
               </Properties>
@@ -252,7 +252,7 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="statusMessageLabel" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="606" max="32767" attributes="0"/>
+                  <EmptySpace pref="638" max="32767" attributes="0"/>
                   <Component id="progressBar" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="statusAnimationLabel" min="-2" max="-2" attributes="0"/>
