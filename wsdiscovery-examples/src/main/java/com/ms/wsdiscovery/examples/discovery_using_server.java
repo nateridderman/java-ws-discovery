@@ -21,8 +21,9 @@ package com.ms.wsdiscovery.examples;
 
 import com.ms.wsdiscovery.WsDiscoveryBuilder;
 import com.ms.wsdiscovery.WsDiscoveryServer;
-import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
-import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
+import com.ms.wsdiscovery.exception.WsDiscoveryException;
+import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 
 /**
  * Starts a WS-Discovery server, probes for services with a Probe-message 
@@ -37,7 +38,7 @@ import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
 public class discovery_using_server {
 
     public static void main(String[] args) 
-            throws WsDiscoveryNetworkException, InterruptedException {
+            throws WsDiscoveryException, InterruptedException {
         
         System.out.println("Starting WS-Discovery server...");
         
@@ -63,15 +64,15 @@ public class discovery_using_server {
         // If they are, try to resolve it. 
         {
             // Get a copy of the remote service directory
-            WsDiscoveryServiceDirectory result = server.getRemoteServices();
+            IWsDiscoveryServiceCollection result = server.getRemoteServiceDirectory().matchAll();
             boolean resolve_sent = false;
-            
-            for (int i = 0; i < result.size(); i++) 
+
+            for (WsDiscoveryService service : result)
                 // Is XAddrs empty?
-                if (result.get(i).getXAddrs().size() == 0) {
+                if (service.getXAddrs().size() == 0) {
                     // Send Resolve-message 
-                    System.out.println("Trying to resolve XAddr for service " + result.get(i).getEndpointReferenceAddress());
-                    server.resolve(result.get(i));
+                    System.out.println("Trying to resolve XAddr for service " +service.getEndpointReferenceAddress());
+                    server.resolve(service);
                     resolve_sent = true;
                 }
                         
@@ -85,11 +86,11 @@ public class discovery_using_server {
         {
             System.out.println("** Discovered services: **");
             
-            WsDiscoveryServiceDirectory result = server.getRemoteServices();
+            IWsDiscoveryServiceCollection result = server.getRemoteServiceDirectory().matchAll();
 
-            for (int i = 0; i < result.size(); i++) {
+            for (WsDiscoveryService service : result) {
                 // Print service info
-                System.out.println(result.get(i).toString());                
+                System.out.println(service);
                 
                 System.out.println("---");
             }
