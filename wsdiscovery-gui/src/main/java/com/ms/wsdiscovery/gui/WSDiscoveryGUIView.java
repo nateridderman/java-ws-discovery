@@ -73,15 +73,15 @@ public class WSDiscoveryGUIView extends FrameView {
         String[] row = new String[4];
 
         // UUID
-        row[0] = service.getEndpointReferenceAddress();
+        row[0] = service.getEndpointReference();
 
         // TYPES
         row[1] = "";
-        for (QName q : service.getTypes()) {
+        for (QName q : service.getPortTypes()) {
             row[1] += q.getPrefix() + ":" + q.getLocalPart() + " ";      
         }
         row[2] = "";
-        for (URI u : service.getScopesValues()) {
+        for (URI u : service.getScopes()) {
             row[2] += u.toString() + " ";        
         }
         row[3] = "";
