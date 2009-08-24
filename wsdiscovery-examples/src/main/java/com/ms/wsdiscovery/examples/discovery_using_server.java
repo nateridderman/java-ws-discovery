@@ -71,7 +71,7 @@ public class discovery_using_server {
                 // Is XAddrs empty?
                 if (service.getXAddrs().size() == 0) {
                     // Send Resolve-message 
-                    System.out.println("Trying to resolve XAddr for service " +service.getEndpointReferenceAddress());
+                    System.out.println("Trying to resolve XAddr for service " +service.getEndpointReference());
                     server.resolve(service);
                     resolve_sent = true;
                 }
