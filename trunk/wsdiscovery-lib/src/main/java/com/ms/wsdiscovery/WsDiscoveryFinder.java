@@ -132,7 +132,7 @@ public class WsDiscoveryFinder {
         // Search in remote services first
         IWsDiscoveryServiceCollection sd = null;
         try {
-            sd = wsd.getRemoteServiceDirectory().
+            sd = wsd.getServiceDirectory().
                     matchBy(portTypes, scopes, matchBy);
         } catch (WsDiscoveryServiceDirectoryException ex) {
             throw new WsDiscoveryException("An error occured while trying to " +
@@ -150,7 +150,7 @@ public class WsDiscoveryFinder {
         // Wait for results
         while (sd.size() == 0) {
             try {
-                sd = wsd.getRemoteServiceDirectory().matchBy(portTypes, scopes, matchBy);
+                sd = wsd.getServiceDirectory().matchBy(portTypes, scopes, matchBy);
             } catch (WsDiscoveryServiceDirectoryException ex) {
                 throw new WsDiscoveryException("Unable to search remote service directory.");
             }
@@ -330,7 +330,7 @@ public class WsDiscoveryFinder {
             throws InterruptedException, WsDiscoveryServiceDirectoryException {
         wsd.probe();
         Thread.sleep(timeoutInMs);
-        return wsd.getRemoteServiceDirectory().matchAll();
+        return wsd.getServiceDirectory().matchAll();
     }        
     
     /**
