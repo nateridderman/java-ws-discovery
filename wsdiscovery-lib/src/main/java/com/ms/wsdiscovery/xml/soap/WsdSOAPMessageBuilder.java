@@ -116,8 +116,8 @@ public class WsdSOAPMessageBuilder extends ObjectFactory {
                 
         h.setScopes(service.createScopesObject());
         
-        if (service.getTypes() != null)
-            h.getTypes().addAll(service.getTypes());
+        if (service.getPortTypes() != null)
+            h.getTypes().addAll(service.getPortTypes());
         
         if (service.getXAddrs() == null)
             throw new NullPointerException("XAddrs can't be null.");

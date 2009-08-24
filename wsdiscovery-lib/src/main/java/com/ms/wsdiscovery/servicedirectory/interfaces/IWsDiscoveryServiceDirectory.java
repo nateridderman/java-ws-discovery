@@ -45,7 +45,7 @@ public interface IWsDiscoveryServiceDirectory {
     
     /**
      * Locate a service in the directory based on the endpoint address.
-     * @param address Endpoint address.
+     * @param endpoint Endpoint reference.
      * @return Service description or <code>null</code> if not found.
      */
     WsDiscoveryService findService(EndpointReferenceType endpoint);
@@ -81,9 +81,6 @@ public interface IWsDiscoveryServiceDirectory {
     /**
      * Creates a new service collection containing all the services in the directory.
      * that matches the parameters.
-     * @param probeTypes List of probe types to match.
-     * @param scopes List of scopes to match.
-     * @param matchBy Matching algorithm.
      * @return Service directory with matching services. May contain 0 items, but is never <code>null</code>.
      * @throws WsDiscoveryServiceDirectoryException on failure when creating new service directory.
      */
@@ -123,7 +120,6 @@ public interface IWsDiscoveryServiceDirectory {
      * Store a service description in the service directory.
      * @param service Service description.
      * @throws WsDiscoveryServiceDirectoryException
-     * @throws WsDiscoveryServiceDescriptionException on failure.
      */
     void store(WsDiscoveryService service) throws WsDiscoveryServiceDirectoryException;
 
@@ -143,6 +139,21 @@ public interface IWsDiscoveryServiceDirectory {
      */
     void store(Object jaxbobject) throws WsDiscoveryServiceDirectoryException;
 
+    /**
+     * Add all entries from another implementation of IWsDiscoveryServiceCollction.
+     *
+     * @param collection Collection to add.
+     * @throws WsDiscoveryServiceDirectoryException if an error occurs while adding the new services to the service directory.
+     */
     void addAll(IWsDiscoveryServiceCollection collection) throws WsDiscoveryServiceDirectoryException;
 
+    /**
+     * Start registering services in a a new service collection. If <code>addExistingServices</code> is true,
+     * existing services are moved from the current service collection to the new one with a call to <code>newServiceCollection.addAll()</code>.
+     * The previous service collection is discarded.
+     *
+     * @param newServiceCollection an instance of an implementation of IWsDiscoveryServiceCollection.
+     * @param addExistingServices when true, already known services will be imported into <code>newServiceCollection</code>.
+     */
+    void moveStorage(IWsDiscoveryServiceCollection newServiceCollection, boolean addExistingServices);
 }

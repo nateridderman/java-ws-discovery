@@ -103,7 +103,7 @@ public enum MatchBy {
      */
     public synchronized boolean match(WsDiscoveryService target, List<QName> probeTypes, ScopesType probeScopes) {
         // Match types first. 
-        if ((probeTypes != null) && (!target.getTypes().containsAll(probeTypes)))
+        if ((probeTypes != null) && (!target.getPortTypes().containsAll(probeTypes)))
                 return false; 
         
         // Match scopes 

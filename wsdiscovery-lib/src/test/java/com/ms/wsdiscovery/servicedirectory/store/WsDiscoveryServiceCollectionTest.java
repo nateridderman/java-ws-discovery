@@ -65,7 +65,7 @@ public class WsDiscoveryServiceCollectionTest {
         System.out.println("indexOf");
 
         WsDiscoveryService service = new WsDiscoveryService(new QName("a"), new ScopesType(), "xaddr");
-        String endpointReference = service.getEndpointReferenceAddress();
+        String endpointReference = service.getEndpointReference();
         WsDiscoveryServiceCollection instance = new WsDiscoveryServiceCollection();
 
         instance.add(service);
@@ -84,7 +84,7 @@ public class WsDiscoveryServiceCollectionTest {
         EndpointReferenceType er = new EndpointReferenceType();
         service = new WsDiscoveryService(new QName("b"), new ScopesType(), "xaddr");
         er.setAddress(WsDiscoveryConstants.XMLBUILDER.createAttributedURI(endpointReference));
-        service.setEndpointReference(er);
+        service.setEndpointReferenceType(er);
         
         expResult = 2;
         instance.add(service);
@@ -104,13 +104,13 @@ public class WsDiscoveryServiceCollectionTest {
 
         // Service description 1
         WsDiscoveryService service1 = new WsDiscoveryService(new QName("a"), new ScopesType(), "xaddr1");
-        String endpointReference = service1.getEndpointReferenceAddress();
+        String endpointReference = service1.getEndpointReference();
 
         // Service description 2, with the same endpoint reference as service 1
         WsDiscoveryService service2 = new WsDiscoveryService(new QName("b"), new ScopesType(), "xaddr2");
         EndpointReferenceType er = new EndpointReferenceType();
         er.setAddress(WsDiscoveryConstants.XMLBUILDER.createAttributedURI(endpointReference));
-        service2.setEndpointReference(er);
+        service2.setEndpointReferenceType(er);
 
         // Add service 1
         instance.add(service1);
@@ -120,17 +120,17 @@ public class WsDiscoveryServiceCollectionTest {
         assertTrue(instance.update(service2));
 
         // Both should return true, as only the endpoint reference is checked by indexOf
-        assertEquals(instance.indexOf(service1.getEndpointReferenceAddress()), 0);
-        assertEquals(instance.indexOf(service2.getEndpointReferenceAddress()), 0);
+        assertEquals(instance.indexOf(service1.getEndpointReference()), 0);
+        assertEquals(instance.indexOf(service2.getEndpointReference()), 0);
 
         // Service1 should now be replaced by Service2
         assertEquals(instance.indexOf(service1), -1);
         assertEquals(instance.indexOf(service2), 0);
 
         // Verify that the service description was changed
-        assertTrue(instance.get(0).getEndpointReferenceAddress().equals(endpointReference));
+        assertTrue(instance.get(0).getEndpointReference().equals(endpointReference));
         assertTrue(instance.get(0).getXAddrs().get(0).equals("xaddr2"));
-        assertTrue(instance.get(0).getTypes().get(0).equals(new QName("b")));
+        assertTrue(instance.get(0).getPortTypes().get(0).equals(new QName("b")));
     }
 
     /**
@@ -154,9 +154,9 @@ public class WsDiscoveryServiceCollectionTest {
         instance.add(service1);
         instance.add(service2);
 
-        assertTrue(instance.contains(service1.getEndpointReferenceAddress()));
-        assertTrue(instance.contains(service2.getEndpointReferenceAddress()));
-        assertFalse(instance.contains(service3.getEndpointReferenceAddress()));
+        assertTrue(instance.contains(service1.getEndpointReference()));
+        assertTrue(instance.contains(service2.getEndpointReference()));
+        assertFalse(instance.contains(service3.getEndpointReference()));
 
         // This is a different method, but test it anyway
         assertTrue(instance.contains(service1));

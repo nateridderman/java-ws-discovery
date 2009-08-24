@@ -30,6 +30,19 @@ import java.util.Collection;
  * @author Magnus Skjegstad
  */
 public interface IWsDiscoveryServiceCollection extends Collection<WsDiscoveryService> {
+    /**
+     * Update the description of an existing service. The services
+     * are matched by endpoint reference.
+     * 
+     * @param service updated service information. The endpoint reference must match an existing service.
+     * @return false if the service is not found.
+     */
     public boolean update(WsDiscoveryService service);
+    /**
+     * Search for a given endpoint reference.
+     *
+     * @param endpointReference is a String-representation of the endpoint reference to search for.
+     * @return true if a service with the given endpoint reference is found.
+     */
     public boolean contains(String endpointReference);
 }
