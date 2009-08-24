@@ -44,8 +44,8 @@ import com.ms.wsdiscovery.WsDiscoveryServer;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
-import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
+import com.ms.wsdiscovery.servicedirectory.store.WsDiscoveryServiceCollection;
 
 
 /**
@@ -91,21 +91,21 @@ public class WSDiscoveryGUIView extends FrameView {
         return row;
     }
     
-    public void addServicesToTable(DefaultTableModel model, IWsDiscoveryServiceCollection services) {
+    public void addServicesToTable(DefaultTableModel model, IWsDiscoveryServiceDirectory services) throws WsDiscoveryServiceDirectoryException {
         // Add or update all rows
-        for (WsDiscoveryService service : services) {
-            String[] row = serviceToRow(service);
+        for (WsDiscoveryService s : services.matchAll()) {
+            String[] row = serviceToRow(s);
             int j = findRowByUUID(model, row[0]);
             if (j > -1)
                 updateRow(model, j, row);
             else
                 model.addRow(row);
         }
-        
+
         // Find rows to delete
         List<Integer> deleteRows = new ArrayList<Integer>();        
         for (int i = 0; i < model.getRowCount(); i++)
-            if (!services.contains((String)model.getValueAt(i, 0)))
+            if (services.findService((String)model.getValueAt(i, 0)) == null)
                 deleteRows.add(i);
         
         // Delete rows from bottom to top
@@ -122,24 +122,24 @@ public class WSDiscoveryGUIView extends FrameView {
             public void actionPerformed(ActionEvent e) {
                 if ((wsdiscovery != null) && (wsdiscovery.isAlive())) {
                     DefaultTableModel model;
-                    IWsDiscoveryServiceCollection services;
+                    IWsDiscoveryServiceDirectory services;
 
                     // Local services
                     try {
-                        services = wsdiscovery.getLocalServiceDirectory().matchAll();
+                        services = wsdiscovery.getLocalServices();
                         model = (DefaultTableModel) tableLocalServices.getModel();
                         addServicesToTable(model, services);
                     } catch (WsDiscoveryServiceDirectoryException ex) {
-                        JOptionPane.showMessageDialog(null, "alert", ex.getMessage(),  JOptionPane.ERROR_MESSAGE);
+                        Logger.getLogger(WSDiscoveryGUIView.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     
                     // Remote services
                     try {
-                        services = wsdiscovery.getRemoteServiceDirectory().matchAll();
+                        services = wsdiscovery.getServiceDirectory();
                         model = (DefaultTableModel) tableRemoteServices.getModel();
                         addServicesToTable(model, services);
                     } catch (WsDiscoveryServiceDirectoryException ex) {
-                        JOptionPane.showMessageDialog(null, "alert", ex.getMessage(),  JOptionPane.ERROR_MESSAGE);
+                        Logger.getLogger(WSDiscoveryGUIView.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     
                     buttonStop.setEnabled(true);
