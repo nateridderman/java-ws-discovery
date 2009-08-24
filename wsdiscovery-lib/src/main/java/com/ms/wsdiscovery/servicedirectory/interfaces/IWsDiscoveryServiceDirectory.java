@@ -155,5 +155,5 @@ public interface IWsDiscoveryServiceDirectory {
      * @param newServiceCollection an instance of an implementation of IWsDiscoveryServiceCollection.
      * @param addExistingServices when true, already known services will be imported into <code>newServiceCollection</code>.
      */
-    void moveStorage(IWsDiscoveryServiceCollection newServiceCollection, boolean addExistingServices);
+    void useStorage(IWsDiscoveryServiceCollection newServiceCollection, boolean addExistingServices);
 }
