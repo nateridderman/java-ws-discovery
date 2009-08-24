@@ -64,7 +64,7 @@ public class discovery_using_server {
         // If they are, try to resolve it. 
         {
             // Get a copy of the remote service directory
-            IWsDiscoveryServiceCollection result = server.getRemoteServiceDirectory().matchAll();
+            IWsDiscoveryServiceCollection result = server.getServiceDirectory().matchAll();
             boolean resolve_sent = false;
 
             for (WsDiscoveryService service : result)
@@ -86,7 +86,7 @@ public class discovery_using_server {
         {
             System.out.println("** Discovered services: **");
             
-            IWsDiscoveryServiceCollection result = server.getRemoteServiceDirectory().matchAll();
+            IWsDiscoveryServiceCollection result = server.getServiceDirectory().matchAll();
 
             for (WsDiscoveryService service : result) {
                 // Print service info
