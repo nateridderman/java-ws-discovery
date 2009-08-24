@@ -7,8 +7,13 @@ package com.ms.wsdiscovery.xml.soap;
 
 import com.ms.wsdiscovery.WsDiscoveryBuilder;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
+import com.ms.wsdiscovery.xml.jaxb_generated.ByeType;
 import com.ms.wsdiscovery.xml.jaxb_generated.EndpointReferenceType;
 import com.ms.wsdiscovery.xml.jaxb_generated.HelloType;
+import com.ms.wsdiscovery.xml.jaxb_generated.ProbeMatchesType;
+import com.ms.wsdiscovery.xml.jaxb_generated.ProbeType;
+import com.ms.wsdiscovery.xml.jaxb_generated.ResolveMatchesType;
+import com.ms.wsdiscovery.xml.jaxb_generated.ResolveType;
 import java.io.ByteArrayOutputStream;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
@@ -143,12 +148,8 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageBye_0args() {
         System.out.println("createWsdSOAPMessageBye");
-        WsdSOAPMessageBuilder instance = new WsdSOAPMessageBuilder();
-        WsdSOAPMessage expResult = null;
         WsdSOAPMessage result = instance.createWsdSOAPMessageBye();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue(result.getJAXBBody() instanceof ByeType);
     }
 
     /**
@@ -157,13 +158,14 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageBye_WsDiscoveryService() {
         System.out.println("createWsdSOAPMessageBye");
-        WsDiscoveryService service = null;
-        WsdSOAPMessageBuilder instance = new WsdSOAPMessageBuilder();
-        WsdSOAPMessage expResult = null;
+
+        QName sName = new QName("a","b","c");
+        WsDiscoveryService service = WsDiscoveryBuilder.createService(sName, "d", "e");
         WsdSOAPMessage result = instance.createWsdSOAPMessageBye(service);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue(result.getJAXBBody() instanceof ByeType);
+        EndpointReferenceType expER = service.createEndpointReferenceObject();
+        ByeType body = (ByeType)result.getJAXBBody();
+        assertEquals(body.getEndpointReference().getAddress().getValue(), expER.getAddress().getValue());
     }
 
     /**
@@ -172,12 +174,8 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageProbe() {
         System.out.println("createWsdSOAPMessageProbe");
-        WsdSOAPMessageBuilder instance = new WsdSOAPMessageBuilder();
-        WsdSOAPMessage expResult = null;
         WsdSOAPMessage result = instance.createWsdSOAPMessageProbe();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue(result.getJAXBBody() instanceof ProbeType);
     }
 
     /**
@@ -186,12 +184,8 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageProbeMatches() {
         System.out.println("createWsdSOAPMessageProbeMatches");
-        WsdSOAPMessageBuilder instance = new WsdSOAPMessageBuilder();
-        WsdSOAPMessage expResult = null;
         WsdSOAPMessage result = instance.createWsdSOAPMessageProbeMatches();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue(result.getJAXBBody() instanceof ProbeMatchesType);
     }
 
     /**
@@ -200,12 +194,8 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageResolve() {
         System.out.println("createWsdSOAPMessageResolve");
-        WsdSOAPMessageBuilder instance = new WsdSOAPMessageBuilder();
-        WsdSOAPMessage expResult = null;
         WsdSOAPMessage result = instance.createWsdSOAPMessageResolve();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue(result.getJAXBBody() instanceof ResolveType);
     }
 
     /**
@@ -215,11 +205,8 @@ public class WsdSOAPMessageBuilderTest {
     public void testCreateWsdSOAPMessageResolveMatches() {
         System.out.println("createWsdSOAPMessageResolveMatches");
         WsdSOAPMessageBuilder instance = new WsdSOAPMessageBuilder();
-        WsdSOAPMessage expResult = null;
         WsdSOAPMessage result = instance.createWsdSOAPMessageResolveMatches();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue(result.getJAXBBody() instanceof ResolveMatchesType);
     }
 
 }

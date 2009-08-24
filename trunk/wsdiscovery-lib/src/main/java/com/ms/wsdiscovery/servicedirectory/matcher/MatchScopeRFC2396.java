@@ -44,7 +44,7 @@ public class MatchScopeRFC2396 implements IMatchScope {
                 URI probeuri = URI.create(probescope);
 
                 // Loop through scopes in target to find a match
-                for (URI targetscope : target.getScopesValues())
+                for (URI targetscope : target.getScopes())
                     if (matchURIByRFC2396(targetscope, probeuri)) {
                         match = true;
                         break;

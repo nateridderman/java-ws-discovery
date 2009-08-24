@@ -238,7 +238,7 @@ public class WsDiscoveryFinder {
     public IWsDiscoveryServiceCollection find(WsDiscoveryService service, int timeoutInMs)
             throws InterruptedException, WsDiscoveryException {
         
-        return find(service.getTypes(), service.getScopesValues(), 
+        return find(service.getPortTypes(), service.getScopes(),
                 service.getScopesMatchBy(), timeoutInMs);
     }    
     /**

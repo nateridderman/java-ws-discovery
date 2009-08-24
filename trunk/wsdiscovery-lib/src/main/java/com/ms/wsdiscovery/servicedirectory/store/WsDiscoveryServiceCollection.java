@@ -24,23 +24,28 @@ import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollect
 import java.util.ArrayList;
 
 /**
- * A memory based implementation of IWsDiscoveryServiceCollection. Stores
+ * A memory based, transient implementation of IWsDiscoveryServiceCollection. Stores
  * a collection of WsDiscoveryService-instances.
  * 
  * @author Magnus Skjegstad
  */
 public class WsDiscoveryServiceCollection extends ArrayList<WsDiscoveryService> implements IWsDiscoveryServiceCollection  {
 
+    /**
+     * Return the index of the first service matching the given endpoint reference.
+     * @param endpointReference String representation of the endpoint reference.
+     * @return position of the first service having the given endpoint reference.
+     */
     protected int indexOf(String endpointReference) {
         for (int i = 0; i < this.size(); i++)
-            if (this.get(i).getEndpointReferenceAddress().equals(endpointReference))
+            if (this.get(i).getEndpointReference().equals(endpointReference))
                 return i;
         return -1;
 
     }
 
     public boolean update(WsDiscoveryService service) {
-        int i = this.indexOf(service.getEndpointReferenceAddress());
+        int i = this.indexOf(service.getEndpointReference());
         
         if (i < 0)
             return false;

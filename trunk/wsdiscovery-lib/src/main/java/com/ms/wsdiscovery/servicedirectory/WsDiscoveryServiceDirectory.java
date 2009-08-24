@@ -41,7 +41,7 @@ import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 /**
  * Thread safe directory of {@link WsDiscoveryService} instances. Used by
  * WS-Discovery to keep track of remote and local services. The services are
- * stored in an instance of IWsDiscoveryServiceDirectoryStore and accessed
+ * stored in an instance of IWsDiscoveryServiceCollection and accessed
  * in a thread-safe manner.
  * <p>
  * This class is thread safe.
@@ -139,8 +139,8 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         r.lock();
         try {
             for (WsDiscoveryService s : services)
-                if ((s.getEndpointReferenceAddress() != null) &&
-                    (s.getEndpointReferenceAddress().equals(address)))
+                if ((s.getEndpointReference() != null) &&
+                    (s.getEndpointReference().equals(address)))
                         return s;
         } finally {
             r.unlock();
@@ -175,7 +175,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         WsDiscoveryService foundService;
 
         synchronized (this){ // Synchronize to avoid race cond. between r/w locks. findService read-locks, so we must wait with w lock.
-            foundService = findService(service.getEndpointReferenceAddress());
+            foundService = findService(service.getEndpointReference());
             if (foundService == null)
                 throw new WsDiscoveryServiceDirectoryException("Unable to update service. Service not found.");
 
@@ -286,7 +286,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
      * @param service Service with endpoint address.
      */
     public void remove(WsDiscoveryService service) {
-        remove(service.getEndpointReferenceAddress());
+        remove(service.getEndpointReference());
     }
     
     /**
@@ -378,5 +378,16 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         if (collection != null)
             for (WsDiscoveryService s : collection)
                 store(s);
-    }    
+    }
+
+    public void moveStorage(IWsDiscoveryServiceCollection newServiceCollection, boolean addExistingServices) {
+        w.lock();
+        try {
+            if (addExistingServices)
+                newServiceCollection.addAll(services);
+            services = newServiceCollection;
+        } finally {
+            w.unlock();
+        }
+    }
 }

@@ -60,12 +60,12 @@ public class WsDiscoveryService {
     /**
      * Port types
      */
-    protected List<QName> types = null;
+    protected List<QName> portTypes = null;
     
     /**
      * Scopes
      */
-    protected List<URI> scopesValues = null;
+    protected List<URI> scopes = null;
     
     /**
      * Algorithm for matching scopes
@@ -96,7 +96,14 @@ public class WsDiscoveryService {
     /**
      * Set for all hosts that has received a ResolveMatch for this service. Used to enforce timeouts per host.
      */
-    protected Map<InetAddress, Date> sentResolveMatch = new HashMap<InetAddress, Date>(); 
+    protected Map<InetAddress, Date> sentResolveMatch = new HashMap<InetAddress, Date>();
+
+    /**
+     * Create a new, empty WS-Discovery service description.
+     */
+    public WsDiscoveryService() {
+        
+    }
     
     /**
      * Create a new WS-Discovery service description.
@@ -108,9 +115,9 @@ public class WsDiscoveryService {
      * @param version Metadata version. 
      */
     public WsDiscoveryService(EndpointReferenceType endpoint, List<QName> portTypes, ScopesType scopes, List<String> XAddrs, long version) {
-        setEndpointReference(endpoint);
-        setTypes(portTypes);
-        setScopes(scopes);
+        setEndpointReferenceType(endpoint);
+        setPortTypes(portTypes);
+        setScopesType(scopes);
         setXAddrs(XAddrs);
         setMetadataVersion(version); 
     }
@@ -126,9 +133,9 @@ public class WsDiscoveryService {
     public WsDiscoveryService(List<QName> portTypes, ScopesType scopes, List<String> XAddrs) {
         EndpointReferenceType endpoint = new EndpointReferenceType();
         endpoint.setAddress(WsDiscoveryConstants.XMLBUILDER.createAttributedURI("urn:uuid:"+UUID.randomUUID().toString()));                     
-        setEndpointReference(endpoint);
-        setTypes(portTypes);
-        setScopes(scopes);
+        setEndpointReferenceType(endpoint);
+        setPortTypes(portTypes);
+        setScopesType(scopes);
         setXAddrs(XAddrs);
         setMetadataVersion(1);
     }
@@ -211,37 +218,37 @@ public class WsDiscoveryService {
     public WsDiscoveryService(Object jaxbbody) throws WsDiscoveryServiceDirectoryException {
         if (jaxbbody instanceof HelloType) {
             HelloType m = (HelloType)jaxbbody;
-            setEndpointReference(m.getEndpointReference());
-            setTypes(m.getTypes());
-            setScopes(m.getScopes());
+            setEndpointReferenceType(m.getEndpointReference());
+            setPortTypes(m.getTypes());
+            setScopesType(m.getScopes());
             setXAddrs(m.getXAddrs());
             setMetadataVersion(m.getMetadataVersion());
         } else
         if (jaxbbody instanceof ByeType) {
             ByeType m = (ByeType)jaxbbody;
-            setEndpointReference(m.getEndpointReference());
+            setEndpointReferenceType(m.getEndpointReference());
         } else
         if (jaxbbody instanceof ProbeMatchType) {
             ProbeMatchType m = (ProbeMatchType)jaxbbody;
-            setEndpointReference(m.getEndpointReference());
-            setTypes(m.getTypes());
-            setScopes(m.getScopes());
+            setEndpointReferenceType(m.getEndpointReference());
+            setPortTypes(m.getTypes());
+            setScopesType(m.getScopes());
             setXAddrs(m.getXAddrs());
             setMetadataVersion(m.getMetadataVersion());
         } else
         if (jaxbbody instanceof ResolveMatchesType) {
             ResolveMatchType m = ((ResolveMatchesType)jaxbbody).getResolveMatch();
-            setEndpointReference(m.getEndpointReference());
-            setTypes(m.getTypes());
-            setScopes(m.getScopes());
+            setEndpointReferenceType(m.getEndpointReference());
+            setPortTypes(m.getTypes());
+            setScopesType(m.getScopes());
             setXAddrs(m.getXAddrs());
             setMetadataVersion(m.getMetadataVersion());
         } else
         if (jaxbbody instanceof ResolveMatchType) {
             ResolveMatchType m = (ResolveMatchType)jaxbbody;
-            setEndpointReference(m.getEndpointReference());
-            setTypes(m.getTypes());
-            setScopes(m.getScopes());
+            setEndpointReferenceType(m.getEndpointReference());
+            setPortTypes(m.getTypes());
+            setScopesType(m.getScopes());
             setXAddrs(m.getXAddrs());
             setMetadataVersion(m.getMetadataVersion());
         } else
@@ -285,15 +292,24 @@ public class WsDiscoveryService {
      * Stores a copy of an endpoint reference.
      * @param er Endpoint reference.
      */
-    public synchronized void setEndpointReference(EndpointReferenceType er) {
+    public synchronized void setEndpointReferenceType(EndpointReferenceType er) {
         this.endpointReference = WsDiscoveryConstants.XMLBUILDER.cloneEndpointReference(er);
     }
-    
+
+    /**
+     * Sets the endpoint reference.
+     * @param endpointReference String-representation of the endpoint reference.
+     */
+    public void setEndpointReference(String endpointReference) {
+        this.endpointReference = WsDiscoveryConstants.XMLBUILDER.createEndpointReference(endpointReference);
+    }
+
+
     /**
      * Get endpoint reference.
      * @return Endpoint reference.
      */
-    public synchronized String getEndpointReferenceAddress() {
+    public synchronized String getEndpointReference() {
         if (endpointReference.getAddress() != null)
             return endpointReference.getAddress().getValue();
         return null;
@@ -327,8 +343,8 @@ public class WsDiscoveryService {
      * Get list of scope URIs 
      * @return Scope URIs
      */
-    public synchronized List<URI> getScopesValues() {
-        return scopesValues;
+    public synchronized List<URI> getScopes() {
+        return scopes;
     }
     
     /**
@@ -343,45 +359,46 @@ public class WsDiscoveryService {
      * Set scopes.
      * @param scopes New scopes.
      */
-    public synchronized void setScopes(ScopesType scopes) {
-        this.scopesValues = Collections.synchronizedList(new ArrayList<URI>());
+    public synchronized void setScopesType(ScopesType scopes) {
+        this.scopes = Collections.synchronizedList(new ArrayList<URI>());
         
         if (scopes != null) {
             if (scopes.getValue() != null)
                 for (String s : scopes.getValue())
-                    this.scopesValues.add(URI.create(s));
+                    this.scopes.add(URI.create(s));
             scopesMatchBy = WsDiscoveryBuilder.getMatcher(scopes);
         }
     }
-    
+
     /**
      * Set scopes.
      * @param scopes List of new scopes.
      */
-    public void setScopes(List<String> scopes) {
+    public void setScopes(List<URI> scopes) {
         ScopesType scopesType = new ScopesType();
-        scopesType.getValue().addAll(scopes);
-        setScopes(scopesType);
+        for (URI scope : scopes)
+            scopesType.getValue().add(scope.toString());
+        setScopesType(scopesType);
     }
 
     /**
      * Get port types.
      * @return List of port types.
      */
-    public synchronized List<QName> getTypes() {
-        return Collections.synchronizedList(types);
+    public synchronized List<QName> getPortTypes() {
+        return Collections.synchronizedList(portTypes);
     }
 
     /**
      * Set port types.
      * @param types List of port types.
      */
-    public synchronized void setTypes(List<QName> types) {
+    public synchronized void setPortTypes(List<QName> types) {
         if (types != null) {
-            this.types = Collections.synchronizedList(new ArrayList<QName>());
-            this.types.addAll(types);
+            this.portTypes = Collections.synchronizedList(new ArrayList<QName>());
+            this.portTypes.addAll(types);
         } else
-            this.types = null;
+            this.portTypes = null;
     }
 
     /**
@@ -433,9 +450,9 @@ public class WsDiscoveryService {
                 l.add("EndpointReference:\n" + s);
         }
         
-        if ((getTypes() != null) && (getTypes().size() > 0)) {
+        if ((getPortTypes() != null) && (getPortTypes().size() > 0)) {
             String s = new String();
-            for (QName q : getTypes()) 
+            for (QName q : getPortTypes())
                 if (q != null)
                     s += "Types: " + q.toString() + "\n";
             if (s.length() != 0)
@@ -450,11 +467,11 @@ public class WsDiscoveryService {
                 l.add(s);
         }
         
-        if (getScopesValues() != null) {
+        if (getScopes() != null) {
             String s = new String();
             if (getScopesMatchBy() != null)
                 s += "Scopes.MatchBy: " + getScopesMatchBy()+ "\n";
-            for (URI scope : getScopesValues())
+            for (URI scope : getScopes())
                 if (scope != null)
                     s += "Scopes: " + scope + "\n";            
             if (s.length() != 0)
@@ -511,7 +528,7 @@ public class WsDiscoveryService {
         ScopesType s = new ScopesType();
         if (getScopesMatchBy() != null)
             s.setMatchBy(getScopesMatchBy().toString());
-        for (URI u : getScopesValues())
+        for (URI u : getScopes())
             s.getValue().add(u.toString());
         return s;
     }
@@ -524,5 +541,6 @@ public class WsDiscoveryService {
     @Override
     public synchronized boolean equals(Object obj) {
         return super.equals(obj);
-    }        
+    }
+
 }

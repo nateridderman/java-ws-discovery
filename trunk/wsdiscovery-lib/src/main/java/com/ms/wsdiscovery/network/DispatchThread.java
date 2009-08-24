@@ -341,7 +341,7 @@ public class DispatchThread extends Thread {
         if (m.getJAXBBody() instanceof ByeType) {
             logger.finer("Bye received.");
             if (useProxy) // Check if the proxy server sent bye
-                if (((ByeType)m.getJAXBBody()).getEndpointReference().getAddress().getValue().equals(remoteProxyService.getEndpointReferenceAddress()))  {
+                if (((ByeType)m.getJAXBBody()).getEndpointReference().getAddress().getValue().equals(remoteProxyService.getEndpointReference()))  {
                     logger.finer("Proxy service left the network. Disabling proxy.");
                     useProxy = false; // Stop using the proxy server
                 }
@@ -437,11 +437,11 @@ public class DispatchThread extends Thread {
         // Return if less than 10 seconds from last time we tried to resolve this service
         if (service.getTriedToResolve() != null)
             if (service.getTriedToResolve().getTime()+10000 > (new Date()).getTime()) {
-                logger.finer("sendResolve() called too often for service " + service.getEndpointReferenceAddress());
+                logger.finer("sendResolve() called too often for service " + service.getEndpointReference());
                 return;
             }
         
-        logger.finer("Sent Resolve for service " + service.getEndpointReferenceAddress());
+        logger.finer("Sent Resolve for service " + service.getEndpointReference());
         // Send resolve package
         WsdSOAPMessage<ResolveType> resolve = soapBuilder.createWsdSOAPMessageResolve();
         resolve.getJAXBBody().setEndpointReference(service.createEndpointReferenceObject());
@@ -510,7 +510,7 @@ public class DispatchThread extends Thread {
         // Return if less than 10 seconds since we sent a resolve match for this service to the requesting host
         if (matchedService.getTriedToResolve() != null)
             if (matchedService.getTriedToResolve().getTime() + 10000 > (new Date()).getTime()) {
-                logger.finer("sendResolveMatch() called too often for service " + matchedService.getEndpointReferenceAddress());
+                logger.finer("sendResolveMatch() called too often for service " + matchedService.getEndpointReference());
                 return;
             }
               
@@ -531,7 +531,7 @@ public class DispatchThread extends Thread {
         match.setEndpointReference(matchedService.createEndpointReferenceObject());
         match.setMetadataVersion(matchedService.getMetadataVersion());
         match.setScopes(matchedService.createScopesObject());
-        match.getTypes().addAll(matchedService.getTypes());
+        match.getTypes().addAll(matchedService.getPortTypes());
         match.getXAddrs().addAll(matchedService.getXAddrs());
 
         m.getJAXBBody().setResolveMatch(match);
@@ -572,7 +572,7 @@ public class DispatchThread extends Thread {
             match.setEndpointReference(service.createEndpointReferenceObject());
             match.setMetadataVersion(service.getMetadataVersion());
             match.setScopes(service.createScopesObject());
-            match.getTypes().addAll(service.getTypes());
+            match.getTypes().addAll(service.getPortTypes());
             match.getXAddrs().addAll(service.getXAddrs());
             
             m.getJAXBBody().getProbeMatch().add(match);

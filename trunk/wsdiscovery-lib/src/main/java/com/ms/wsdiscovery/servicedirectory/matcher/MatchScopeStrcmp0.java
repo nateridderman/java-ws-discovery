@@ -44,7 +44,7 @@ public class MatchScopeStrcmp0 implements IMatchScope {
         boolean found = false;
         for (String s : probeScopes.getValue()) {
             found = false;
-            for (URI u : target.getScopesValues())
+            for (URI u : target.getScopes())
                 if (u.toString().equals(s)) {
                     found = true;
                     continue;
