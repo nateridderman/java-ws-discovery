@@ -380,7 +380,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
                 store(s);
     }
 
-    public void moveStorage(IWsDiscoveryServiceCollection newServiceCollection, boolean addExistingServices) {
+    public void useStorage(IWsDiscoveryServiceCollection newServiceCollection, boolean addExistingServices) {
         w.lock();
         try {
             if (addExistingServices)

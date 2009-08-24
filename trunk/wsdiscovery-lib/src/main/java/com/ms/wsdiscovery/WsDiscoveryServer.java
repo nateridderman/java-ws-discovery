@@ -28,6 +28,8 @@ import com.ms.wsdiscovery.network.DispatchThread;
 import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 
 /** 
@@ -184,6 +186,12 @@ public class WsDiscoveryServer extends DispatchThread {
     public void disableProxyMode() {
         synchronized (this) {
             disableProxyAnnouncements();
+        }
+    }
+
+    public void useServiceStore(IWsDiscoveryServiceCollection newServiceStore) {
+        synchronized (this) {
+            serviceDirectory.useStorage(newServiceStore, true);
         }
     }
     
