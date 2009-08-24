@@ -67,8 +67,8 @@ import com.ms.wsdiscovery.xml.jaxb_generated.Relationship;
  */
 public class DispatchThread extends Thread {    
     private ITransportType transport; 
-    private WsDiscoveryServiceDirectory localServices = new WsDiscoveryServiceDirectory(); // Service directory containing published local services 
-    private WsDiscoveryServiceDirectory remoteServices = new WsDiscoveryServiceDirectory(); // Service directory containing discovered remote services
+    protected WsDiscoveryServiceDirectory localServices = new WsDiscoveryServiceDirectory(); // Service directory containing published local services
+    protected WsDiscoveryServiceDirectory serviceDirectory = new WsDiscoveryServiceDirectory(); // Service directory containing discovered services (including local)
     private WsdSOAPMessageBuilder soapBuilder = WsDiscoveryConstants.SOAPBUILDER; // Helper functions for building SOAP-messages
     private WsdXMLBuilder jaxbBuilder = WsDiscoveryConstants.XMLBUILDER; // Helper functions for building XML with JAXB
     private ArrayList<AttributedURI> messagesReceived = new ArrayList<AttributedURI>(); // list of received message IDs
@@ -119,7 +119,7 @@ public class DispatchThread extends Thread {
      * Get local services.
      * @return Service directory containing local services.
      */
-    public IWsDiscoveryServiceDirectory getLocalServiceDirectory() {
+    public IWsDiscoveryServiceDirectory getLocalServices() {
         return localServices;
     }
 
@@ -127,8 +127,8 @@ public class DispatchThread extends Thread {
      * Get remote services. Services can be discovered with <code>sendProbe</code>
      * @return Service directory containing remote services.
      */
-    public IWsDiscoveryServiceDirectory getRemoteServiceDirectory() {
-        return remoteServices; 
+    public IWsDiscoveryServiceDirectory getServiceDirectory() {
+        return serviceDirectory;
     }
     
     /**
@@ -220,6 +220,7 @@ public class DispatchThread extends Thread {
             return; // Already enabled
         isProxy = true;
         localServices.store(localProxyService);
+        serviceDirectory.store(localProxyService);
         // All Hello's should now be answered by multicast suppression messages 
     }
     
@@ -233,6 +234,7 @@ public class DispatchThread extends Thread {
         isProxy = false;
         sendBye(localProxyService);
         localServices.remove(localProxyService);
+        serviceDirectory.remove(localProxyService);
     }
     
     /**
@@ -283,7 +285,7 @@ public class DispatchThread extends Thread {
             
             // Store service information
             try {
-                remoteServices.store(hello);
+                serviceDirectory.store(hello);
             } catch (WsDiscoveryServiceDirectoryException ex) {
                 throw new WsDiscoveryNetworkException("Unable to store service received in Hello-message.");
             }
@@ -303,7 +305,7 @@ public class DispatchThread extends Thread {
         if (m.getJAXBBody() instanceof ProbeMatchesType) {
             logger.finer("ProbeMatches received.");
             try {
-                remoteServices.store((ProbeMatchesType)m.getJAXBBody());
+                serviceDirectory.store((ProbeMatchesType)m.getJAXBBody());
             } catch (WsDiscoveryServiceDirectoryException ex) {
                 throw new WsDiscoveryNetworkException("Unable to store remote service.");
             }
@@ -322,7 +324,7 @@ public class DispatchThread extends Thread {
         if (m.getJAXBBody() instanceof ResolveMatchesType) {
             logger.finer("ResolveMatches received.");
             try {
-                remoteServices.store((ResolveMatchesType) m.getJAXBBody());
+                serviceDirectory.store((ResolveMatchesType) m.getJAXBBody());
             } catch (WsDiscoveryServiceDirectoryException ex) {
                 throw new WsDiscoveryNetworkException("Unable to store results from ResolveMatches-message.");
             }
@@ -345,7 +347,7 @@ public class DispatchThread extends Thread {
                     logger.finer("Proxy service left the network. Disabling proxy.");
                     useProxy = false; // Stop using the proxy server
                 }
-            remoteServices.remove((ByeType)m.getJAXBBody());
+            serviceDirectory.remove((ByeType)m.getJAXBBody());
         } else
             throw new WsDiscoveryNetworkException("Message of unknown type passed to recvBye()");
     }
@@ -374,8 +376,8 @@ public class DispatchThread extends Thread {
                 sendResolveMatch(match, m,
                         originalMessage.getSrcAddress(), originalMessage.getSrcPort());
             } else {
-                if (isProxy) { // We are running in proxy mode. Check remote services as well
-                    match = remoteServices.findService(((ResolveType)m.getJAXBBody()).getEndpointReference());
+                if (isProxy) { // We are running in proxy mode. Check full service directory
+                    match = serviceDirectory.findService(((ResolveType)m.getJAXBBody()).getEndpointReference());
                     if (match != null) {
                         logger.finer("Service found (remote). Sending resolve match.");
                         sendResolveMatch(match, m,
@@ -404,20 +406,21 @@ public class DispatchThread extends Thread {
             logger.finer("Probe received. Running matchBy...");
             ProbeType probe = (ProbeType)m.getJAXBBody();
             
-            // Match local services first
             IWsDiscoveryServiceCollection totalMatches;
-            try {
-                totalMatches = localServices.matchBy(probe.getTypes(), probe.getScopes());
-            } catch (WsDiscoveryServiceDirectoryException ex) {
-                throw new WsDiscoveryNetworkException("Unable to get MatchBy-results for received Probe-message.");
-            }
-            
-            if (isProxy) // If we are in proxy mode, search remote services as well
+
+            if (!isProxy) { // Not in proxy mode; match local services only                
                 try {
-                    totalMatches.addAll(remoteServices.matchBy(probe.getTypes(), probe.getScopes()));
+                    totalMatches = localServices.matchBy(probe.getTypes(), probe.getScopes());
+                } catch (WsDiscoveryServiceDirectoryException ex) {
+                    throw new WsDiscoveryNetworkException("Unable to get MatchBy-results for received Probe-message.");
+                }
+            } else { // If we are in proxy mode, search full service directory
+                try {
+                    totalMatches = serviceDirectory.matchBy(probe.getTypes(), probe.getScopes());
                 } catch (WsDiscoveryServiceDirectoryException ex) {
                     throw new WsDiscoveryNetworkException("Unable to search remote services for match.");
                 }
+            }
             
             if (totalMatches.size() > 0) {
                 logger.finer("Probe match sent.");

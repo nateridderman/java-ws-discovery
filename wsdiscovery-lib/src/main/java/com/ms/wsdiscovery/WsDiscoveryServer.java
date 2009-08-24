@@ -21,8 +21,6 @@ package com.ms.wsdiscovery;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
@@ -56,7 +54,8 @@ public class WsDiscoveryServer extends DispatchThread {
      * @throws WsDiscoveryServiceDirectoryException on failure to store service in the service directory.
      */
     public void publish(WsDiscoveryService service) throws WsDiscoveryServiceDirectoryException {
-        getLocalServiceDirectory().store(service);
+        getLocalServices().store(service);
+        getServiceDirectory().store(service);
         synchronized (this) {
             sendHello(service);
         }
@@ -80,7 +79,7 @@ public class WsDiscoveryServer extends DispatchThread {
      * @param address Endpoint address.
      */
     public void unpublish(String address) {
-        unpublish(getLocalServiceDirectory().findService(address));
+        unpublish(getLocalServices().findService(address));
     }
     
     /**
@@ -92,7 +91,8 @@ public class WsDiscoveryServer extends DispatchThread {
         synchronized (this) {
             sendBye(service);
         }
-        getLocalServiceDirectory().remove(service);
+        getLocalServices().remove(service);
+        getServiceDirectory().remove(service);
     }
     
     /**
@@ -193,7 +193,7 @@ public class WsDiscoveryServer extends DispatchThread {
     @Override
     public void done() throws WsDiscoveryException {
         try {
-            for (WsDiscoveryService service : getLocalServiceDirectory().matchAll())
+            for (WsDiscoveryService service : getLocalServices().matchAll())
                 unpublish(service);
         } catch (WsDiscoveryServiceDirectoryException ex) {
             throw new WsDiscoveryException("Unable to unpublish all services.", ex);
