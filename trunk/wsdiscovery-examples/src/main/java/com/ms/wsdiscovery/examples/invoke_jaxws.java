@@ -59,7 +59,7 @@ public class invoke_jaxws {
                     com.ms.wsdiscovery.examples.calculatorservice.CalculatorService service =
                             new com.ms.wsdiscovery.examples.calculatorservice.CalculatorService(
                                 serviceurl,
-                                wsdservice.getTypes().get(0));
+                                wsdservice.getPortTypes().get(0));
                     com.ms.wsdiscovery.examples.calculatorservice.Calculator port = service.getCalculatorPort();
                     int a = (int)Math.round(Math.random() * 1000);
                     int b = (int)Math.round(Math.random() * 1000);
