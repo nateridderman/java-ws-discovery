@@ -59,4 +59,11 @@ public class WsDiscoveryServiceCollection extends ArrayList<WsDiscoveryService> 
         return (indexOf(endpointReference) > -1);
     }
 
+    public WsDiscoveryService get(String endpointReference) {
+        int i = this.indexOf(endpointReference);
+        if (i < 0)
+            return null;
+        return this.get(i);
+    }
+
 }
