@@ -45,4 +45,11 @@ public interface IWsDiscoveryServiceCollection extends Collection<WsDiscoverySer
      * @return true if a service with the given endpoint reference is found.
      */
     public boolean contains(String endpointReference);
+    /**
+     * Retrieve the first service object in the collection that describes the given endpoint reference.
+     *
+     * @param endpointReference is a String-representation of the endpoint reference to search for.
+     * @return WsDiscoveryService-object on success or null on failure.
+     */
+    public WsDiscoveryService get(String endpointReference);
 }
