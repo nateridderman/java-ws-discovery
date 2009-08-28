@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.xml.soap.WsdSOAPMessage;
+import java.net.Inet4Address;
 
 /**
  * Class used to represent messages received or sent on the network. Contains 
@@ -296,15 +297,15 @@ public class NetworkMessage {
      */
     @Override
     public String toString() {
-        String src = "";
-        String dst = "";
+        String src = "(null)";
+        String dst = "(null)";
         String msg = "";
 
         if (getSrcAddress() != null)
             src = getSrcAddress().toString();
                 
         if (getDstAddress() != null)
-            src = getDstAddress().toString();
+            dst = getDstAddress().toString();
 
         msg = getMessage();
                 
