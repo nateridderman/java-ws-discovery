@@ -29,7 +29,8 @@ import static org.junit.Assert.*;
  * @author magnus
  */
 public class WsdSOAPMessageTest {
-
+    
+    static String wsdSuppressionString;
     static WsdSOAPMessageBuilder builder;
     static String wsdString;
 
@@ -49,6 +50,18 @@ public class WsdSOAPMessageTest {
                 "<env:Body>"+
                 "<wsd:Probe><wsd:Types xmlns=\"http://calculatorservice.examples.wsdiscovery.ms.com/\">CalculatorService</wsd:Types></wsd:Probe>" +
                 "</env:Body></env:Envelope>";
+        wsdSuppressionString = "<env:Envelope xmlns:env=\"http://www.w3.org/2003/05/soap-envelope\" "+
+                "xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" xmlns:wsd=\"http://schemas.xmlsoap.org/ws/2005/04/discovery\">"+
+                "<env:Header><wsd:AppSequence InstanceId=\"1251491488912\" MessageNumber=\"2\" SequenceId=\"urn:uuid:8f568b8b-3b65-4a3a-864a-3281f915a9fb\"/>"+
+                "<wsa:To>urn:schemas-xmlsoap-org:ws:2005:04:discovery</wsa:To>"+
+                "<wsa:Action>http://schemas.xmlsoap.org/ws/2005/04/discovery/Hello</wsa:Action><wsa:RelatesTo "+
+                "RelationshipType=\""+WsDiscoveryConstants.defaultProxyRelatesToRelationship.toString()+"\">urn:uuid:03d2fa70-560c-49fe-8606-c5a14250ed62</wsa:RelatesTo>"+
+                "<wsa:MessageID>urn:uuid:9ac61583-80d3-466e-be3e-1341ccbd6d03</wsa:MessageID></env:Header><env:Body>"+
+                "<wsd:Hello><wsa:EndpointReference><wsa:Address>urn:uuid:5dbefb5e-5133-490a-b1f8-8b346526389c</wsa:Address>"+
+                "</wsa:EndpointReference><wsd:Types>DiscoveryProxy</wsd:Types><wsd:Scopes "+
+                "MatchBy=\"http://schemas.xmlsoap.org/ws/2005/04/discovery/rfc2396\"/>"+
+                "<wsd:XAddrs>http://10.0.1.4:3702/DiscoveryProxy</wsd:XAddrs><wsd:MetadataVersion>1</wsd:MetadataVersion>"+
+                "</wsd:Hello></env:Body></env:Envelope>";
     }
 
     @AfterClass
@@ -70,6 +83,8 @@ public class WsdSOAPMessageTest {
     public void testParseSoap() throws Exception {
         System.out.println("parseSoap");
         WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.HELLO, null); // initial values will be overwritten by parseSoap()
+
+        // Test probe
         SOAPMessage soap = builder.createSOAPMessage(wsdString);
         instance.parseSoap(soap);
         assertEquals(instance.getWsaAction().getValue(), WsaActionType.PROBE.toString());
@@ -81,6 +96,14 @@ public class WsdSOAPMessageTest {
         ProbeType pt = (ProbeType) instance.getJAXBBody(); // We know it is a probe
         assertEquals(pt.getTypes().get(0).getLocalPart(), "CalculatorService");
         assertEquals(pt.getTypes().get(0).getNamespaceURI(), "http://calculatorservice.examples.wsdiscovery.ms.com/");
+
+        // Test hello with suppression
+        soap = builder.createSOAPMessage(wsdSuppressionString);
+        instance.parseSoap(soap);
+        assertEquals(instance.getWsaAction().getValue(), WsaActionType.HELLO.toString());
+        assertEquals(instance.getWsaRelatesTo().getValue(), "urn:uuid:03d2fa70-560c-49fe-8606-c5a14250ed62");
+        assertNotNull(instance.getWsaRelatesTo().getRelationshipType());
+        assertEquals(instance.getWsaRelatesTo().getRelationshipType().getLocalPart(), "Suppression");
     }
 
     /**

@@ -52,6 +52,7 @@ import com.ms.wsdiscovery.xml.soap.WsdSOAPMessage;
 import com.ms.wsdiscovery.xml.soap.WsdSOAPMessageBuilder;
 import com.ms.wsdiscovery.xml.jaxb_generated.AttributedURI;
 import com.ms.wsdiscovery.xml.jaxb_generated.Relationship;
+import java.util.Map.Entry;
 
 /** 
  * Worker thread for WS-Discovery. Handles WS-Discovery messages received from 
@@ -252,28 +253,34 @@ public class DispatchThread extends Thread {
      */
     private void recvHello(WsdSOAPMessage m) 
             throws WsDiscoveryNetworkException {
-        
+
         if (m.getJAXBBody() instanceof HelloType) {
             logger.finer("Hello received.");
-            
-            HelloType hello = (HelloType)m.getJAXBBody();
+
+            HelloType hello = (HelloType) m.getJAXBBody();
 
             // if RelatesTo is set and @Relationship="Suppression", use sender as proxy.
-            if (m.getWsaRelatesTo() != null) 
-                if (m.getWsaRelatesTo().getRelationshipType() != null)
+            if (m.getWsaRelatesTo() != null) {
+                logger.finest("wsaRelatesTo: " + m.getWsaRelatesTo().getValue());
+                if (m.getWsaRelatesTo().getOtherAttributes() != null)
+                    for (Entry<QName, String> e : m.getWsaRelatesTo().getOtherAttributes().entrySet())
+                        logger.finest("wsaRelatesTo.otherAttributes: " + e.getKey().toString() + "=" + e.getValue());
+                if (m.getWsaRelatesTo().getRelationshipType() != null) {
+                    logger.finest("wsaRelatesTo.RelationshipType: " + m.getWsaRelatesTo().getRelationshipType().toString());
                     if (m.getWsaRelatesTo().getRelationshipType().equals(WsDiscoveryConstants.defaultProxyRelatesToRelationship)) {
                         logger.finer("Received proxy suppression.");
                         try {
                             // Find proxy address from hello body                            
                             URI addr = URI.create(hello.getXAddrs().get(0));
                             useProxyAddress = InetAddress.getByName((addr.getHost()));
-                            if (addr.getPort() == -1)
+                            if (addr.getPort() == -1) {
                                 useProxyPort = WsDiscoveryConstants.multicastPort;
-                            else
-                                useProxyPort = addr.getPort();                            
-                            
+                            } else {
+                                useProxyPort = addr.getPort();
+                            }
+
                             remoteProxyService = new WsDiscoveryService(hello);
-                            
+
                             useProxy = true;
                             logger.finer("Using proxy server at " + useProxyAddress.toString() + ", port " + useProxyPort);
                         } catch (Exception ex) {
@@ -282,15 +289,18 @@ public class DispatchThread extends Thread {
                             useProxy = false;
                         }
                     }
-            
+                }
+            }
+
             // Store service information
             try {
                 serviceDirectory.store(hello);
             } catch (WsDiscoveryServiceDirectoryException ex) {
                 throw new WsDiscoveryNetworkException("Unable to store service received in Hello-message.");
             }
-        } else
+        } else {
             throw new WsDiscoveryNetworkException("Message of unknown type passed to recvHello()");
+        }
     }
     
     /**
@@ -468,11 +478,14 @@ public class DispatchThread extends Thread {
         
         logger.finer("Sending proxy announce to " + originalMessage.getSrcAddress().getHostName());
         WsdSOAPMessage<HelloType> m = soapBuilder.createWsdSOAPMessageHello(localProxyService);
+        
         Relationship r = new Relationship();
         r.setValue(relatesToMessage.getWsaMessageId().getValue());
-        m.setWsaRelatesTo(r);
         // Set relationShipType to suppression (client should suppress multicast and use unicast to proxy instead)
         r.setRelationshipType(WsDiscoveryConstants.defaultProxyRelatesToRelationship);
+        
+        m.setWsaRelatesTo(r);
+        
         transport .send(new NetworkMessage(m.toString(), null, 0, originalMessage.getSrcAddress(), originalMessage.getSrcPort()));
     }
     
@@ -602,7 +615,9 @@ public class DispatchThread extends Thread {
             return;
         
         // Was message sent multicast or unicast?
-        boolean isMulticast = message.getDstAddress().equals(WsDiscoveryConstants.multicastAddress);
+        boolean isMulticast = message.getDstAddress().equals(WsDiscoveryConstants.multicastAddress) || 
+                message.getDstAddress().isMulticastAddress() ||
+                message.getDstAddress().isAnyLocalAddress();
         
         // Parse message
         WsdSOAPMessage m;
@@ -629,14 +644,18 @@ public class DispatchThread extends Thread {
 
         // HELLO
         if (m.getJAXBBody() instanceof HelloType) {
-            if (isMulticast && useProxy) // Multicast Hello-packets are ignored when using proxy
+            if (isMulticast && useProxy) { // Multicast Hello-packets are ignored when using proxy
+                logger.finest("Ignoring multicast HELLO when using proxy.");
                 return;
+            }
             recvHello(m); // Add new service
         } else        
         // PROBE
         if (m.getJAXBBody() instanceof ProbeType) {
-            if (isMulticast && isProxy) // Respond to multicast probes with unicast proxy announcement
-                sendProxyAnnounce(m, message); 
+            if (isMulticast && isProxy) { // Respond to multicast probes with unicast proxy announcement
+                logger.finest("Sending proxy announce in response to multicast probe");
+                sendProxyAnnounce(m, message);
+            }
             recvProbe(m, message);
         } else
         // PROBE MATCHES
@@ -645,8 +664,10 @@ public class DispatchThread extends Thread {
         } else
         // RESOLVE    
         if (m.getJAXBBody() instanceof ResolveType) {
-            if (isMulticast && isProxy) // Respond to multicast resolves with unicast proxy announcement
+            if (isMulticast && isProxy) { // Respond to multicast resolves with unicast proxy announcement
+                logger.finest("Sending proxy announce in response to multicast resolve");
                 sendProxyAnnounce(m, message);
+            }
             recvResolve(m, message); // Send resolve match
         } else
         // RESOLVE MATCHES    
@@ -655,8 +676,10 @@ public class DispatchThread extends Thread {
         } else
         // BYE
         if (m.getJAXBBody() instanceof ByeType) {
-            if (isMulticast && useProxy) // Multicast Bye-packets are ignored when using proxy
+            if (isMulticast && useProxy) { // Multicast Bye-packets are ignored when using proxy
+                logger.finest("Ignoring multicast BYE when using proxy.");
                 return;
+            }
             recvBye(m); // Remove service         
         } else
             throw new WsDiscoveryNetworkException("Don't know how to handle message " + message.toString());

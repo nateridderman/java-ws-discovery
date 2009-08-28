@@ -112,7 +112,9 @@ public class WsDiscoveryConstants {
      * when a proxy server announces itself.
      */
     public final static QName defaultProxyRelatesToRelationship = 
-            new QName(defaultNsDiscovery.toString(), "Suppression");
+            // TODO, schema defines this to be: new QName(defaultNsDiscovery.toString(), "Suppression");
+            // .. however, JAXB doesn't seem to like that and leaves the RelationshipType-attribute empty (null).
+            new QName("Suppression");
     
     /**
      * URI used by WS-Addressing when sending messages to anonymous recipients 
@@ -156,7 +158,7 @@ public class WsDiscoveryConstants {
      * proxy service. NOTE: The WS-Discovery specification does not define how 
      * a proxy server should announce itself.
      */
-    public final static QName proxyPortType = new QName("proxyService");
+    public final static QName proxyPortType = new QName("DiscoveryProxy");
     
     /**
      * Scope used for the proxy service (if enabled). 
