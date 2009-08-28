@@ -258,7 +258,7 @@ public class WsdSOAPMessage<E> {
                 EndpointReferenceType e = (EndpointReferenceType)j.getValue();
                 if (tag.equals("ReplyTo"))
                     wsaReplyTo = e;
-            }
+            } else
             if (j.getValue().getClass().equals(AppSequenceType.class)) {
                 AppSequenceType a = (AppSequenceType)j.getValue();
                 if (tag.equals("AppSequence")) {
@@ -266,7 +266,8 @@ public class WsdSOAPMessage<E> {
                     wsdMessageNumber = a.getMessageNumber();
                     wsdSequenceId = a.getSequenceId();
                 }
-            }                                        
+            } else
+                throw new WsDiscoveryXMLException("Unknown element: " + tag + " (" + j.getValue().getClass() + ")");
         }            
     }
                 

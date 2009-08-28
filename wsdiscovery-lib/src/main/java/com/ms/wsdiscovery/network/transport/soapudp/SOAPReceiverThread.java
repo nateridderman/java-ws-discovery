@@ -27,6 +27,7 @@ import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.BlockingQueue;
 import com.ms.wsdiscovery.logger.WsdLogger;
+import java.net.InetSocketAddress;
 
 /**
  * SOAP-over-UDP receiver thread.
@@ -115,10 +116,15 @@ public class SOAPReceiverThread extends Thread {
                 try {                
                     socket.receive(packet);
 
+                    InetSocketAddress sender = (InetSocketAddress) packet.getSocketAddress();
+
                     NetworkMessage nm = new NetworkMessage(packet.getData(), packet.getLength(),
                                                            packet.getAddress(), packet.getPort(),
                                                            socket.getLocalAddress(), socket.getLocalPort());
-
+                   /* NetworkMessage nm = new NetworkMessage(packet.getData(), packet.getLength(),
+                            sender.getAddress(), sender.getPort(),
+                            socket.getLocalAddress(), socket.getLocalPort());*/
+                    
                     logger.finest("Recv: " + nm);
 
                     queue.add(nm);                
