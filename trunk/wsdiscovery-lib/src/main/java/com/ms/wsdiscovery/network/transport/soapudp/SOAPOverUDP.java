@@ -32,6 +32,7 @@ import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.logger.WsdLogger;
 import com.ms.wsdiscovery.network.NetworkMessage;
 import com.ms.wsdiscovery.network.transport.exception.WsDiscoveryTransportException;
+import java.net.NetworkInterface;
 
 /**
  * Implementation of SOAP-over-UDP for WS-Discovery as specified in 
@@ -79,13 +80,24 @@ public class SOAPOverUDP implements ITransportType {
     public static final int UDP_UPPER_DELAY = 500;
 
     /**
-     * 
+     * @param multicastPort Port for sending and receiving multicast messages
+     * @param multicastAddress Address for sending and listening to multicast messages.
+     * @throws WsDiscoveryTransportException if an error occured while opening
+     * the sockets or creating child threads.
+     */
+    public SOAPOverUDP(int multicastPort, InetAddress multicastAddress)
+            throws WsDiscoveryTransportException {
+        this(null, multicastPort, multicastAddress);
+    }
+
+    /**
+     * @param multicastInterface Network interface to use for multicasting. Set to null to use default.
      * @param multicastPort Port for sending and receiving multicast messages
      * @param multicastAddress Address for sending and listening to multicast messages.
      * @throws WsDiscoveryTransportException if an error occured while opening 
      * the sockets or creating child threads.
      */
-    public SOAPOverUDP(int multicastPort, InetAddress multicastAddress) 
+    public SOAPOverUDP(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress)
             throws WsDiscoveryTransportException {
         
         logger = new WsdLogger(this.getClass().getName());
@@ -97,7 +109,9 @@ public class SOAPOverUDP implements ITransportType {
         DatagramSocket uniSock = null;
         
         try {
-            multiSock = new MulticastSocket(null);        
+            multiSock = new MulticastSocket(null);
+            if (multicastInterface != null)
+                multiSock.setNetworkInterface(multicastInterface);
             multiSock.setReuseAddress(true); // Required by spec.
             if (!multiSock.getReuseAddress())
                 throw new WsDiscoveryTransportException("Platform doesn't support SO_REUSEADDR");        
@@ -142,7 +156,7 @@ public class SOAPOverUDP implements ITransportType {
      * the sockets or creating child threads.
      */
     public SOAPOverUDP() throws WsDiscoveryTransportException {
-        this(WsDiscoveryConstants.multicastPort, WsDiscoveryConstants.multicastAddress);
+        this(WsDiscoveryConstants.multicastInterface, WsDiscoveryConstants.multicastPort, WsDiscoveryConstants.multicastAddress);
     }
     
     @Override

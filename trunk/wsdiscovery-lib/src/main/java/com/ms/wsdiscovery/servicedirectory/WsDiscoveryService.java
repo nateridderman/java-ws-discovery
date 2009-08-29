@@ -528,8 +528,9 @@ public class WsDiscoveryService {
         ScopesType s = new ScopesType();
         if (getScopesMatchBy() != null)
             s.setMatchBy(getScopesMatchBy().toString());
-        for (URI u : getScopes())
-            s.getValue().add(u.toString());
+        if (getScopes() != null)
+            for (URI u : getScopes())
+                s.getValue().add(u.toString());
         return s;
     }
 

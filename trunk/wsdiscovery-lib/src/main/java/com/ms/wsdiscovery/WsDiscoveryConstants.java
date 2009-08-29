@@ -34,6 +34,7 @@ import com.ms.wsdiscovery.network.transport.TransportType;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 import com.ms.wsdiscovery.xml.jaxb_generated.AttributedURI;
 import com.ms.wsdiscovery.xml.jaxb_generated.HelloType;
+import java.net.NetworkInterface;
 
 /**
  * Class containing variables that can be used to change the behaviour of the 
@@ -134,6 +135,12 @@ public class WsDiscoveryConstants {
      * WS-Discovery defaults to 239.255.255.0.
      */
     public static InetAddress multicastAddress; // Set later, in static{}
+
+    /**
+     * Interface used for multicast. Set to null to use default based on
+     * the address set in multicastAddress.
+     */
+    public static NetworkInterface multicastInterface = null;
         
     /**
      * Instance ID should be incremented each time the WS-Discovery service is 
