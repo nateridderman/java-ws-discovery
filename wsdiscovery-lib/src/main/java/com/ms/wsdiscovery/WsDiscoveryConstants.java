@@ -129,6 +129,16 @@ public class WsDiscoveryConstants {
      * defaults to 3702.
      */
     public static int multicastPort = 3702;
+
+    /**
+     * The address used for the proxy service if it is enabled.
+     *
+     * If it is null, the IP of multicastInterface will be used.
+     * If multicastInterface is null as well, the IP will be guessed
+     * based on the available network interfaces.
+     * 
+     */
+    public static InetAddress proxyAddress = null; 
     
     /**
      * Address used for sending and listening for multicast messages. 
@@ -138,7 +148,8 @@ public class WsDiscoveryConstants {
 
     /**
      * Interface used for multicast. Set to null to use default based on
-     * the address set in multicastAddress.
+     * the address set in multicastAddress. The IP of this interface will also
+     * be used as proxy service address if proxyAddress is null.
      */
     public static NetworkInterface multicastInterface = null;
         

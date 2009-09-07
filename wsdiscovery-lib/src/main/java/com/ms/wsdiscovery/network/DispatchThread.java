@@ -19,11 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package com.ms.wsdiscovery.network;
 
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryBuilder;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
@@ -52,6 +55,10 @@ import com.ms.wsdiscovery.xml.soap.WsdSOAPMessage;
 import com.ms.wsdiscovery.xml.soap.WsdSOAPMessageBuilder;
 import com.ms.wsdiscovery.xml.jaxb_generated.AttributedURI;
 import com.ms.wsdiscovery.xml.jaxb_generated.Relationship;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import java.util.Map.Entry;
 
 /** 
@@ -87,26 +94,62 @@ public class DispatchThread extends Thread {
 
     /**
      * Creates a new {@link DispatchThread} instance.
+     *
+     * A proxy service description will also be created, but it will not be used until
+     * enableProxyAnnouncements() is called. The IP of the proxy service will be
+     * enumerated from the constants given in WsDiscoveryConstants, according to
+     * the following rules:<br>
+     * <li>Try to use proxyAddress</li>
+     * <li>If proxyAddress is null, try to use the first IP mapped to multicastInterface</li>
+     * <li>If multicastInterface is null, use the first non-loopback IP-address returned from NetworkInterface.getNetworkInterfaces().</li>
+     * <br>
      * 
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException 
      * Thrown when unable to instantiate the transport layer.
      */
     public DispatchThread() throws WsDiscoveryNetworkException {
         this.setDaemon(true);        
-        // Create a proxy service description that can be added to the directory later if a proxy is enabled on this host               
-        try {
+
+        // Create a proxy service description that can be added to the directory later if a proxy is enabled on this host
+        InetAddress proxyIp = null;
+        Enumeration<InetAddress> ips = null;
+
+        if (WsDiscoveryConstants.proxyAddress != null) {
+            proxyIp = WsDiscoveryConstants.proxyAddress;
+        } else
+        if (WsDiscoveryConstants.multicastInterface != null) {
+            ips = WsDiscoveryConstants.multicastInterface.getInetAddresses();
+
+            while ((ips != null) && (ips.hasMoreElements())) {
+               proxyIp = ips.nextElement();
+               logger.info("IP detected on multicastinterface: " + proxyIp.getHostAddress());
+               if (proxyIp instanceof Inet4Address) // Prefer IPv4
+                   break;
+            }
+        } else
+            try {
+                proxyIp = getFirstNonLoopbackAddress(true, false);
+                logger.warning("Proxy address guessed as " + proxyIp.toString() + ". Set proxyAddress to override.");
+            } catch (SocketException ex) {
+                logger.warning("Unable to enumerate IP address for proxy service.");
+            }
+       
+        if (proxyIp != null) {
+            logger.info("Proxy-service bound to " + proxyIp.getHostAddress() + " (not enabled)");
+
             localProxyService = WsDiscoveryBuilder.createService(WsDiscoveryConstants.proxyPortType,
                                                                     WsDiscoveryConstants.proxyScope,
-                                                                    "http://" + 
-                                                                    InetAddress.getLocalHost().getHostAddress() + 
-                                                                    ":" + 
-                                                                    WsDiscoveryConstants.multicastPort + 
-                                                                    "/" + 
+                                                                    "http://" +
+                                                                    proxyIp.getHostAddress() +
+                                                                    ":" +
+                                                                    WsDiscoveryConstants.multicastPort +
+                                                                    "/" +
                                                                     WsDiscoveryConstants.proxyPortType.getLocalPart());
-        } catch (UnknownHostException ex) {
+        }  else {
+            logger.warning("Unable to assign IP-address to proxy-service. This thread may not act as a proxy server.");
             localProxyService = null;
-            logger.warning("Unable to get local IP address. This node can not function as a proxy server.");            
         }
+
         try {
             this.transport = WsDiscoveryConstants.transportType.newInstance();
         } catch (IllegalAccessException ex) {
@@ -220,6 +263,8 @@ public class DispatchThread extends Thread {
         if (isProxy)
             return; // Already enabled
         isProxy = true;
+        if (localProxyService == null)
+            throw new WsDiscoveryServiceDirectoryException("Local proxy service not available.");
         localServices.store(localProxyService);
         serviceDirectory.store(localProxyService);
         // All Hello's should now be answered by multicast suppression messages 
@@ -757,5 +802,32 @@ public class DispatchThread extends Thread {
         synchronized(this) {
             notifyAll();
         }
+    }
+
+    // Method to get first non-loopback address. Used as fallback when proxy-address is not specified by user.
+    // Courtesy of http://stackoverflow.com/questions/901755/how-to-get-the-ip-of-the-computer-on-linux-through-java/901943#901943
+    private static InetAddress getFirstNonLoopbackAddress(boolean preferIpv4, boolean preferIPv6) throws SocketException {
+        Enumeration en = NetworkInterface.getNetworkInterfaces();
+        while (en.hasMoreElements()) {
+            NetworkInterface i = (NetworkInterface) en.nextElement();
+            for (Enumeration en2 = i.getInetAddresses(); en2.hasMoreElements();) {
+                InetAddress addr = (InetAddress) en2.nextElement();
+                if (!addr.isLoopbackAddress()) {
+                    if (addr instanceof Inet4Address) {
+                        if (preferIPv6) {
+                            continue;
+                        }
+                        return addr;
+                    }
+                    if (addr instanceof Inet6Address) {
+                        if (preferIpv4) {
+                            continue;
+                        }
+                        return addr;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
