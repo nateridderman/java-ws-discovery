@@ -20,10 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package com.ms.wsdiscovery.examples;
 
 import com.ms.wsdiscovery.WsDiscoveryBuilder;
+import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.WsDiscoveryServer;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 /**
  * Starts a WS-Discovery server, probes for services with a Probe-message 
@@ -38,9 +43,15 @@ import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollect
 public class discovery_using_server {
 
     public static void main(String[] args) 
-            throws WsDiscoveryException, InterruptedException {
+            throws WsDiscoveryException, InterruptedException, UnknownHostException, SocketException {
         
         System.out.println("Starting WS-Discovery server...");
+
+        // Uncomment the following to override the IP this server will announce itself at
+        // if proxy mode is enabled. This IP is only used if server.enableProxyMode() is called.
+        //   WsDiscoveryConstants.proxyAddress = InetAddress.getByName("10.0.1.3");
+        // Uncomment the following to bind multicasts to a specific interface
+        //   WsDiscoveryConstants.multicastInterface = NetworkInterface.getByInetAddress(InetAddress.getByName("10.0.1.4"));
         
         // Create a new server instance
         WsDiscoveryServer server = WsDiscoveryBuilder.createServer();
