@@ -42,4 +42,13 @@ public class WsDiscoveryNetworkException extends WsDiscoveryException {
     public WsDiscoveryNetworkException(String msg) {
         super(msg);
     }
+
+    /**
+     * Constructs an instance of <code>WsDiscoveryNetworkException</code> with the specified detail message.
+     * @param msg the detail message.
+     * @param cause is the exception that caused the error.
+     */
+    public WsDiscoveryNetworkException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }
