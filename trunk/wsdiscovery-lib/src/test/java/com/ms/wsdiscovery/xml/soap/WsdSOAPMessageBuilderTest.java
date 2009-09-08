@@ -174,8 +174,11 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageProbe() {
         System.out.println("createWsdSOAPMessageProbe");
-        WsdSOAPMessage result = instance.createWsdSOAPMessageProbe();
+        WsdSOAPMessage<ProbeType> result = instance.createWsdSOAPMessageProbe();
+        String firstUuid = result.getWsaMessageId().getValue();
         assertTrue(result.getJAXBBody() instanceof ProbeType);
+        result = instance.createWsdSOAPMessageProbe();
+        assertFalse(firstUuid.equals(result.getWsaMessageId().getValue()));
     }
 
     /**
