@@ -24,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.xml.soap.WsdSOAPMessage;
-import java.net.Inet4Address;
 
 /**
  * Class used to represent messages received or sent on the network. Contains 
@@ -54,7 +53,7 @@ public class NetworkMessage {
      * When the message was received, measured in milliseconds after epoch.
      */
     protected long timestamp;
-    
+
     /**
      * Stores a network message.
      * 
