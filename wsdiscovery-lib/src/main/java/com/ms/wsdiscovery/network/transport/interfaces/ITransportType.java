@@ -60,6 +60,18 @@ public interface ITransportType {
     void send(NetworkMessage message);
 
     /**
+     * Returns the port used for sending and receiving multicasted packets.
+     * @return Port used for multicasts.
+     */
+    int getMulticastPort();
+
+    /**
+     * Returns the port used for sending and receiving unicasted packets.
+     * @return Port used for unicasts.
+     */
+    int getUnicastPort();
+
+    /**
      * Shuts down the transport layer. Called by {@link DispatchThread#dispatch()} 
      * on shutdown. 
      */
