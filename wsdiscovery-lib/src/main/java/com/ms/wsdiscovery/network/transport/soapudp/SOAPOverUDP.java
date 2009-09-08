@@ -24,7 +24,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
-import java.net.SocketException;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -47,15 +46,16 @@ public class SOAPOverUDP implements ITransportType {
     protected WsdLogger logger;
     
     // Threads and stuff
-    private SOAPReceiverThread multicastReceiverThread; // Thread listening for incoming multicast messages
-    private SOAPReceiverThread unicastReceiverThread; // Thread listening for incoming unicast messages
-    private SOAPSenderThread multicastSenderThread; // Thread sending multicast messages
-    private SOAPSenderThread unicastSenderThread; // Thread sending unicast messages
+    private final SOAPReceiverThread multicastReceiverThread; // Thread listening for incoming multicast messages
+    private final SOAPReceiverThread unicastReceiverThread; // Thread listening for incoming unicast messages
+    private final SOAPSenderThread multicastSenderThread; // Thread sending multicast messages
+    private final SOAPSenderThread unicastSenderThread; // Thread sending unicast messages
     private LinkedBlockingQueue<NetworkMessage> inQueue = new LinkedBlockingQueue<NetworkMessage>(); // Queue used by the receiver threads
     private DelayQueue<SOAPNetworkMessage> outUnicastQueue = new DelayQueue<SOAPNetworkMessage>(); // Queue used by unicastSenderThread
     private DelayQueue<SOAPNetworkMessage> outMulticastQueue = new DelayQueue<SOAPNetworkMessage>(); // Queue used by multicastSenderThread
     private final int multicastPort;
     private final InetAddress multicastAddress;
+    private final int unicastPort;
     
     // Default vaules for retry and back-off algorithm (see Appendix I in the SOAP-over-UDP draft)
     /**
@@ -105,44 +105,49 @@ public class SOAPOverUDP implements ITransportType {
         this.multicastPort = multicastPort;
         this.multicastAddress = multicastAddress;
         
-        MulticastSocket multiSock = null;
-        DatagramSocket uniSock = null;
+        MulticastSocket multicastReceiveSocket = null;
+        DatagramSocket mainSocket = null;
         
         try {
-            multiSock = new MulticastSocket(null);
+            multicastReceiveSocket = new MulticastSocket(null);
             if (multicastInterface != null)
-                multiSock.setNetworkInterface(multicastInterface);
-            multiSock.setReuseAddress(true); // Required by spec.
-            if (!multiSock.getReuseAddress())
+                multicastReceiveSocket.setNetworkInterface(multicastInterface);
+            multicastReceiveSocket.setReuseAddress(true); // Required by spec.
+            if (!multicastReceiveSocket.getReuseAddress())
                 throw new WsDiscoveryTransportException("Platform doesn't support SO_REUSEADDR");        
-            multiSock.setTimeToLive(1); // Suggested by spec
-            multiSock.bind(new InetSocketAddress(multicastPort));
-            multiSock.joinGroup(multicastAddress);
+            multicastReceiveSocket.setTimeToLive(1); // Suggested by spec
+            multicastReceiveSocket.bind(new InetSocketAddress(multicastPort));
+            if (multicastReceiveSocket.getLocalPort() != multicastPort)
+                throw new WsDiscoveryTransportException("Unable to bind multicast socket to multicast port.");
+            multicastReceiveSocket.joinGroup(multicastAddress);
         } catch (IOException ex) {
             throw new WsDiscoveryTransportException("Unable to open multicast socket.");
         }        
             
         try {
-            uniSock = new DatagramSocket(null);
-            uniSock.setReuseAddress(true);
-            if (!uniSock.getReuseAddress())
-                throw new WsDiscoveryTransportException("Platform doesn't support SO_REUSEADDR");        
-            uniSock.bind(new InetSocketAddress(multicastPort));        
+            mainSocket = new DatagramSocket();
+            mainSocket.setReuseAddress(true);
+            if (!mainSocket.getReuseAddress())
+                throw new WsDiscoveryTransportException("Platform doesn't support SO_REUSEADDR");
+            this.unicastPort = mainSocket.getLocalPort();
+           // mainSocket.bind(new InetSocketAddress(multicastPort));
+           // if (mainSocket.getLocalPort() != multicastPort)
+           //     throw new WsDiscoveryTransportException("Unable to bind unicast socket to multicast port.");
         } catch (IOException ex) {
             throw new WsDiscoveryTransportException("Unable to open unicast socket.");
         }
         
         multicastReceiverThread = new SOAPReceiverThread("multicast_recv", 
-                    inQueue, multiSock);
+                    inQueue, multicastReceiveSocket);
         
         unicastSenderThread = new SOAPSenderThread("unicast_send", 
-                    outUnicastQueue, uniSock);
-        try {
+                    outUnicastQueue, mainSocket);
+        //try {
             multicastSenderThread = new SOAPSenderThread("multicast_send", 
-                        outMulticastQueue);
-        } catch (SocketException ex) {
-            throw new WsDiscoveryTransportException("Unable to start multicast send thread.");
-        }
+                        outMulticastQueue, mainSocket);
+        //} catch (SocketException ex) {
+        //    throw new WsDiscoveryTransportException("Unable to start multicast send thread.");
+        //}
         
         unicastReceiverThread = new SOAPReceiverThread("unicast_recv", 
                     inQueue, multicastSenderThread.getSocket());
@@ -279,6 +284,22 @@ public class SOAPOverUDP implements ITransportType {
         multicastSenderThread.done();
         unicastReceiverThread.done();
         unicastSenderThread.done();                        
+    }
+
+    /**
+     * Returns the port we listen for multicasts on.
+     * @return Multicast port.
+     */
+    public int getMulticastPort() {
+        return multicastPort;
+    }
+
+    /**
+     * Returns the port used for sending and receiving unicast packets.
+     * @return Port used for unicasts.
+     */
+    public int getUnicastPort() {
+        return unicastPort;
     }
     
 }
