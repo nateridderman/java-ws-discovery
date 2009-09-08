@@ -108,7 +108,15 @@ public class DispatchThread extends Thread {
      * Thrown when unable to instantiate the transport layer.
      */
     public DispatchThread() throws WsDiscoveryNetworkException {
-        this.setDaemon(true);        
+        this.setDaemon(true);
+
+        try {
+            this.transport = WsDiscoveryConstants.transportType.newInstance();
+        } catch (IllegalAccessException ex) {
+            throw new WsDiscoveryNetworkException("Unable to instantiate transport type: " + ex.toString());
+        } catch (InstantiationException ex) {
+            throw new WsDiscoveryNetworkException("Unable to instantiate transport type: " + ex.toString());
+        } 
 
         // Create a proxy service description that can be added to the directory later if a proxy is enabled on this host
         InetAddress proxyIp = null;
@@ -135,28 +143,20 @@ public class DispatchThread extends Thread {
             }
        
         if (proxyIp != null) {
-            logger.info("Proxy-service bound to " + proxyIp.getHostAddress() + " (not enabled)");
+            logger.info("Proxy-service bound to " + proxyIp.getHostAddress() + " on port " + this.transport.getUnicastPort() + " (not enabled)");
 
             localProxyService = WsDiscoveryBuilder.createService(WsDiscoveryConstants.proxyPortType,
                                                                     WsDiscoveryConstants.proxyScope,
                                                                     "http://" +
                                                                     proxyIp.getHostAddress() +
                                                                     ":" +
-                                                                    WsDiscoveryConstants.multicastPort +
+                                                                    this.transport.getUnicastPort() +
                                                                     "/" +
                                                                     WsDiscoveryConstants.proxyPortType.getLocalPart());
         }  else {
             logger.warning("Unable to assign IP-address to proxy-service. This thread may not act as a proxy server.");
             localProxyService = null;
-        }
-
-        try {
-            this.transport = WsDiscoveryConstants.transportType.newInstance();
-        } catch (IllegalAccessException ex) {
-            throw new WsDiscoveryNetworkException("Unable to instantiate transport type: " + ex.toString());
-        } catch (InstantiationException ex) {
-            throw new WsDiscoveryNetworkException("Unable to instantiate transport type: " + ex.toString());
-        }                
+        }                       
     }
     
     /**
@@ -179,11 +179,12 @@ public class DispatchThread extends Thread {
      * Check if the AppSequence in the soap-messages is already received (used to avoid duplicates)
      * @param soap A SOAP-message
      * @return Whether a message with the same MessageID as the message in <code>soap</code> has been received earlier.
+     * @throws WsDiscoveryNetworkException if getWsaMessageId() returns null.
      */ 
-    private boolean isAlreadyReceived(WsdSOAPMessage soap) {
+    private boolean isAlreadyReceived(WsdSOAPMessage soap) throws WsDiscoveryNetworkException {
         // TODO Eats memory
         if (soap.getWsaMessageId() == null)
-            return true;
+            throw new WsDiscoveryNetworkException("Message ID was null.");
         
         for (AttributedURI a : messagesReceived) 
             try {
@@ -198,7 +199,7 @@ public class DispatchThread extends Thread {
     /**
      * Reads AppSequenceType in <code>soap</code> and registers this messages as received. Used to avoid duplicates.
      * @param soap SOAP-message
-     * @throws java.lang.Exception
+     * @throws WsDiscoveryNetworkException if getWsaMessageId() returns null.
      */
     private void registerReceived(WsdSOAPMessage soap) throws WsDiscoveryNetworkException {
         // TODO Eats memory. Shoudl discard oldest entries.
@@ -247,10 +248,13 @@ public class DispatchThread extends Thread {
             probe.getJAXBBody().getTypes().addAll(types);                
         
         // Send packet multicast or to proxy
-        if (useProxy) 
+        if (useProxy) {
+            logger.finer("Sending probe unicast to proxy at " + useProxyAddress + ":" + useProxyPort);
             transport.send(new NetworkMessage(probe.toString(), null, 0, useProxyAddress, useProxyPort)); // Unicast to proxy
-        else
+        } else {
+            logger.finer("Multicasting probe (not using proxy).");
             transport.send(new NetworkMessage(probe));  // Multicast
+        }
     }
     
     /**
@@ -327,9 +331,9 @@ public class DispatchThread extends Thread {
                             remoteProxyService = new WsDiscoveryService(hello);
 
                             useProxy = true;
-                            logger.finer("Using proxy server at " + useProxyAddress.toString() + ", port " + useProxyPort);
+                            logger.finer("** Using proxy server at " + useProxyAddress.toString() + ", port " + useProxyPort);
                         } catch (Exception ex) {
-                            logger.finer("Proxy suppression contained invalid data. Aborted (not using proxy).");
+                            logger.finer("** Proxy suppression contained invalid data. Aborted (not using proxy).");
                             ex.printStackTrace();
                             useProxy = false;
                         }
@@ -433,12 +437,12 @@ public class DispatchThread extends Thread {
             } else {
                 if (isProxy) { // We are running in proxy mode. Check full service directory
                     match = serviceDirectory.findService(((ResolveType)m.getJAXBBody()).getEndpointReference());
-                    if (match != null) {
-                        logger.finer("Service found (remote). Sending resolve match.");
-                        sendResolveMatch(match, m,
+                    if (match != null)
+                        logger.finer("Service found (remote). Sending resolve match in proxy mode.");
+                    else
+                        logger.finer("Service not found (remote). Sending resolve match in proxy mode.");
+                    sendResolveMatch(match, m,
                                 originalMessage.getSrcAddress(), originalMessage.getSrcPort());
-                    } else // Remote service was not found
-                        logger.finer("Service not found remote or locally (in proxy mode). No reply sent.");
                 } else // If in normal mode, just log failure.
                     logger.finer("Service not found locally. No reply sent.");
             }
@@ -477,8 +481,8 @@ public class DispatchThread extends Thread {
                 }
             }
             
-            if (totalMatches.size() > 0) {
-                logger.finer("Probe match sent.");
+            if ((totalMatches.size() > 0) || isProxy) { // Proxy MUST reply with match, even if empty
+                logger.finer("Probe match sent with " + totalMatches.size() + " matches.");
                 sendProbeMatch(totalMatches, m, originalMessage.getSrcAddress(), originalMessage.getSrcPort());
             } else
                 logger.finer("Probe match NOT found. No reply sent.");
@@ -561,7 +565,7 @@ public class DispatchThread extends Thread {
      * Send ResolveMatch. Will only be sent once every 10 seconds for each 
      * service to avoid network floods.
      * 
-     * @param matchedService The service that matched the Resolve.
+     * @param matchedService The service that matched the Resolve - may be null.
      * @param originalMessage Original message as received from transport layer.
      * @param dstAddress Destination address.
      * @param dstPort Destination port.
@@ -569,7 +573,7 @@ public class DispatchThread extends Thread {
     private void sendResolveMatch(WsDiscoveryService matchedService, 
             WsdSOAPMessage originalMessage, InetAddress dstAddress, int dstPort) {
         // Return if less than 10 seconds since we sent a resolve match for this service to the requesting host
-        if (matchedService.getTriedToResolve() != null)
+        if ((matchedService != null) && (matchedService.getTriedToResolve() != null))
             if (matchedService.getTriedToResolve().getTime() + 10000 > (new Date()).getTime()) {
                 logger.finer("sendResolveMatch() called too often for service " + matchedService.getEndpointReference());
                 return;
@@ -587,15 +591,18 @@ public class DispatchThread extends Thread {
         else
             m.setWsaTo(WsDiscoveryConstants.anonymousTo);
         
-        ResolveMatchType match = new ResolveMatchType();
-               
-        match.setEndpointReference(matchedService.createEndpointReferenceObject());
-        match.setMetadataVersion(matchedService.getMetadataVersion());
-        match.setScopes(matchedService.createScopesObject());
-        match.getTypes().addAll(matchedService.getPortTypes());
-        match.getXAddrs().addAll(matchedService.getXAddrs());
+        ResolveMatchType match = null;
+        if (matchedService != null) {
+            match = new ResolveMatchType();
 
-        m.getJAXBBody().setResolveMatch(match);
+            match.setEndpointReference(matchedService.createEndpointReferenceObject());
+            match.setMetadataVersion(matchedService.getMetadataVersion());
+            match.setScopes(matchedService.createScopesObject());
+            match.getTypes().addAll(matchedService.getPortTypes());
+            match.getXAddrs().addAll(matchedService.getXAddrs());
+
+            m.getJAXBBody().setResolveMatch(match);
+        }
                         
         // Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
         transport.send(new NetworkMessage(m.toString(), null, 0, dstAddress, dstPort));
@@ -660,77 +667,71 @@ public class DispatchThread extends Thread {
             return;
         
         // Was message sent multicast or unicast?
-        boolean isMulticast = message.getDstAddress().equals(WsDiscoveryConstants.multicastAddress) || 
-                message.getDstAddress().isMulticastAddress() ||
-                message.getDstAddress().isAnyLocalAddress();
+        boolean isMulticast = (message.getDstAddress().equals(WsDiscoveryConstants.multicastAddress) ||
+                              (message.getDstPort() == transport.getMulticastPort()));
         
         // Parse message
         WsdSOAPMessage m;
         try {
             m = soapBuilder.createWsdSOAPMessage(message.getMessage());
         } catch (WsDiscoveryXMLException ex) {
-            WsDiscoveryNetworkException wex = new WsDiscoveryNetworkException("Unable to create WS-Discovery SOAP message.");
-            wex.initCause(ex);
-            throw wex;
+            throw new WsDiscoveryNetworkException("Unable to create WS-Discovery SOAP message.", ex);
         }             
         
         // Return if the message was from us
         if ((m.getWsdInstanceId() == WsDiscoveryConstants.instanceId) &&
                 ((m.getWsdSequenceId() == null) ||
-                (m.getWsdSequenceId().equals("urn:uuid:" + WsDiscoveryConstants.sequenceId)))) { 
+                (m.getWsdSequenceId().equals("urn:uuid:" + WsDiscoveryConstants.sequenceId)))) {
+            // TODO Shouldn't this be handled by the transport class?
+            logger.finer("** Discarded message sent from us: " + m.getWsaMessageId().getValue());
             return;
         }
         
         // Return if the message has already been handled
         if (isAlreadyReceived(m)) {
-            logger.finest("Dup discarded! MessageID: " + m.getWsaMessageId().getValue() + " " + message.toString());
+            // TODO Shouldn't this be handled by the transport class?
+            logger.finer("** Discarded duplicate MessageID: " + m.getWsaMessageId().getValue());
             return;
         }
 
-        // HELLO
-        if (m.getJAXBBody() instanceof HelloType) {
-            if (isMulticast && useProxy) { // Multicast Hello-packets are ignored when using proxy
-                logger.finest("Ignoring multicast HELLO when using proxy.");
-                return;
-            }
-            recvHello(m); // Add new service
-        } else        
-        // PROBE
-        if (m.getJAXBBody() instanceof ProbeType) {
-            if (isMulticast && isProxy) { // Respond to multicast probes with unicast proxy announcement
-                logger.finest("Sending proxy announce in response to multicast probe");
-                sendProxyAnnounce(m, message);
-            }
-            recvProbe(m, message);
-        } else
-        // PROBE MATCHES
-        if (m.getJAXBBody() instanceof ProbeMatchesType) {
-            recvProbeMatches(m); // Add services from probe matches
-        } else
-        // RESOLVE    
-        if (m.getJAXBBody() instanceof ResolveType) {
-            if (isMulticast && isProxy) { // Respond to multicast resolves with unicast proxy announcement
-                logger.finest("Sending proxy announce in response to multicast resolve");
-                sendProxyAnnounce(m, message);
-            }
-            recvResolve(m, message); // Send resolve match
-        } else
-        // RESOLVE MATCHES    
-        if (m.getJAXBBody() instanceof ResolveMatchesType) {
-            recvResolveMatches(m); // Add updates from resolve matches
-        } else
-        // BYE
-        if (m.getJAXBBody() instanceof ByeType) {
-            if (isMulticast && useProxy) { // Multicast Bye-packets are ignored when using proxy
-                logger.finest("Ignoring multicast BYE when using proxy.");
-                return;
-            }
-            recvBye(m); // Remove service         
-        } else
-            throw new WsDiscoveryNetworkException("Don't know how to handle message " + message.toString());
-        
-        // Mark the message ID as received.
-        registerReceived(m);        
+        try {
+            // HELLO
+            if (m.getJAXBBody() instanceof HelloType) {                
+                recvHello(m); // Add new service, even when using proxy
+            } else
+            // PROBE
+            if (m.getJAXBBody() instanceof ProbeType) {
+                if (isMulticast && isProxy) { // Respond to multicast probes with unicast proxy announcement
+                    logger.finer("** Sending proxy announce in response to multicast probe with MessageID: " + m.getWsaMessageId().getValue());
+                    sendProxyAnnounce(m, message);
+                }
+                recvProbe(m, message);
+            } else
+            // PROBE MATCHES
+            if (m.getJAXBBody() instanceof ProbeMatchesType) {
+                recvProbeMatches(m); // Add services from probe matches
+            } else
+            // RESOLVE
+            if (m.getJAXBBody() instanceof ResolveType) {
+                if (isMulticast && isProxy) { // Respond to multicast resolves with unicast proxy announcement
+                    logger.finest("** Sending proxy announce in response to multicast resolve with MessageID " + m.getWsaMessageId().getValue());
+                    sendProxyAnnounce(m, message);
+                }
+                recvResolve(m, message); // Send resolve match
+            } else
+            // RESOLVE MATCHES
+            if (m.getJAXBBody() instanceof ResolveMatchesType) {
+                recvResolveMatches(m); // Add updates from resolve matches
+            } else
+            // BYE
+            if (m.getJAXBBody() instanceof ByeType) {
+                recvBye(m); // Remove service
+            } else
+                throw new WsDiscoveryNetworkException("Don't know how to handle message " + message.toString());
+        } finally {
+            // Mark the message ID as received.
+            registerReceived(m);
+        }
     }
     
     /**
