@@ -106,7 +106,7 @@ public class SOAPSenderThread extends Thread {
         
         SOAPNetworkMessage nm;
         
-        logger.finer("Started " + getName());
+        logger.finer("Started sender thread " + getName() + ", sending from " + socket.getLocalAddress());
         
         isRunning = true;
         
@@ -118,7 +118,7 @@ public class SOAPSenderThread extends Thread {
                     if (nm == null)
                         continue;
 
-                    logger.finest("Send: " + nm.toString());
+                    logger.finest(this.getName() + ", send: " + nm.toString());
 
                     DatagramPacket packet = new DatagramPacket(nm.getPayload(), nm.getPayloadLen(), 
                                                                 nm.getDstAddress(), nm.getDstPort());
