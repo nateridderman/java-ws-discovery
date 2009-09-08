@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery;
 
+import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import java.net.InetAddress;
 import com.ms.wsdiscovery.xml.WsdXMLBuilder;
 import com.ms.wsdiscovery.xml.soap.WsdSOAPMessageBuilder;
@@ -35,6 +36,8 @@ import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 import com.ms.wsdiscovery.xml.jaxb_generated.AttributedURI;
 import com.ms.wsdiscovery.xml.jaxb_generated.HelloType;
 import java.net.NetworkInterface;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 
 /**
  * Class containing variables that can be used to change the behaviour of the 
@@ -170,6 +173,11 @@ public class WsDiscoveryConstants {
      * Log level.
      */
     public static Level loggerLevel = Level.FINEST;
+
+    /**
+     * Handler used for logging debug messages. Default is ConsoleHandler().
+     */
+    public static Handler loggerHandler = new ConsoleHandler();
     
     /**
      * If proxy server mode is enabled this will be the port type used for the 
