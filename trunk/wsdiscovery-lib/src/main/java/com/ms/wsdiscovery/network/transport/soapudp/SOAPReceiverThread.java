@@ -97,8 +97,8 @@ public class SOAPReceiverThread extends Thread {
     @Override
     public void run() {
         threadDone = false;
-               
-        logger.finer("Started " + this.getName());
+
+        logger.finer("Started receiver thread " + this.getName() + ", listening on " + socket.getLocalAddress());
         try {
             socket.setSoTimeout(1000);
         } catch (SocketException ex) {
@@ -117,15 +117,15 @@ public class SOAPReceiverThread extends Thread {
                     socket.receive(packet);
 
                     InetSocketAddress sender = (InetSocketAddress) packet.getSocketAddress();
-
+                    
                     NetworkMessage nm = new NetworkMessage(packet.getData(), packet.getLength(),
-                                                           packet.getAddress(), packet.getPort(),
+                                                           sender.getAddress(), sender.getPort(),
                                                            socket.getLocalAddress(), socket.getLocalPort());
                    /* NetworkMessage nm = new NetworkMessage(packet.getData(), packet.getLength(),
                             sender.getAddress(), sender.getPort(),
                             socket.getLocalAddress(), socket.getLocalPort());*/
                     
-                    logger.finest("Recv: " + nm);
+                    logger.finest(this.getName() + ", recv: " + nm.toString());
 
                     queue.add(nm);                
 
