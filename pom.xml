@@ -63,13 +63,14 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <dependencies></dependencies>
+    <dependencies/>
 
     <modules>
         <module>wsdiscovery-lib</module>
         <module>wsdiscovery-examples</module>
         <module>wsdiscovery-gui</module>
         <module>wsdiscovery-example-ws</module>
-    </modules>
+    <module>wsdiscovery-gui-2</module>
+  </modules>
 
 </project>
