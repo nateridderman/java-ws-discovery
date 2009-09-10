@@ -189,6 +189,16 @@ public class WsDiscoveryServer extends DispatchThread {
         }
     }
 
+    /**
+     * Use the specified service collection as storage for the service directory.
+     * The IWsDiscoveryServiceCollection implementation does not need to be thread safe, but after it has
+     * been passed as a parameter to this method, the collection should not
+     * be used by other threads.<p/>
+     * This call has been implemented to allow for persistent storage of the service directory, e.g.
+     * when running in proxy mode.
+     *
+     * @param newServiceStore Implementation of IWsDiscoveryServiceCollection to use as service directory.
+     */
     public void useServiceStore(IWsDiscoveryServiceCollection newServiceStore) {
         synchronized (this) {
             serviceDirectory.useStorage(newServiceStore, true);

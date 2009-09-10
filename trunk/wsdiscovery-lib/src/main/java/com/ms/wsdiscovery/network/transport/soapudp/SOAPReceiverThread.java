@@ -142,8 +142,8 @@ public class SOAPReceiverThread extends Thread {
             }
         } finally {   
             socket.close();
+            logger.finer("Stopped " + this.getName());
             isRunning = false;
-        }        
-        logger.finer("Stopped " + this.getName());
+        }                
     }
 }
