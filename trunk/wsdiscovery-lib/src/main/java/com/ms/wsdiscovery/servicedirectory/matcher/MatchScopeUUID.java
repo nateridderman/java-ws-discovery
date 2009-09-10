@@ -20,6 +20,8 @@ package com.ms.wsdiscovery.servicedirectory.matcher;
 
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
+import java.net.URI;
+import java.util.UUID;
 
 /**
  * Match scope against target service using the UUID algorithm.
@@ -27,6 +29,26 @@ import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
  * @author Magnus Skjegstad
  */
 public class MatchScopeUUID implements IMatchScope {
+
+    private UUID urnToUUID(String urn) {
+        UUID uuid = null; // default to null 
+        try {
+            URI uri = URI.create(urn);
+            
+            if (uri.getScheme() == null) // no scheme?
+                uuid = UUID.fromString(urn);
+            else {
+                if (uri.getScheme().equals("urn")) // urn prefix
+                    uri = URI.create(uri.getSchemeSpecificPart()); // extract inner uuid from urn:uuid: prefix
+                
+                if (uri.getScheme().equals("uuid")) // uuid prefix
+                    uuid = UUID.fromString(uri.getSchemeSpecificPart());
+            }
+        } finally {
+            return uuid;
+        }
+    }
+
     /**
      * Match scope against target service using the UUID algorithm.
      * See the WS-Discovery specification or {@link MatchBy} for details.
@@ -35,7 +57,33 @@ public class MatchScopeUUID implements IMatchScope {
      * @return True on success, false on failure.
      */
     public boolean matchScope(WsDiscoveryService target, ScopesType probeScopes) {
-        throw new UnsupportedOperationException("Match by UUID not supported yet.");
+        /**
+     * From the WS-Discovery Specification Draft, 2005:<p>
+     * Using a case-insensitive comparison, the scheme of S1 and S2 is "uuid" and each of the
+     * unsigned integer fields in S1 is equal to the corresponding field in S2, or equivalently, the
+     * 128 bits of the in-memory representation of S1 and S2 are the same 128 bit unsigned integer.
+     */
+         if (probeScopes == null) // The probe didn't include scope
+            return true;
+
+        boolean found = false;
+        for (String s : probeScopes.getValue()) {
+
+            UUID uuid = urnToUUID(s);
+            if (uuid == null)
+                continue;
+
+            for (URI u : target.getScopes())
+                if (urnToUUID(u.toString()).equals(uuid)) {
+                    found = true;
+                    break;
+                }
+
+            if (found)
+                break;
+        }
+
+        return found;
     }
 
 }
