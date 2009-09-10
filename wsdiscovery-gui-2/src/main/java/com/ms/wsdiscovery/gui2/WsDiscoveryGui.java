@@ -23,10 +23,12 @@ import com.ms.wsdiscovery.WsDiscoveryBuilder;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.WsDiscoveryServer;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
+import com.ms.wsdiscovery.gui2.dialogs.WsDiscoveryCustomProbeDialog;
 import com.ms.wsdiscovery.gui2.dialogs.WsDiscoveryServiceDialog;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
+import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 import java.awt.Color;
 import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
@@ -96,7 +98,8 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
 
                     buttonPublishService.setEnabled(true);
                     buttonProxyControl.setEnabled(true);
-                    buttonSendProxy.setEnabled(true);
+                    buttonSendProbe.setEnabled(true);
+                    buttonSendCustomProbe.setEnabled(true);
 
                     DefaultTableModel model;
                     IWsDiscoveryServiceDirectory services;
@@ -152,7 +155,8 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
                     buttonPublishService.setEnabled(false);
                     buttonRemoveService.setEnabled(false);
                     buttonProxyControl.setEnabled(false);
-                    buttonSendProxy.setEnabled(false);
+                    buttonSendProbe.setEnabled(false);
+                    buttonSendCustomProbe.setEnabled(false);
                 }
             }
         });
@@ -342,7 +346,8 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
         panelServiceDirectory = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tableServiceDirectory = new javax.swing.JTable();
-        buttonSendProxy = new javax.swing.JButton();
+        buttonSendProbe = new javax.swing.JButton();
+        buttonSendCustomProbe = new javax.swing.JButton();
         panelControls = new javax.swing.JPanel();
         buttonWsDiscoveryControl = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -393,11 +398,19 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
         tableServiceDirectory.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane2.setViewportView(tableServiceDirectory);
 
-        buttonSendProxy.setText("Send probe");
-        buttonSendProxy.setEnabled(false);
-        buttonSendProxy.addActionListener(new java.awt.event.ActionListener() {
+        buttonSendProbe.setText("Send probe");
+        buttonSendProbe.setEnabled(false);
+        buttonSendProbe.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonSendProxyActionPerformed(evt);
+                buttonSendProbeActionPerformed(evt);
+            }
+        });
+
+        buttonSendCustomProbe.setText("Send custom probe");
+        buttonSendCustomProbe.setEnabled(false);
+        buttonSendCustomProbe.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonSendCustomProbeActionPerformed(evt);
             }
         });
 
@@ -409,7 +422,10 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(panelServiceDirectoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 768, Short.MAX_VALUE)
-                    .addComponent(buttonSendProxy, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelServiceDirectoryLayout.createSequentialGroup()
+                        .addComponent(buttonSendProbe)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(buttonSendCustomProbe)))
                 .addContainerGap())
         );
         panelServiceDirectoryLayout.setVerticalGroup(
@@ -417,7 +433,9 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
             .addGroup(panelServiceDirectoryLayout.createSequentialGroup()
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(buttonSendProxy))
+                .addGroup(panelServiceDirectoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(buttonSendCustomProbe)
+                    .addComponent(buttonSendProbe)))
         );
 
         panelControls.setBorder(javax.swing.BorderFactory.createTitledBorder("Controls"));
@@ -660,8 +678,8 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
                 }});
 }//GEN-LAST:event_buttonWsDiscoveryControlActionPerformed
 
-    private void buttonSendProxyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSendProxyActionPerformed
-        buttonSendProxy.setEnabled(false);
+    private void buttonSendProbeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSendProbeActionPerformed
+        buttonSendProbe.setEnabled(false);
         java.awt.EventQueue.invokeLater(new Runnable() {
                 public void run() {
                     try {
@@ -670,10 +688,10 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
                             wsdiscovery.probe();
                         }
                     } finally {
-                        buttonSendProxy.setEnabled(true);                        
+                        buttonSendProbe.setEnabled(true);
                     }
                 }});
-    }//GEN-LAST:event_buttonSendProxyActionPerformed
+    }//GEN-LAST:event_buttonSendProbeActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
         String sel = (String) jComboBox1.getModel().getSelectedItem();
@@ -701,7 +719,6 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
             java.awt.EventQueue.invokeLater(new Runnable() {
                 public void run() {
                     WsDiscoveryServiceDialog dialog = new WsDiscoveryServiceDialog(new javax.swing.JFrame(), true);
-                    dialog.setModalityType(ModalityType.APPLICATION_MODAL);
                     dialog.setLocationRelativeTo(dialog.getParent());
                     dialog.setVisible(true);
                     if (!dialog.isCancelled()) {
@@ -736,6 +753,38 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
                         }});
     }//GEN-LAST:event_buttonRemoveServiceActionPerformed
 
+    private void buttonSendCustomProbeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSendCustomProbeActionPerformed
+        buttonSendCustomProbe.setEnabled(false);
+        java.awt.EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    try {
+                        if ((wsdiscovery != null) && (wsdiscovery.isAlive())) {
+                            WsDiscoveryCustomProbeDialog dialog = new WsDiscoveryCustomProbeDialog(new javax.swing.JFrame(), true);
+                            dialog.setLocationRelativeTo(dialog.getParent());
+                            dialog.setVisible(true);
+                            if (!dialog.isCancelled()) {
+                                QName portType = null;
+                                URI scope = null;
+
+                                if (!dialog.getTextPortType().getText().trim().equals(""))
+                                    portType = new QName(dialog.getTextPortType().getText());
+
+                                if (!dialog.getTextScope().getText().trim().equals(""))
+                                    scope = URI.create(dialog.getTextScope().getText());
+
+                                MatchBy matcher = (MatchBy) dialog.getComboMatchBy().getModel().getSelectedItem();
+
+                                log_info("Sending custom probe (\"" + portType + "\" in scope " + scope + ") using matcher " + matcher.name());
+
+                                wsdiscovery.probe(portType, scope, matcher);
+                            }
+                        }
+                    } finally {
+                        buttonSendCustomProbe.setEnabled(true);
+                    }
+                }});
+    }//GEN-LAST:event_buttonSendCustomProbeActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -762,7 +811,8 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
     private javax.swing.JButton buttonProxyControl;
     private javax.swing.JButton buttonPublishService;
     private javax.swing.JButton buttonRemoveService;
-    private javax.swing.JButton buttonSendProxy;
+    private javax.swing.JButton buttonSendCustomProbe;
+    private javax.swing.JButton buttonSendProbe;
     private javax.swing.JButton buttonWsDiscoveryControl;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JLabel jLabel1;
