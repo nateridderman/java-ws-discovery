@@ -149,10 +149,17 @@ public class WsDiscoveryServer extends DispatchThread {
      * <code>null</code> uses default from {@link WsDiscoveryConstants}
      */
     public void probe(QName portType, URI scope, MatchBy matchBy) {
-        List<QName> ports = new ArrayList<QName>();        
-        ports.add(portType);
-        List<URI> scopes = new ArrayList<URI>(); 
-        scopes.add(scope);        
+        List<QName> ports = null;
+        if (portType != null) {
+            ports = new ArrayList<QName>();
+            ports.add(portType);
+        }
+
+        List<URI> scopes = null;
+        if (scope != null) {
+            scopes = new ArrayList<URI>();
+            scopes.add(scope);
+        }
 
         probe(ports, scopes, matchBy);
     }
