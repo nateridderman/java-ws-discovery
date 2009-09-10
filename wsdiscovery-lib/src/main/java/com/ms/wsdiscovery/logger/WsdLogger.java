@@ -20,41 +20,54 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package com.ms.wsdiscovery.logger;
 
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
+import java.util.logging.Handler;
 
 /** 
  * Contains helper methods for logging debug messages.
  * @author Magnus Skjegstad
  */
 public class WsdLogger {
-    private static ConsoleHandler consoleHandler = new ConsoleHandler();
     private Logger logger;
+    private Handler handler;
     private static ReentrantLock loggerLock = new ReentrantLock();
-
-    static {        
-        // The handler logs everything passed to it, content is filtered at the Logger level.
-       consoleHandler = new ConsoleHandler(); 
-       consoleHandler.setLevel(Level.ALL);
-    }
-   
+  
     /**
      * Constructs a new {@link WsdLogger} instance.
      * @param name Name of instance. Will be prefixed to all log messages.
+     * @param handler Descendant of java.util.logging.Handler that can handle the log messages.
      * @param level Detail level. See {@link Level}.
      */    
-    public WsdLogger(String name, Level level) {
+    public WsdLogger(String name, Level level, Handler handler) {
         loggerLock.lock();
-        
+
+        this.handler = handler;        
         this.logger = Logger.getLogger(name);        
-        logger.removeHandler(consoleHandler);
+        logger.removeHandler(this.handler);
         logger.setUseParentHandlers(false);
-        logger.addHandler(consoleHandler);
+        logger.addHandler(this.handler);
         logger.setLevel(level);
+
+        // The handler logs everything passed to it, content is filtered at the Logger level. As
+        // each instance of WsdLogger uses the same handler, this could be placed in a static-block.
+        // However, if the user has changed WsDiscoveryConstants.loggerHandler it should be called
+        // again.... so we call it once for every instance, just in case :-)
+        this.handler.setLevel(Level.ALL);
         
         loggerLock.unlock();
+    }
+
+    /**
+     * Constructs a new {@link WsdLogger} instance. The message handler will be 
+     * set to the value of WsDiscoveryConstants.loggerHandler.
+     *
+     * @param name Name of instance. Will be prefixed to all log messages.
+     * @param level Detail level. See {@link Level}.
+     */
+    public WsdLogger(String name, Level level) {
+        this(name, level, WsDiscoveryConstants.loggerHandler);
     }
         
     /**

@@ -156,23 +156,28 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     private void add(WsDiscoveryService service) 
             throws WsDiscoveryServiceDirectoryException {
 
+        logger.finer("serviceDirectory.add()");
+        logger.fine("Adding service " + service.getEndpointReference());
         w.lock();
         try {
             Boolean res = false;
-            logger.fine("Adding service " + service.toString());
-               
+                           
             res = services.add(service);
             if (!res)
                 throw new WsDiscoveryServiceDirectoryException("Unable to add new service to service directory.");
         } finally {
             w.unlock();
-        }        
+        }
+     
+        logger.finest("Added service: \n" + service.toString());
     }
        
     private void update(WsDiscoveryService service) 
             throws WsDiscoveryServiceDirectoryException {
 
         WsDiscoveryService foundService;
+        
+        logger.finer("serviceDirectory.update()");
 
         synchronized (this){ // Synchronize to avoid race cond. between r/w locks. findService read-locks, so we must wait with w lock.
             foundService = findService(service.getEndpointReference());
@@ -182,9 +187,9 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
             w.lock(); // get write lock
         }
         
-        try {            
-            logger.fine("Updating service " + service.toString());
+        logger.fine("Updating service " + service.getEndpointReference());
 
+        try {                        
             // Increase metadataversion if hashcode differs
             if (service.hashCode() != foundService.hashCode())
                 service.setMetadataVersion(foundService.getMetadataVersion()+1);
@@ -196,6 +201,8 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         } finally {
             w.unlock();
         }
+
+        logger.finest("Updated service " + service.toString());
     }
     
     /**

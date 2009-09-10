@@ -32,6 +32,8 @@ import com.ms.wsdiscovery.logger.WsdLogger;
 import com.ms.wsdiscovery.network.NetworkMessage;
 import com.ms.wsdiscovery.network.transport.exception.WsDiscoveryTransportException;
 import java.net.NetworkInterface;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of SOAP-over-UDP for WS-Discovery as specified in 
@@ -283,7 +285,19 @@ public class SOAPOverUDP implements ITransportType {
         multicastReceiverThread.done();
         multicastSenderThread.done();
         unicastReceiverThread.done();
-        unicastSenderThread.done();                        
+        unicastSenderThread.done();
+        // Wait for childs to complete
+        while (multicastReceiverThread.isRunning() ||
+                multicastSenderThread.isRunning() ||
+                unicastSenderThread.isRunning() ||
+                unicastReceiverThread.isRunning()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                break;
+            }
+        }
+
     }
 
     /**

@@ -146,10 +146,9 @@ public class SOAPSenderThread extends Thread {
             }
         } finally {        
             socket.close();
+            logger.finer("Stopped " + getName());
             isRunning = false;
-        }
-        
-        logger.finer("Stopped " + getName());
+        }                
     }
 
 }
