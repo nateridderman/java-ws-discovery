@@ -18,9 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.ms.wsdiscovery.network.transport.soapudp;
 
+import com.ms.wsdiscovery.network.NetworkMessage;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
-import com.ms.wsdiscovery.network.NetworkMessage;
+import com.ms.wsdiscovery.network.interfaces.INetworkMessage;
 
 /**
  * Extended version of {@link NetworkMessage} that supports the retry and 
@@ -29,7 +30,7 @@ import com.ms.wsdiscovery.network.NetworkMessage;
  * 
  * @author Magnus Skjegstad
  */
-public class SOAPNetworkMessage extends NetworkMessage implements Delayed {
+public class SOAPNetworkMessage extends NetworkMessage implements Delayed, INetworkMessage {
     /**
      * Random delay between {@link SOAPOverUDP#UDP_MIN_DELAY} and 
      * {@link SOAPOverUDP#UDP_MAX_DELAY} chosen at startup. T is doubled
@@ -57,7 +58,7 @@ public class SOAPNetworkMessage extends NetworkMessage implements Delayed {
      * @param multicast True if <code>nm</code> is to be sent multicast. Affects
      * the number of resends. 
      */
-    public SOAPNetworkMessage(NetworkMessage nm, boolean multicast) {
+    public SOAPNetworkMessage(INetworkMessage nm, boolean multicast) {
         super(nm.getPayload(), nm.getPayloadLen(), 
                 nm.getSrcAddress(), nm.getSrcPort(), 
                 nm.getDstAddress(), nm.getDstPort());

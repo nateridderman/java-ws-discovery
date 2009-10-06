@@ -252,10 +252,10 @@ public class DispatchThread extends Thread {
         // Send packet multicast or to proxy
         if (useProxy) {
             logger.fine("Sending probe unicast to proxy at " + useProxyAddress + ":" + useProxyPort);
-            transport.send(new NetworkMessage(probe.toString(), null, 0, useProxyAddress, useProxyPort)); // Unicast to proxy
+            transport.send(new WsdNetworkMessage(probe.toString(), null, 0, useProxyAddress, useProxyPort)); // Unicast to proxy
         } else {
             logger.fine("Multicasting probe (not using proxy).");
-            transport.send(new NetworkMessage(probe));  // Multicast
+            transport.send(new WsdNetworkMessage(probe));  // Multicast
         }
     }
     
@@ -364,7 +364,7 @@ public class DispatchThread extends Thread {
      * @param originalMessage The original NetworkMessage.
      * @throws WsDiscoveryNetworkException if m is not an instance of ProbeMatchesType.
      */
-    private void recvProbeMatches(WsdSOAPMessage m, NetworkMessage originalMessage)
+    private void recvProbeMatches(WsdSOAPMessage m, WsdNetworkMessage originalMessage)
             throws WsDiscoveryNetworkException {
         logger.finer("recvProbeMatches()");
         if (m.getJAXBBody() instanceof ProbeMatchesType) {
@@ -389,7 +389,7 @@ public class DispatchThread extends Thread {
      * @param originalMessage The original NetworkMessage.
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException if m is not an instance of ResolveMatchesType.
      */
-    private void recvResolveMatches(WsdSOAPMessage m, NetworkMessage originalMessage)
+    private void recvResolveMatches(WsdSOAPMessage m, WsdNetworkMessage originalMessage)
             throws WsDiscoveryNetworkException {
         logger.finer("recvResolveMatches()");
         if (m.getJAXBBody() instanceof ResolveMatchesType) {
@@ -437,7 +437,7 @@ public class DispatchThread extends Thread {
      * @param originalMessage Original message as received from the transport layer.
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException if m is not an instance of ResolveType.
      */
-    private void recvResolve(WsdSOAPMessage m, NetworkMessage originalMessage) 
+    private void recvResolve(WsdSOAPMessage m, WsdNetworkMessage originalMessage)
             throws WsDiscoveryNetworkException {
         logger.finer("recvResolve()");
         if (m.getJAXBBody() instanceof ResolveType) {
@@ -476,7 +476,7 @@ public class DispatchThread extends Thread {
      * @param originalMessage Original message as received from the transport layer.
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException if m is not an instance of ProbeType.
      */
-    private void recvProbe(WsdSOAPMessage m, NetworkMessage originalMessage) 
+    private void recvProbe(WsdSOAPMessage m, WsdNetworkMessage originalMessage)
             throws WsDiscoveryNetworkException {
         logger.finer("recvProbe()");
         
@@ -530,9 +530,9 @@ public class DispatchThread extends Thread {
         resolve.getJAXBBody().setEndpointReference(service.createEndpointReferenceObject());
         // Send multicast in normal mode or unicast in proxy mode
         if (useProxy) // Unicast
-            transport.send(new NetworkMessage(resolve.toString(), null, 0, useProxyAddress, useProxyPort));
+            transport.send(new WsdNetworkMessage(resolve.toString(), null, 0, useProxyAddress, useProxyPort));
         else // Multicast
-            transport.send(new NetworkMessage(resolve));        
+            transport.send(new WsdNetworkMessage(resolve));
         
         service.setTriedToResolve(new Date());
     }
@@ -544,7 +544,7 @@ public class DispatchThread extends Thread {
      * @param originalMessage Original message as received from the transport layer.
      */
     protected void sendProxyAnnounce(WsdSOAPMessage relatesToMessage, 
-            NetworkMessage originalMessage) {
+            WsdNetworkMessage originalMessage) {
         logger.finer("sendProxyAnnounce()");
 
         logger.fine("Sending proxy announce to " + originalMessage.getSrcAddress() + ":" + originalMessage.getSrcPort());
@@ -557,7 +557,7 @@ public class DispatchThread extends Thread {
         
         m.setWsaRelatesTo(r);
         
-        transport .send(new NetworkMessage(m.toString(), null, 0, originalMessage.getSrcAddress(), originalMessage.getSrcPort()));
+        transport .send(new WsdNetworkMessage(m.toString(), null, 0, originalMessage.getSrcAddress(), originalMessage.getSrcPort()));
     }
     
     
@@ -568,7 +568,7 @@ public class DispatchThread extends Thread {
      */
     protected void sendHello(WsDiscoveryService service) {
         WsdSOAPMessage<HelloType> m = soapBuilder.createWsdSOAPMessageHello(service);
-        transport.send (new NetworkMessage(m)); // Send multicast if no address is given
+        transport.send (new WsdNetworkMessage(m)); // Send multicast if no address is given
         logger.finer("sendHello() called for service " + m.getJAXBBody().getEndpointReference());
     }
     
@@ -579,7 +579,7 @@ public class DispatchThread extends Thread {
      */
     protected void sendBye(WsDiscoveryService service) {
         WsdSOAPMessage<ByeType> m = soapBuilder.createWsdSOAPMessageBye(service);
-        transport.send(new NetworkMessage(m));
+        transport.send(new WsdNetworkMessage(m));
         logger.finer("sendBye() called for service " + m.getJAXBBody().getEndpointReference());
     }
     
@@ -627,7 +627,7 @@ public class DispatchThread extends Thread {
         }
                         
         // Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
-        transport.send(new NetworkMessage(m.toString(), null, 0, dstAddress, dstPort));
+        transport.send(new WsdNetworkMessage(m.toString(), null, 0, dstAddress, dstPort));
         
         // Store time 
         matchedService.setSentResolveMatch(dstAddress);
@@ -669,7 +669,7 @@ public class DispatchThread extends Thread {
         }
                         
         // Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
-        transport.send(new NetworkMessage(m.toString(), null, 0, dstAddress, dstPort)); 
+        transport.send(new WsdNetworkMessage(m.toString(), null, 0, dstAddress, dstPort));
     }
     
     /**
@@ -679,10 +679,10 @@ public class DispatchThread extends Thread {
      */
     private void dispatch() throws WsDiscoveryNetworkException {
         
-        NetworkMessage message = null;
+        WsdNetworkMessage message = null;
         
         try {
-            message = transport.recv(1000);
+            message = (WsdNetworkMessage) transport.recv(1000);
         } catch (InterruptedException ex) {}
         
         if (message == null)

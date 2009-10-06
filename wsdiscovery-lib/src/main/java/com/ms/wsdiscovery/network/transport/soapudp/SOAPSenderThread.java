@@ -25,7 +25,7 @@ import java.net.SocketException;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
 import com.ms.wsdiscovery.logger.WsdLogger;
-import com.ms.wsdiscovery.network.NetworkMessage;
+import com.ms.wsdiscovery.network.WsdNetworkMessage;
 import java.util.concurrent.Delayed;
 
 /**

@@ -27,9 +27,8 @@ import java.net.MulticastSocket;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.logger.WsdLogger;
-import com.ms.wsdiscovery.network.NetworkMessage;
+import com.ms.wsdiscovery.network.interfaces.INetworkMessage;
 import com.ms.wsdiscovery.network.transport.exception.WsDiscoveryTransportException;
 import java.net.NetworkInterface;
 import java.util.logging.Level;
@@ -52,7 +51,7 @@ public class SOAPOverUDP implements ITransportType {
     private final SOAPReceiverThread unicastReceiverThread; // Thread listening for incoming unicast messages
     private final SOAPSenderThread multicastSenderThread; // Thread sending multicast messages
     private final SOAPSenderThread unicastSenderThread; // Thread sending unicast messages
-    private LinkedBlockingQueue<NetworkMessage> inQueue = new LinkedBlockingQueue<NetworkMessage>(); // Queue used by the receiver threads
+    private LinkedBlockingQueue<INetworkMessage> inQueue = new LinkedBlockingQueue<INetworkMessage>(); // Queue used by the receiver threads
     private DelayQueue<SOAPNetworkMessage> outUnicastQueue = new DelayQueue<SOAPNetworkMessage>(); // Queue used by unicastSenderThread
     private DelayQueue<SOAPNetworkMessage> outMulticastQueue = new DelayQueue<SOAPNetworkMessage>(); // Queue used by multicastSenderThread
     private final int multicastPort;
@@ -154,18 +153,7 @@ public class SOAPOverUDP implements ITransportType {
         unicastReceiverThread = new SOAPReceiverThread("unicast_recv", 
                     inQueue, multicastSenderThread.getSocket());
     }
-    
-    /**
-     * Create new instance using multicast configuration from the default values in
-     * {@link WsDiscoveryConstants#multicastAddress} and {@link WsDiscoveryConstants#multicastPort}.
-     * 
-     * @throws WsDiscoveryTransportException if an error occured while opening 
-     * the sockets or creating child threads.
-     */
-    public SOAPOverUDP() throws WsDiscoveryTransportException {
-        this(WsDiscoveryConstants.multicastInterface, WsDiscoveryConstants.multicastPort, WsDiscoveryConstants.multicastAddress);
-    }
-    
+            
     @Override
     public void finalize() throws Throwable {
         try {            
@@ -182,7 +170,7 @@ public class SOAPOverUDP implements ITransportType {
      * @param blockUntilSent When true the method will wait until the send-queue is empty. False returns immediately.
      * @throws java.lang.InterruptedException if interrupted while waiting for the message to be sent.
      */
-    public void send(NetworkMessage message, boolean blockUntilSent) throws InterruptedException {
+    public void send(INetworkMessage message, boolean blockUntilSent) throws InterruptedException {
         // Multicast
         if (message.getDstAddress().equals(this.multicastAddress)) { 
             outMulticastQueue.add(new SOAPNetworkMessage(message, true));
@@ -206,7 +194,7 @@ public class SOAPOverUDP implements ITransportType {
      * 
      * @param message
      */
-    public void send(NetworkMessage message) {
+    public void send(INetworkMessage message) {
         try {
             send(message, false);
         } catch (InterruptedException ex) {} // Will never be thrown, since blockUntilSent is false
@@ -219,7 +207,7 @@ public class SOAPOverUDP implements ITransportType {
      * @return SOAP message. <code>null</code> on timeout.
      * @throws java.lang.InterruptedException if interrupted while waiting for data.
      */
-    public NetworkMessage recv(long timeoutInMillis) throws InterruptedException {
+    public INetworkMessage recv(long timeoutInMillis) throws InterruptedException {
         return inQueue.poll(timeoutInMillis, TimeUnit.MILLISECONDS);
     }
     
@@ -228,7 +216,7 @@ public class SOAPOverUDP implements ITransportType {
      * 
      * @return SOAP message. <code>null</code> if interrupted while waiting.
      */
-    public NetworkMessage recv() {
+    public INetworkMessage recv() {
         try {
             return inQueue.take();
         } catch (InterruptedException ex) {
