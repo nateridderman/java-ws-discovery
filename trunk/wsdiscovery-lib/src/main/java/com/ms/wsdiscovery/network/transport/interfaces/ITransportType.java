@@ -21,6 +21,7 @@ package com.ms.wsdiscovery.network.transport.interfaces;
 
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.network.*;
+import com.ms.wsdiscovery.network.interfaces.INetworkMessage;
 
 /**
  * Transport types in {@link TransportType} must implement this interface.
@@ -40,7 +41,7 @@ public interface ITransportType {
      * @return Received packet stored in a {@link NetworkMessage}.
      * @throws java.lang.InterruptedException if interrupted while waiting.
      */
-    NetworkMessage recv(long timeoutInMillis) throws InterruptedException;
+    INetworkMessage recv(long timeoutInMillis) throws InterruptedException;
     
     /**
      * Receive a packet from the transport layer. Blocks until a packet is 
@@ -48,7 +49,7 @@ public interface ITransportType {
      * 
      * @return Received packet stored in a {@link NetworkMessage}.
      */
-    NetworkMessage recv();
+    INetworkMessage recv();
 
     /**
      * Send a message to the transport layer. The implementer must support 
@@ -57,7 +58,7 @@ public interface ITransportType {
      * 
      * @param message Message to send.
      */
-    void send(NetworkMessage message);
+    void send(INetworkMessage message);
 
     /**
      * Returns the port used for sending and receiving multicasted packets.

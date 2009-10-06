@@ -19,26 +19,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.network.transport.soapudp.zlib;
 
+import com.ms.wsdiscovery.network.NetworkMessage;
+import com.ms.wsdiscovery.network.transport.exception.WsDiscoveryTransportException;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
-import com.ms.wsdiscovery.network.NetworkMessage;
+import com.ms.wsdiscovery.network.interfaces.INetworkMessage;
 import com.ms.wsdiscovery.network.transport.interfaces.ITransportType;
-import com.ms.wsdiscovery.network.transport.exception.WsDiscoveryTransportException;
 import com.ms.wsdiscovery.network.transport.soapudp.SOAPOverUDP;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 
 /**
  * An implementation of SOAP-over-UDP using ZLib-compression.
  * 
  * @author Magnus Skjegstad
  */
-public class SOAPOverUDPzlib extends SOAPOverUDP implements ITransportType {    
+public class SOAPOverUDPzlib extends SOAPOverUDP implements ITransportType {
+    
     /**
-     *
-     * @throws wsdiscovery.network.transport.exception.WsDiscoveryTransportException
+     * @param multicastInterface Network interface to use for multicasting. Set to null to use default.
+     * @param multicastPort Port for sending and receiving multicast messages
+     * @param multicastAddress Address for sending and listening to multicast messages.
+     * @throws WsDiscoveryTransportException if an error occured while opening
+     * the sockets or creating child threads.
      */
-    public SOAPOverUDPzlib() throws WsDiscoveryTransportException {
-        super();
+    public SOAPOverUDPzlib(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddrses) throws WsDiscoveryTransportException {
+        super(multicastInterface,multicastPort,multicastAddrses);
     }
 
     /**
@@ -49,8 +56,8 @@ public class SOAPOverUDPzlib extends SOAPOverUDP implements ITransportType {
      * @throws java.lang.InterruptedException if interrupted while waiting.
      */
     @Override
-    public NetworkMessage recv(long timeoutInMillis) throws InterruptedException {        
-        NetworkMessage nm = super.recv(timeoutInMillis);        
+    public INetworkMessage recv(long timeoutInMillis) throws InterruptedException {
+        INetworkMessage nm = super.recv(timeoutInMillis);
         
         if (nm != null) {
             Inflater decompresser = new Inflater();
@@ -76,7 +83,7 @@ public class SOAPOverUDPzlib extends SOAPOverUDP implements ITransportType {
      * @throws java.lang.InterruptedException if interrupted while waiting.
      */
     @Override
-    public void send(NetworkMessage message, boolean blockUntilSent) 
+    public void send(INetworkMessage message, boolean blockUntilSent)
             throws InterruptedException {
               
         Deflater compresser = new Deflater(Deflater.BEST_COMPRESSION);
@@ -86,7 +93,7 @@ public class SOAPOverUDPzlib extends SOAPOverUDP implements ITransportType {
         compresser.finish();
         int len = compresser.deflate(data);
 
-        NetworkMessage nm = new NetworkMessage(
+        INetworkMessage nm = new NetworkMessage(
                 data, len, 
                 message.getSrcAddress(), message.getSrcPort(), 
                 message.getDstAddress(), message.getDstPort());        

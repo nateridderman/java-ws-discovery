@@ -27,6 +27,7 @@ import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.BlockingQueue;
 import com.ms.wsdiscovery.logger.WsdLogger;
+import com.ms.wsdiscovery.network.interfaces.INetworkMessage;
 import java.net.InetSocketAddress;
 
 /**
@@ -48,7 +49,7 @@ public class SOAPReceiverThread extends Thread {
     /**
      * Queue for received messages.
      */
-    protected BlockingQueue<NetworkMessage> queue;    
+    protected BlockingQueue<INetworkMessage> queue;
     
     /**
      * Socket messages are received on.
@@ -62,7 +63,7 @@ public class SOAPReceiverThread extends Thread {
      * @param queue Queue for received messages.
      * @param socket Listening socket.
      */
-    public SOAPReceiverThread(String name, BlockingQueue<NetworkMessage> queue, DatagramSocket socket) {
+    public SOAPReceiverThread(String name, BlockingQueue<INetworkMessage> queue, DatagramSocket socket) {
         super(name);
         logger = new WsdLogger(SOAPReceiverThread.class.getName());
         this.queue = queue;        
@@ -78,7 +79,7 @@ public class SOAPReceiverThread extends Thread {
      * @param listenport Port to listen to.
      * @throws SocketException 
      */
-    public SOAPReceiverThread(String name, BlockingQueue<NetworkMessage> queue, int listenport) throws SocketException {
+    public SOAPReceiverThread(String name, BlockingQueue<INetworkMessage> queue, int listenport) throws SocketException {
         this (name, queue, new DatagramSocket(listenport));
     }
        
@@ -118,7 +119,7 @@ public class SOAPReceiverThread extends Thread {
 
                     InetSocketAddress sender = (InetSocketAddress) packet.getSocketAddress();
                     
-                    NetworkMessage nm = new NetworkMessage(packet.getData(), packet.getLength(),
+                    INetworkMessage nm = new NetworkMessage(packet.getData(), packet.getLength(),
                                                            sender.getAddress(), sender.getPort(),
                                                            socket.getLocalAddress(), socket.getLocalPort());
                    /* NetworkMessage nm = new NetworkMessage(packet.getData(), packet.getLength(),

@@ -41,7 +41,7 @@ public class NetworkMessageTest {
     public NetworkMessageTest() {
     }
 
-    private static NetworkMessage instance;
+    private static WsdNetworkMessage instance;
     private static InetAddress srcAddress;
     private static InetAddress dstAddress;
     private static int dstPort;
@@ -56,7 +56,7 @@ public class NetworkMessageTest {
         dstAddress = InetAddress.getByName("10.0.0.2");
         message = "This is a test message";
 
-        instance = new NetworkMessage(message, srcAddress, srcPort, dstAddress, dstPort);
+        instance = new WsdNetworkMessage(message, srcAddress, srcPort, dstAddress, dstPort);
     }
 
     @AfterClass
