@@ -21,7 +21,6 @@ package com.ms.wsdiscovery.network;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.xml.namespace.QName;
@@ -57,6 +56,7 @@ import java.net.Inet6Address;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.Map.Entry;
 
 /** 
@@ -77,7 +77,7 @@ public class DispatchThread extends Thread {
     protected WsDiscoveryServiceDirectory serviceDirectory = new WsDiscoveryServiceDirectory(); // Service directory containing discovered services (including local)
     private WsdSOAPMessageBuilder soapBuilder = WsDiscoveryConstants.SOAPBUILDER; // Helper functions for building SOAP-messages
     private WsdXMLBuilder jaxbBuilder = WsDiscoveryConstants.XMLBUILDER; // Helper functions for building XML with JAXB
-    private ArrayList<AttributedURI> messagesReceived = new ArrayList<AttributedURI>(); // list of received message IDs
+    private LinkedList<AttributedURI> messagesReceived = new LinkedList<AttributedURI>(); // list of received message IDs
     private WsdLogger logger = new WsdLogger(DispatchThread.class.getName());
     private boolean threadDone = false; // Thread aborts when set to true
     
@@ -181,11 +181,10 @@ public class DispatchThread extends Thread {
      * @throws WsDiscoveryNetworkException if getWsaMessageId() returns null.
      */ 
     private boolean isAlreadyReceived(WsdSOAPMessage soap) throws WsDiscoveryNetworkException {
-        // TODO Eats memory
         if (soap.getWsaMessageId() == null)
             throw new WsDiscoveryNetworkException("Message ID was null.");
         
-        for (AttributedURI a : messagesReceived) 
+        for (AttributedURI a : messagesReceived)
             try {
                 if (a.getValue().equals(soap.getWsaMessageId().getValue()))
                     return true;
@@ -201,9 +200,13 @@ public class DispatchThread extends Thread {
      * @throws WsDiscoveryNetworkException if getWsaMessageId() returns null.
      */
     private void registerReceived(WsdSOAPMessage soap) throws WsDiscoveryNetworkException {
-        // TODO Eats memory. Shoudl discard oldest entries.
         if (soap.getWsaMessageId() == null)
             throw new WsDiscoveryNetworkException("MessageID was null");
+        // TODO Use ringbuffer instead?
+        // trim at 1000 entries
+        while (messagesReceived.size() > 1000)
+            messagesReceived.removeFirst();
+        // add to end
         messagesReceived.add(soap.getWsaMessageId());
     }
     
