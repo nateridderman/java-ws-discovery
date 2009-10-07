@@ -19,6 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.skjegstad.soapoverudp.interfaces;
 
+import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.logging.Logger;
+
 /**
  * SOAP transport types must implement this interface.
  * <p>
@@ -27,7 +32,7 @@ package com.skjegstad.soapoverudp.interfaces;
  * @author Magnus Skjegstad
  */
 public interface ISOAPTransport {
-
+    
     /**
      * Receive a packet from the transport layer. Implementer must listen to 
      * unicast and multicast. Multicast messages are sent to the address
@@ -75,8 +80,14 @@ public interface ISOAPTransport {
     void done();
     
     /**
-     * Intializes the transport layer. Called by {@link DispatchThread#dispatch()}
+     * Starts the transport layer threads. Called by {@link DispatchThread#dispatch()}
      * on startup.
      */
     void start();
+
+    /**
+     * Initialize the transport layer. This method can be called automatically from
+     * the constructor, but is included to support instantiations using newInstance().
+     */
+    void init(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, Logger logger) throws SOAPOverUDPException;
 }
