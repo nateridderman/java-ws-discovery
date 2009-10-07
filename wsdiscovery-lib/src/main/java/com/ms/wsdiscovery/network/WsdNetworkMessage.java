@@ -77,9 +77,9 @@ public class WsdNetworkMessage extends NetworkMessage implements INetworkMessage
      * 
      * @return String representation of payload
      */
-    @Override
+    
     public String getMessage() {
-        return new String(payload, 0, payloadLen, WsDiscoveryConstants.defaultEncoding);
+        return getMessage(WsDiscoveryConstants.defaultEncoding);
     }        
     
     /**
@@ -89,7 +89,7 @@ public class WsdNetworkMessage extends NetworkMessage implements INetworkMessage
      * @param newMessage Payload represented as a string.
      */
     public synchronized void setMessage(String newMessage) {
-        setPayload(newMessage.getBytes(WsDiscoveryConstants.defaultEncoding));
+        setMessage(newMessage, WsDiscoveryConstants.defaultEncoding);
     }    
     
 }

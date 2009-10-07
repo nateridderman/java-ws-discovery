@@ -51,6 +51,9 @@ import com.ms.wsdiscovery.xml.soap.WsdSOAPMessage;
 import com.ms.wsdiscovery.xml.soap.WsdSOAPMessageBuilder;
 import com.ms.wsdiscovery.xml.jaxb_generated.AttributedURI;
 import com.ms.wsdiscovery.xml.jaxb_generated.Relationship;
+import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
+import com.skjegstad.soapoverudp.interfaces.INetworkMessage;
+import com.skjegstad.soapoverudp.messages.NetworkMessage;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetSocketAddress;
@@ -58,6 +61,7 @@ import java.net.NetworkInterface;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 /** 
  * Worker thread for WS-Discovery. Handles WS-Discovery messages received from 
@@ -108,11 +112,17 @@ public class DispatchThread extends Thread {
     public DispatchThread() throws WsDiscoveryNetworkException {        
         try {
             this.transport = WsDiscoveryConstants.transportType.newInstance();
+            this.transport.init(WsDiscoveryConstants.multicastInterface,
+                                WsDiscoveryConstants.multicastPort,
+                                WsDiscoveryConstants.multicastAddress,
+                                null);
         } catch (IllegalAccessException ex) {
-            throw new WsDiscoveryNetworkException("Unable to instantiate transport type: " + ex.toString());
+            throw new WsDiscoveryNetworkException("Unable to instantiate transport", ex);
         } catch (InstantiationException ex) {
-            throw new WsDiscoveryNetworkException("Unable to instantiate transport type: " + ex.toString());
-        } 
+            throw new WsDiscoveryNetworkException("Unable to instantiate transport", ex);
+        } catch (SOAPOverUDPException ex) {
+            throw new WsDiscoveryNetworkException("Unable to instantiate transport", ex);
+        }
 
         // Create a proxy service description that can be added to the directory later if a proxy is enabled on this host
         InetAddress proxyIp = null;
@@ -252,7 +262,8 @@ public class DispatchThread extends Thread {
         // Send packet multicast or to proxy
         if (useProxy) {
             logger.fine("Sending probe unicast to proxy at " + useProxyAddress + ":" + useProxyPort);
-            transport.send(new WsdNetworkMessage(probe.toString(), null, 0, useProxyAddress, useProxyPort)); // Unicast to proxy
+            transport.send(new NetworkMessage(probe.toString().getBytes(WsDiscoveryConstants.defaultEncoding), null, 0,
+                    useProxyAddress, useProxyPort)); // Unicast to proxy
         } else {
             logger.fine("Multicasting probe (not using proxy).");
             transport.send(new WsdNetworkMessage(probe));  // Multicast
@@ -364,7 +375,7 @@ public class DispatchThread extends Thread {
      * @param originalMessage The original NetworkMessage.
      * @throws WsDiscoveryNetworkException if m is not an instance of ProbeMatchesType.
      */
-    private void recvProbeMatches(WsdSOAPMessage m, WsdNetworkMessage originalMessage)
+    private void recvProbeMatches(WsdSOAPMessage m, INetworkMessage originalMessage)
             throws WsDiscoveryNetworkException {
         logger.finer("recvProbeMatches()");
         if (m.getJAXBBody() instanceof ProbeMatchesType) {
@@ -389,7 +400,7 @@ public class DispatchThread extends Thread {
      * @param originalMessage The original NetworkMessage.
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException if m is not an instance of ResolveMatchesType.
      */
-    private void recvResolveMatches(WsdSOAPMessage m, WsdNetworkMessage originalMessage)
+    private void recvResolveMatches(WsdSOAPMessage m, INetworkMessage originalMessage)
             throws WsDiscoveryNetworkException {
         logger.finer("recvResolveMatches()");
         if (m.getJAXBBody() instanceof ResolveMatchesType) {
@@ -437,7 +448,7 @@ public class DispatchThread extends Thread {
      * @param originalMessage Original message as received from the transport layer.
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException if m is not an instance of ResolveType.
      */
-    private void recvResolve(WsdSOAPMessage m, WsdNetworkMessage originalMessage)
+    private void recvResolve(WsdSOAPMessage m, INetworkMessage originalMessage)
             throws WsDiscoveryNetworkException {
         logger.finer("recvResolve()");
         if (m.getJAXBBody() instanceof ResolveType) {
@@ -476,7 +487,7 @@ public class DispatchThread extends Thread {
      * @param originalMessage Original message as received from the transport layer.
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException if m is not an instance of ProbeType.
      */
-    private void recvProbe(WsdSOAPMessage m, WsdNetworkMessage originalMessage)
+    private void recvProbe(WsdSOAPMessage m, INetworkMessage originalMessage)
             throws WsDiscoveryNetworkException {
         logger.finer("recvProbe()");
         
@@ -544,7 +555,7 @@ public class DispatchThread extends Thread {
      * @param originalMessage Original message as received from the transport layer.
      */
     protected void sendProxyAnnounce(WsdSOAPMessage relatesToMessage, 
-            WsdNetworkMessage originalMessage) {
+            INetworkMessage originalMessage) {
         logger.finer("sendProxyAnnounce()");
 
         logger.fine("Sending proxy announce to " + originalMessage.getSrcAddress() + ":" + originalMessage.getSrcPort());
@@ -679,10 +690,10 @@ public class DispatchThread extends Thread {
      */
     private void dispatch() throws WsDiscoveryNetworkException {
         
-        WsdNetworkMessage message = null;
+        INetworkMessage message = null;
         
         try {
-            message = (WsdNetworkMessage) transport.recv(1000);
+            message = transport.recv(1000);
         } catch (InterruptedException ex) {}
         
         if (message == null)
@@ -695,7 +706,7 @@ public class DispatchThread extends Thread {
         // Parse message
         WsdSOAPMessage m;
         try {
-            m = soapBuilder.createWsdSOAPMessage(message.getMessage());
+            m = soapBuilder.createWsdSOAPMessage(message.getMessage(WsDiscoveryConstants.defaultEncoding));
         } catch (WsDiscoveryXMLException ex) {
             throw new WsDiscoveryNetworkException("Unable to create WS-Discovery SOAP message.", ex);
         }             
