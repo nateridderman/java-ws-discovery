@@ -50,6 +50,13 @@ public class SOAPOverUDPzlib extends SOAPOverUDP implements ISOAPTransport {
     }
 
     /**
+     * Empty constructor for use with newInstance(). Call init() to initialize the instance.
+     */
+    public SOAPOverUDPzlib() {
+
+    }
+
+    /**
      * Receive message.
      * 
      * @param timeoutInMillis Time to wait for new message.

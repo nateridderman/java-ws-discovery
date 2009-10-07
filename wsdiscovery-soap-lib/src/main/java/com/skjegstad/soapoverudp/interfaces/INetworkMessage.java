@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package com.skjegstad.soapoverudp.interfaces;
 
 import java.net.InetAddress;
+import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 
 /**
@@ -129,5 +130,22 @@ public interface INetworkMessage {
      */
     @Override
     String toString();
+
+    /**
+     * Get payload as a String with the encoding specified.
+     *
+     * @param encoding Which encoding to use.
+     * @return String representation of payload
+     */
+    public String getMessage(Charset encoding);
+
+    /**
+     * Set new payload. The input string will be converted to an array of bytes
+     * with the encoding specified.
+     *
+     * @param newMessage Payload represented as a string.
+     * @param encoding Which encoding to use.
+     */
+    public void setMessage(String newMessage, Charset encoding);
 
 }

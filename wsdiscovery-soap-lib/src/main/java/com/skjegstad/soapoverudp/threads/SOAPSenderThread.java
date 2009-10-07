@@ -124,7 +124,11 @@ public class SOAPSenderThread extends Thread {
                     if (nm == null)
                         continue;
 
-                    logger.finest(this.getName() + ", send: " + nm.toString());
+                    if (logger != null) {
+                        synchronized(logger) {
+                            logger.finest(this.getName() + ", send: " + nm.toString());
+                        }
+                    }
 
                     DatagramPacket packet = new DatagramPacket(nm.getPayload(), nm.getPayloadLen(), 
                                                                 nm.getDstAddress(), nm.getDstPort());

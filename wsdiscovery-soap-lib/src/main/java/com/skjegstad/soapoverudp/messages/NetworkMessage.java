@@ -20,6 +20,7 @@ package com.skjegstad.soapoverudp.messages;
 
 import com.skjegstad.soapoverudp.interfaces.INetworkMessage;
 import java.net.InetAddress;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -255,5 +256,25 @@ public class NetworkMessage implements INetworkMessage {
         return src + ":" + getSrcPort() + "->" +
                dst + ":" + getDstPort() + " - \"" +
                msg + "\"";
+    }
+
+    /**
+     * Get payload as a String with the encoding specified.
+     * @param encoding Encoding to use.
+     * @return String representation of payload
+     */
+    @Override
+    public String getMessage(Charset encoding) {
+        return new String(payload, 0, payloadLen, encoding);
+    }
+
+    /**
+     * Set new payload. The input string will be converted to an array of bytes
+     * with the encoding specified.
+     * @param encoding Encoding to use.
+     * @param newMessage Payload represented as a string.
+     */
+    public synchronized void setMessage(String newMessage, Charset encoding) {
+        setPayload(newMessage.getBytes(encoding));
     }
 }

@@ -34,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 import com.skjegstad.soapoverudp.interfaces.INetworkMessage;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
 import java.net.NetworkInterface;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -47,19 +46,19 @@ public class SOAPOverUDP implements ISOAPTransport {
     /**
      * Instance of Logger used for debug messages.
      */
-    protected final Logger logger;
+    protected Logger logger;
     
     // Threads and stuff
-    private final SOAPReceiverThread multicastReceiverThread; // Thread listening for incoming multicast messages
-    private final SOAPReceiverThread unicastReceiverThread; // Thread listening for incoming unicast messages
-    private final SOAPSenderThread multicastSenderThread; // Thread sending multicast messages
-    private final SOAPSenderThread unicastSenderThread; // Thread sending unicast messages
+    private SOAPReceiverThread multicastReceiverThread; // Thread listening for incoming multicast messages
+    private SOAPReceiverThread unicastReceiverThread; // Thread listening for incoming unicast messages
+    private SOAPSenderThread multicastSenderThread; // Thread sending multicast messages
+    private SOAPSenderThread unicastSenderThread; // Thread sending unicast messages
     private LinkedBlockingQueue<INetworkMessage> inQueue = new LinkedBlockingQueue<INetworkMessage>(); // Queue used by the receiver threads
     private DelayQueue<SOAPNetworkMessage> outUnicastQueue = new DelayQueue<SOAPNetworkMessage>(); // Queue used by unicastSenderThread
     private DelayQueue<SOAPNetworkMessage> outMulticastQueue = new DelayQueue<SOAPNetworkMessage>(); // Queue used by multicastSenderThread
-    private final int multicastPort;
-    private final InetAddress multicastAddress;
-    private final int unicastPort;
+    private int multicastPort;
+    private InetAddress multicastAddress;
+    private int unicastPort;
     
     // Default vaules for retry and back-off algorithm (see Appendix I in the SOAP-over-UDP draft)
     /**
@@ -92,7 +91,7 @@ public class SOAPOverUDP implements ISOAPTransport {
      */
     public SOAPOverUDP(int multicastPort, InetAddress multicastAddress, Logger logger)
             throws SOAPOverUDPException {
-        this(null, multicastPort, multicastAddress, logger);
+        init(null, multicastPort, multicastAddress, logger);
     }
 
     /**
@@ -105,59 +104,15 @@ public class SOAPOverUDP implements ISOAPTransport {
      */
     public SOAPOverUDP(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, Logger logger)
             throws SOAPOverUDPException {
-        
-        this.logger = logger;
-        
-        this.multicastPort = multicastPort;
-        this.multicastAddress = multicastAddress;
-        
-        MulticastSocket multicastReceiveSocket = null;
-        DatagramSocket mainSocket = null;
-        
-        try {
-            multicastReceiveSocket = new MulticastSocket(null);
-            if (multicastInterface != null)
-                multicastReceiveSocket.setNetworkInterface(multicastInterface);
-            multicastReceiveSocket.setReuseAddress(true); // Required by spec.
-            if (!multicastReceiveSocket.getReuseAddress())
-                throw new SOAPOverUDPException("Platform does not support SO_REUSEADDR");
-            multicastReceiveSocket.setTimeToLive(1); // Suggested by spec
-            multicastReceiveSocket.bind(new InetSocketAddress(multicastPort));
-            if (multicastReceiveSocket.getLocalPort() != multicastPort)
-                throw new SOAPOverUDPException("Unable to bind multicast socket to multicast port.");
-            multicastReceiveSocket.joinGroup(multicastAddress);
-        } catch (IOException ex) {
-            throw new SOAPOverUDPException("Unable to open multicast socket.", ex);
-        }        
-            
-        try {
-            mainSocket = new DatagramSocket();
-            mainSocket.setReuseAddress(true);
-            if (!mainSocket.getReuseAddress())
-                throw new SOAPOverUDPException("Platform doesn't support SO_REUSEADDR");
-            this.unicastPort = mainSocket.getLocalPort();
-           // mainSocket.bind(new InetSocketAddress(multicastPort));
-           // if (mainSocket.getLocalPort() != multicastPort)
-           //     throw new WsDiscoveryTransportException("Unable to bind unicast socket to multicast port.");
-        } catch (IOException ex) {
-            throw new SOAPOverUDPException("Unable to open unicast socket.", ex);
-        }
-        
-        try {
-            multicastReceiverThread = new SOAPReceiverThread("multicast_recv", inQueue, multicastReceiveSocket, logger);
-        } catch (SocketException ex) {
-            throw new SOAPOverUDPException("Unable to start multicast receiver thread", ex);
-        }
-        
-        unicastSenderThread = new SOAPSenderThread("unicast_send", 
-                    outUnicastQueue, mainSocket, logger);
-        multicastSenderThread = new SOAPSenderThread("multicast_send", 
-                        outMulticastQueue, mainSocket, logger);
-        try {
-            unicastReceiverThread = new SOAPReceiverThread("unicast_recv", inQueue, multicastSenderThread.getSocket(), logger);
-        } catch (SocketException ex) {
-            throw new SOAPOverUDPException("Unable to start unicast receiver thread", ex);
-        }
+        init(multicastInterface, multicastPort, multicastAddress, logger);
+    }
+
+    /**
+     * Empty constructor for use with newInstance(). Call init() to initialize the
+     * new instance.
+     */
+    public SOAPOverUDP() {
+
     }
             
     @Override
@@ -310,6 +265,61 @@ public class SOAPOverUDP implements ISOAPTransport {
      */
     public int getUnicastPort() {
         return unicastPort;
+    }
+
+    public void init(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, Logger logger) throws SOAPOverUDPException {
+        this.logger = logger;
+
+        this.multicastPort = multicastPort;
+        this.multicastAddress = multicastAddress;
+
+        MulticastSocket multicastReceiveSocket = null;
+        DatagramSocket mainSocket = null;
+
+        try {
+            multicastReceiveSocket = new MulticastSocket(null);
+            if (multicastInterface != null)
+                multicastReceiveSocket.setNetworkInterface(multicastInterface);
+            multicastReceiveSocket.setReuseAddress(true); // Required by spec.
+            if (!multicastReceiveSocket.getReuseAddress())
+                throw new SOAPOverUDPException("Platform does not support SO_REUSEADDR");
+            multicastReceiveSocket.setTimeToLive(1); // Suggested by spec
+            multicastReceiveSocket.bind(new InetSocketAddress(multicastPort));
+            if (multicastReceiveSocket.getLocalPort() != multicastPort)
+                throw new SOAPOverUDPException("Unable to bind multicast socket to multicast port.");
+            multicastReceiveSocket.joinGroup(multicastAddress);
+        } catch (IOException ex) {
+            throw new SOAPOverUDPException("Unable to open multicast socket.", ex);
+        }
+
+        try {
+            mainSocket = new DatagramSocket();
+            mainSocket.setReuseAddress(true);
+            if (!mainSocket.getReuseAddress())
+                throw new SOAPOverUDPException("Platform doesn't support SO_REUSEADDR");
+            this.unicastPort = mainSocket.getLocalPort();
+           // mainSocket.bind(new InetSocketAddress(multicastPort));
+           // if (mainSocket.getLocalPort() != multicastPort)
+           //     throw new WsDiscoveryTransportException("Unable to bind unicast socket to multicast port.");
+        } catch (IOException ex) {
+            throw new SOAPOverUDPException("Unable to open unicast socket.", ex);
+        }
+
+        try {
+            multicastReceiverThread = new SOAPReceiverThread("multicast_recv", inQueue, multicastReceiveSocket, logger);
+        } catch (SocketException ex) {
+            throw new SOAPOverUDPException("Unable to start multicast receiver thread", ex);
+        }
+
+        unicastSenderThread = new SOAPSenderThread("unicast_send",
+                    outUnicastQueue, mainSocket, logger);
+        multicastSenderThread = new SOAPSenderThread("multicast_send",
+                        outMulticastQueue, mainSocket, logger);
+        try {
+            unicastReceiverThread = new SOAPReceiverThread("unicast_recv", inQueue, multicastSenderThread.getSocket(), logger);
+        } catch (SocketException ex) {
+            throw new SOAPOverUDPException("Unable to start unicast receiver thread", ex);
+        }
     }
     
 }
