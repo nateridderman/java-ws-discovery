@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.network.transport;
 
-import com.ms.wsdiscovery.network.transport.interfaces.ITransportType;
-import com.ms.wsdiscovery.network.transport.soapudp.SOAPOverUDP;
-import com.ms.wsdiscovery.network.transport.soapudp.zlib.SOAPOverUDPzlib;
+import com.skjegstad.soapoverudp.interfaces.ISOAPTransport;
+import com.skjegstad.soapoverudp.SOAPOverUDP;
+import com.skjegstad.soapoverudp.SOAPOverUDPzlib;
 
 /**
  * Contains supported transport protocols. Transport types must implement 
@@ -49,8 +49,8 @@ public enum TransportType {
      * @throws java.lang.InstantiationException
      * @throws java.lang.IllegalAccessException
      */
-    public ITransportType newInstance() throws InstantiationException, IllegalAccessException {
-        return (ITransportType)networkLayer.newInstance();
+    public ISOAPTransport newInstance() throws InstantiationException, IllegalAccessException {
+        return (ISOAPTransport)networkLayer.newInstance();
     }
         
     TransportType(Class layer) {

@@ -28,7 +28,7 @@ import com.ms.wsdiscovery.WsDiscoveryBuilder;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.logger.WsdLogger;
-import com.ms.wsdiscovery.network.transport.interfaces.ITransportType;
+import com.skjegstad.soapoverudp.interfaces.ISOAPTransport;
 import com.ms.wsdiscovery.xml.WsdXMLBuilder;
 import com.ms.wsdiscovery.xml.jaxb_generated.ByeType;
 import com.ms.wsdiscovery.xml.jaxb_generated.HelloType;
@@ -72,7 +72,7 @@ import java.util.Map.Entry;
  * @author Magnus Skjegstad
  */
 public class DispatchThread extends Thread {    
-    private ITransportType transport; 
+    private ISOAPTransport transport;
     protected WsDiscoveryServiceDirectory localServices = new WsDiscoveryServiceDirectory(); // Service directory containing published local services
     protected WsDiscoveryServiceDirectory serviceDirectory = new WsDiscoveryServiceDirectory(); // Service directory containing discovered services (including local)
     private WsdSOAPMessageBuilder soapBuilder = WsDiscoveryConstants.SOAPBUILDER; // Helper functions for building SOAP-messages

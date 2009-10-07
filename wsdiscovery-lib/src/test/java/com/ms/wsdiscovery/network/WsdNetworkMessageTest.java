@@ -20,7 +20,6 @@ package com.ms.wsdiscovery.network;
 
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import java.io.UnsupportedEncodingException;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
@@ -36,9 +35,9 @@ import static org.junit.Assert.*;
  *
  * @author Magnus Skjegstad
  */
-public class NetworkMessageTest {
+public class WsdNetworkMessageTest {
 
-    public NetworkMessageTest() {
+    public WsdNetworkMessageTest() {
     }
 
     private static WsdNetworkMessage instance;
@@ -149,7 +148,7 @@ public class NetworkMessageTest {
     @Test
     public void testGetPayload() {
         System.out.println("getPayload");        
-        byte[] expResult = instance.payload;
+        byte[] expResult = instance.getPayload();
         byte[] result = instance.getPayload();
         assertEquals(expResult.length, result.length);
         assertEquals(expResult, result);
@@ -161,7 +160,7 @@ public class NetworkMessageTest {
     @Test
     public void testGetPayloadLen() {
         System.out.println("getPayloadLen");
-        int expResult = instance.payload.length;
+        int expResult = instance.getPayload().length;
         int result = instance.getPayloadLen();
         assertEquals(expResult, result);
     }
@@ -177,8 +176,8 @@ public class NetworkMessageTest {
 
         instance.setPayload(payload, len);
 
-        assertEquals(payload, instance.payload);
-        assertEquals(len, instance.payloadLen);
+        assertEquals(payload, instance.getPayload());
+        assertEquals(len, instance.getPayloadLen());
     }
 
     /**
@@ -191,8 +190,8 @@ public class NetworkMessageTest {
 
         instance.setPayload(payload);
 
-        assertEquals(payload, instance.payload);
-        assertEquals(payload.length, instance.payloadLen);
+        assertEquals(payload, instance.getPayload());
+        assertEquals(payload.length, instance.getPayloadLen());
     }
 
     /**
@@ -225,7 +224,7 @@ public class NetworkMessageTest {
         System.out.println("setSrcPort");
         int newPort = 1111;
         instance.setSrcPort(newPort);
-        assertEquals(newPort, instance.srcPort);
+        assertEquals(newPort, instance.getSrcPort());
     }
 
     /**
@@ -236,7 +235,7 @@ public class NetworkMessageTest {
         System.out.println("setDstPort");
         int newPort = 2222;
         instance.setDstPort(newPort);
-        assertEquals(newPort, instance.dstPort);
+        assertEquals(newPort, instance.getDstPort());
     }
 
     /**
@@ -245,7 +244,7 @@ public class NetworkMessageTest {
     @Test
     public void testGetTimestamp() {
         System.out.println("getTimestamp");
-        long expResult = instance.timestamp;
+        long expResult = instance.getTimestamp();
         long result = instance.getTimestamp();
         assertEquals(expResult, result);
         assertFalse(result == 0);
