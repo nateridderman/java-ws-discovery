@@ -66,6 +66,7 @@
     <dependencies/>
 
     <modules>
+        <module>wsdiscovery-soap-lib</module>
         <module>wsdiscovery-lib</module>
         <module>wsdiscovery-example-ws</module>
         <module>wsdiscovery-examples</module>
