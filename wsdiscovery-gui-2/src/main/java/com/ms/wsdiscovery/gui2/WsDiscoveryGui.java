@@ -306,11 +306,15 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
 
                 buttonWsDiscoveryControl.setText("Stop WS-Discovery");
             } catch (WsDiscoveryException ex) {
-                log_fatal(ex.toString());
-                JOptionPane.showMessageDialog(this, ex.toString());
+                JOptionPane.showMessageDialog(this, ex.getMessage());
+                log_fatal(ex.getMessage());
+                log_fine("Stacktrace:");
+                for (StackTraceElement e : ex.getStackTrace())
+                    log_fine(e.toString());
             }
-        } finally {            
-            log_info("WS-Discovery started.");
+        } finally {
+            if ((wsdiscovery != null) && (wsdiscovery.isAlive()))
+                log_info("WS-Discovery started.");
             buttonWsDiscoveryControl.setEnabled(true);
             panelLocalServices.setEnabled(true);
             panelServiceDirectory.setEnabled(true);
