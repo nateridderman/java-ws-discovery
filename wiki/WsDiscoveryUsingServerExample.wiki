@@ -8,26 +8,32 @@ easier way to do this.
 {{{
 public class discovery_using_server {
 
-    public static void main(String[] args)
-            throws WsDiscoveryNetworkException, InterruptedException {
-
+    public static void main(String[] args) 
+            throws WsDiscoveryException, InterruptedException, UnknownHostException, SocketException {
+        
         System.out.println("Starting WS-Discovery server...");
 
+        // Uncomment the following to override the IP this server will announce itself at
+        // if proxy mode is enabled. This IP is only used if server.enableProxyMode() is called.
+        //   WsDiscoveryConstants.proxyAddress = InetAddress.getByName("10.0.1.3");
+        // Uncomment the following to bind multicasts to a specific interface
+        //   WsDiscoveryConstants.multicastInterface = NetworkInterface.getByInetAddress(InetAddress.getByName("10.0.1.4"));
+        
         // Create a new server instance
         WsDiscoveryServer server = WsDiscoveryBuilder.createServer();
-
+        
         // Start background threads
         server.start();
 
         System.out.println("Sending probe...");
-
+        
         // Send Probe-message. 
         server.probe();
-
+        
         // All listening WS-Discovery instances should respond to a blank probe. 
         // The background server will receive the replies and store the 
         // discovered services in a service directory.
-
+        
         System.out.println("Waiting for replies. (2 sec)");
         Thread.sleep(2000);
 
@@ -35,37 +41,38 @@ public class discovery_using_server {
         // If they are, try to resolve it. 
         {
             // Get a copy of the remote service directory
-            WsDiscoveryServiceDirectory result = server.getRemoteServices();
+            IWsDiscoveryServiceCollection result = server.getServiceDirectory().matchAll();
             boolean resolve_sent = false;
 
-            for (int i = 0; i < result.size(); i++)
+            for (WsDiscoveryService service : result)
                 // Is XAddrs empty?
-                if (result.get(i).getXAddrs().size() == 0) {
+                if (service.getXAddrs().size() == 0) {
                     // Send Resolve-message 
-                    System.out.println("Trying to resolve XAddr for service " + result.get(i).getEndpointReferenceAddress());
-                    server.resolve(result.get(i));
+                    System.out.println("Trying to resolve XAddr for service " +service.getEndpointReference());
+                    server.resolve(service);
                     resolve_sent = true;
                 }
-
+                        
             if (resolve_sent) {
                 System.out.println("Waiting for ResolveMatches. (2 sec)");
                 Thread.sleep(2000);
             }
         }
-
+                
         // Get a copy of the remote service directory and display the results.
         {
             System.out.println("** Discovered services: **");
+            
+            IWsDiscoveryServiceCollection result = server.getServiceDirectory().matchAll();
 
-            WsDiscoveryServiceDirectory result = server.getRemoteServices();
-
-            for (int i = 0; i < result.size(); i++) {
+            for (WsDiscoveryService service : result) {
                 // Print service info
-                System.out.println(result.get(i).toString());
-
+                System.out.println(service);
+                
                 System.out.println("---");
             }
         }
     }
+
 }
 }}}
