@@ -13,12 +13,6 @@ public class discovery_using_server {
         
         System.out.println("Starting WS-Discovery server...");
 
-        // Uncomment the following to override the IP this server will announce itself at
-        // if proxy mode is enabled. This IP is only used if server.enableProxyMode() is called.
-        //   WsDiscoveryConstants.proxyAddress = InetAddress.getByName("10.0.1.3");
-        // Uncomment the following to bind multicasts to a specific interface
-        //   WsDiscoveryConstants.multicastInterface = NetworkInterface.getByInetAddress(InetAddress.getByName("10.0.1.4"));
-        
         // Create a new server instance
         WsDiscoveryServer server = WsDiscoveryBuilder.createServer();
         
