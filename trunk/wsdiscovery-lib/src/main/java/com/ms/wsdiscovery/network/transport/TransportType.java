@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.network.transport;
 
+import com.skjegstad.soapoverudp.SOAPOverUDP11;
+import com.skjegstad.soapoverudp.SOAPOverUDP11withZlib;
+import com.skjegstad.soapoverudp.SOAPOverUDPdraft2004;
 import com.skjegstad.soapoverudp.interfaces.ISOAPTransport;
-import com.skjegstad.soapoverudp.SOAPOverUDP;
-import com.skjegstad.soapoverudp.SOAPOverUDPzlib;
 
 /**
  * Contains supported transport protocols. Transport types must implement 
@@ -31,13 +32,17 @@ import com.skjegstad.soapoverudp.SOAPOverUDPzlib;
  */
 public enum TransportType {
     /**
-     * Plain SOAP-over-UDP. See {@link SOAPOverUDP}.
+     * Plain SOAP-over-UDP 1.1. See {@link SOAPOverUDP11}.
      */
-    SOAP_OVER_UDP(SOAPOverUDP.class),
+    SOAP_OVER_UDP_11(SOAPOverUDP11.class),
     /**
-     * Compressed version of SOAP-over-UDP. See {@link SOAPOverUDPzlib}.
+     * Compressed version of SOAP-over-UDP 1.1. See {@link SOAPOverUDP11withZlib}.
      */
-    SOAP_OVER_UDP_ZLIB(SOAPOverUDPzlib.class);
+    SOAP_OVER_UDP_11_ZLIB(SOAPOverUDP11withZlib.class),
+    /**
+     * Plain SOAP-over-UDP as specified in the 2004 draft. See {@link SOAPOverUDPdraft2004}.
+     */
+    SOAP_OVER_UDP_DRAFT2004(SOAPOverUDPdraft2004.class);
     
         
     private final Class networkLayer;

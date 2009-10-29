@@ -18,7 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.skjegstad.soapoverudp.messages;
 
-import com.skjegstad.soapoverudp.SOAPOverUDP;
+import com.skjegstad.soapoverudp.generic.SOAPOverUDPGeneric;
+import com.skjegstad.soapoverudp.configurations.SOAPOverUDPConfiguration;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import com.skjegstad.soapoverudp.interfaces.INetworkMessage;
@@ -50,6 +51,11 @@ public class SOAPNetworkMessage extends NetworkMessage implements ISOAPNetworkMe
      * When to resend this message. Timestamp in millis from epoch.
      */
     protected long nextSend = 0;
+
+    /**
+     * SOAPOverUDP configuration.
+     */
+    protected SOAPOverUDPConfiguration soapConfig = null;
     
     /**
      * Create new <code>SOAPNetworkMessage</code> from existing 
@@ -59,21 +65,22 @@ public class SOAPNetworkMessage extends NetworkMessage implements ISOAPNetworkMe
      * @param multicast True if <code>nm</code> is to be sent multicast. Affects
      * the number of resends. 
      */
-    public SOAPNetworkMessage(INetworkMessage nm, boolean multicast) {
+    public SOAPNetworkMessage(SOAPOverUDPConfiguration soapConfig, INetworkMessage nm, boolean multicast) {
         super(nm.getPayload(), nm.getPayloadLen(), 
                 nm.getSrcAddress(), nm.getSrcPort(), 
                 nm.getDstAddress(), nm.getDstPort());
-        
+        this.soapConfig = soapConfig;
+
         // Set initial UDP_REPEAT value
         if (multicast)
-            UDP_REPEAT = SOAPOverUDP.MULTICAST_UDP_REPEAT;
+            UDP_REPEAT = soapConfig.getMulticastUDPRepeat();
         else
-            UDP_REPEAT = SOAPOverUDP.UNICAST_UDP_REPEAT;
+            UDP_REPEAT = soapConfig.getUnicastUDPRepeat();
         
         // Initialize T to a random value between UDP_MIN_DELAY and UDP_MAX_DELAY
         T = (int)Math.round(Math.random() * 
-                (SOAPOverUDP.UDP_MAX_DELAY - SOAPOverUDP.UDP_MIN_DELAY) + 
-                SOAPOverUDP.UDP_MIN_DELAY);
+                (soapConfig.getUDPMaxDelay() - soapConfig.getUDPMinDelay())) +
+                soapConfig.getUDPMinDelay();
                 
     }        
        
@@ -84,8 +91,8 @@ public class SOAPNetworkMessage extends NetworkMessage implements ISOAPNetworkMe
      */
     public void increaseT() {
         T = T * 2;
-        if (T > SOAPOverUDP.UDP_UPPER_DELAY)
-            T = SOAPOverUDP.UDP_UPPER_DELAY;
+        if (T > soapConfig.getUDPUpperDelay())
+            T = soapConfig.getUDPUpperDelay();
     }
 
     /**

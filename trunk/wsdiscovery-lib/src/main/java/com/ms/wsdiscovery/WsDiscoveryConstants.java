@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery;
 
-import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import java.net.InetAddress;
 import com.ms.wsdiscovery.xml.WsdXMLBuilder;
 import com.ms.wsdiscovery.xml.soap.WsdSOAPMessageBuilder;
@@ -50,7 +49,7 @@ public class WsDiscoveryConstants {
      * Select the transport protocol to use when sending SOAP-messages. See 
      * {@link TransportType} for valid transport types.
      */
-    public final static TransportType transportType = TransportType.SOAP_OVER_UDP;
+    public final static TransportType transportType = TransportType.SOAP_OVER_UDP_DRAFT2004;
 
     /**
      * Builder with helpers used for constructing XML

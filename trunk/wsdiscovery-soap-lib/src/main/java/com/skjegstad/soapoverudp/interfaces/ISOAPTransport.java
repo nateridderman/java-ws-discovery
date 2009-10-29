@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package com.skjegstad.soapoverudp.interfaces;
 
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
+import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPNotInitializedException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.logging.Logger;
@@ -35,8 +36,7 @@ public interface ISOAPTransport {
     
     /**
      * Receive a packet from the transport layer. Implementer must listen to 
-     * unicast and multicast. Multicast messages are sent to the address
-     * specified in {@link WsDiscoveryConstants#multicastAddress}.
+     * unicast and multicast. 
      * 
      * @param timeoutInMillis Time to wait for data before returning to caller.
      * @return Received packet stored in a {@link NetworkMessage}.
@@ -54,8 +54,7 @@ public interface ISOAPTransport {
 
     /**
      * Send a message to the transport layer. The implementer must support 
-     * unicast and multicast. Multicast messages are always sent to the address
-     * specified in {@link WsDiscoveryConstants#multicastAddress}.
+     * unicast and multicast.
      * 
      * @param message Message to send.
      */
@@ -74,20 +73,39 @@ public interface ISOAPTransport {
     int getUnicastPort();
 
     /**
-     * Shuts down the transport layer. Called by {@link DispatchThread#dispatch()} 
-     * on shutdown. 
+     * Shuts down the transport layer.
      */
     void done();
     
     /**
-     * Starts the transport layer threads. Called by {@link DispatchThread#dispatch()}
-     * on startup.
+     * Starts the transport threads.
+     *
+     * @throws SOAPOverUDPNotInitializedException if isInitialized() returns false.
      */
-    void start();
+    void start() throws SOAPOverUDPNotInitializedException;
+
+    /**
+     * Returns true after start() has return successfully. Set to false by done().
+     *
+     * @return true when the transport layer is started, otherwise false.
+     */
+    boolean isRunning();
 
     /**
      * Initialize the transport layer. This method can be called automatically from
      * the constructor, but is included to support instantiations using newInstance().
+     *
+     * @param multicastInterface Network interface to use for multicasting. Set to null to use default.
+     * @param multicastPort Port for sending and receiving multicast messages
+     * @param multicastAddress Address for sending and listening to multicast messages.
+     * @param logger Instance of Logger used for debugging. May be set to null.
+     * @throws SOAPOverUDPException if an error occured while opening
+     * the sockets or creating child threads.
      */
     void init(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, Logger logger) throws SOAPOverUDPException;
+
+    /**
+     * Returns true after init() has been called successfully.
+     */
+    boolean isInitialized();
 }

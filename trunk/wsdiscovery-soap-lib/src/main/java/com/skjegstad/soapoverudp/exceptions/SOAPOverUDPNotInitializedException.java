@@ -1,5 +1,5 @@
 /*
-SOAPOverUDPException.java
+SOAPOverUDPNotInitializedException.java
 
 Copyright (C) 2008-2009 Magnus Skjegstad
 
@@ -16,37 +16,37 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 package com.skjegstad.soapoverudp.exceptions;
 
 /**
- * Base class for exceptions in the SOAPOverUDP package.
- * 
+ * SOAPOverUDPNotInitializedException is thrown when SOAPOverUDP-classes are 
+ * used before they have been initialized properly.
+ *
  * @author Magnus Skjegstad
  */
-public class SOAPOverUDPException extends Exception {
+public class SOAPOverUDPNotInitializedException extends SOAPOverUDPException {
 
     /**
-     * Creates a new instance of <code>SOAPOverUDPException</code> without detail message.
+     * Creates a new instance of <code>SOAPOverUDPNotInitializedException</code> without detail message.
      */
-    public SOAPOverUDPException() {
+    public SOAPOverUDPNotInitializedException() {
     }
 
 
     /**
-     * Constructs an instance of <code>SOAPOverUDPException</code> with the specified detail message.
+     * Constructs an instance of <code>SOAPOverUDPNotInitializedException</code> with the specified detail message.
      * @param msg the detail message.
      */
-    public SOAPOverUDPException(String msg) {
+    public SOAPOverUDPNotInitializedException(String msg) {
         super(msg);
     }
 
     /**
-     * Constructs an instance of <code>SOAPOverUDPException</code> with the specified detail message.
+     * Constructs an instance of <code>SOAPOverUDPNotInitializedException</code> with the specified detail message.
      * @param msg the detail message.
      * @param cause Throwable that caused the exception.
      */
-    public SOAPOverUDPException(String msg, Throwable cause) {
+    public SOAPOverUDPNotInitializedException(String msg, Throwable cause) {
         super(msg, cause);
     }
 }
