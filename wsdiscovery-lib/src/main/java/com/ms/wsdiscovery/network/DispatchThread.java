@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.ms.wsdiscovery.network;
 
+import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPNotInitializedException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.URI;
@@ -61,7 +62,6 @@ import java.net.NetworkInterface;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 
 /** 
  * Worker thread for WS-Discovery. Handles WS-Discovery messages received from 
@@ -813,16 +813,23 @@ public class DispatchThread extends Thread {
         
         logger.finer("Started " + getName());
         
-        transport.start();
-        
-        isRunning = true;        
-        
-        // Notify waiting threads that we have started.
-        synchronized(this) {
-            notifyAll();
-        }
-        
+
         try {
+            // Attempt to start transport layer
+            try {
+                transport.start();
+            } catch (SOAPOverUDPNotInitializedException ex) {
+                logger.severe(ex.getMessage());
+                ex.printStackTrace();
+                return;
+            }
+            isRunning = true;
+
+            // Notify waiting threads that we have started.
+            synchronized (this) {
+                notifyAll();
+            }
+
             while (!threadDone) {
                 try {
                     dispatch();

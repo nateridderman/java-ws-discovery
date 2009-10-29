@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.skjegstad.soapoverudp;
+package com.skjegstad.soapoverudp.generic;
 
 import com.skjegstad.soapoverudp.messages.NetworkMessage;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
@@ -25,35 +25,18 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 import com.skjegstad.soapoverudp.interfaces.INetworkMessage;
+import com.skjegstad.soapoverudp.interfaces.ISOAPConfigurable;
 import com.skjegstad.soapoverudp.interfaces.ISOAPTransport;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.logging.Logger;
 
 /**
  * An implementation of SOAP-over-UDP using ZLib-compression.
  * 
  * @author Magnus Skjegstad
  */
-public class SOAPOverUDPzlib extends SOAPOverUDP implements ISOAPTransport {
+public abstract class SOAPOverUDPGenericZlib extends SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigurable {
     
-    /**
-     * @param multicastInterface Network interface to use for multicasting. Set to null to use default.
-     * @param multicastPort Port for sending and receiving multicast messages
-     * @param multicastAddress Address for sending and listening to multicast messages.
-     * @param logger Instance of Logger used for debugging. May be set to null.
-     * @throws WsDiscoveryTransportException if an error occured while opening
-     * the sockets or creating child threads.
-     */
-    public SOAPOverUDPzlib(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddrses, Logger logger) throws SOAPOverUDPException {
-        super(multicastInterface,multicastPort,multicastAddrses, logger);
-    }
-
-    /**
-     * Empty constructor for use with newInstance(). Call init() to initialize the instance.
-     */
-    public SOAPOverUDPzlib() {
-
+    public SOAPOverUDPGenericZlib() {
+        super();
     }
 
     /**

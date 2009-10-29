@@ -16,8 +16,9 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.skjegstad.soapoverudp;
+package com.skjegstad.soapoverudp.generic;
 
+import com.skjegstad.soapoverudp.configurations.SOAPOverUDPConfiguration;
 import com.skjegstad.soapoverudp.threads.SOAPReceiverThread;
 import com.skjegstad.soapoverudp.threads.SOAPSenderThread;
 import com.skjegstad.soapoverudp.messages.SOAPNetworkMessage;
@@ -33,6 +34,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import com.skjegstad.soapoverudp.interfaces.INetworkMessage;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
+import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPNotInitializedException;
+import com.skjegstad.soapoverudp.interfaces.ISOAPConfigurable;
 import java.net.NetworkInterface;
 import java.util.logging.Logger;
 
@@ -42,11 +45,26 @@ import java.util.logging.Logger;
  * 
  * @author Magnus Skjegstad
  */
-public class SOAPOverUDP implements ISOAPTransport {
+public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigurable {
     /**
      * Instance of Logger used for debug messages.
      */
     protected Logger logger;
+    
+    /**
+     * Set to true after init() has been called.
+     */
+    protected boolean initialized = false;
+
+    /**
+     * Set to true by start(), false by done(). Used by isRunning() to determine status.
+     */
+    protected boolean running = false;
+
+    /**
+     * SOAPOverUDP configuration.
+     */
+    SOAPOverUDPConfiguration soapConfig = null;
     
     // Threads and stuff
     private SOAPReceiverThread multicastReceiverThread; // Thread listening for incoming multicast messages
@@ -60,59 +78,12 @@ public class SOAPOverUDP implements ISOAPTransport {
     private InetAddress multicastAddress;
     private int unicastPort;
     
-    // Default vaules for retry and back-off algorithm (see Appendix I in the SOAP-over-UDP draft)
-    /**
-     * Number of times to repeat unicast messages.
-     */
-    public static final int UNICAST_UDP_REPEAT = 2;
-    /**
-     * Number of times to repeat multicast messages.
-     */
-    public static final int MULTICAST_UDP_REPEAT = 4;
-    /**
-     * Minimum initial delay for resend.
-     */
-    public static final int UDP_MIN_DELAY = 50;
-    /**
-     * Maximum initial delay for resend.
-     */
-    public static final int UDP_MAX_DELAY = 250;
-    /**
-     * Maximum delay between resent messages.
-     */
-    public static final int UDP_UPPER_DELAY = 500;
-
-    /**
-     * @param multicastPort Port for sending and receiving multicast messages
-     * @param multicastAddress Address for sending and listening to multicast messages.
-     * @param logger Instance of Logger used for debugging. May be set to null.
-     * @throws SOAPOverUDPException if an error occured while opening
-     * the sockets or creating child threads.
-     */
-    public SOAPOverUDP(int multicastPort, InetAddress multicastAddress, Logger logger)
-            throws SOAPOverUDPException {
-        init(null, multicastPort, multicastAddress, logger);
-    }
-
-    /**
-     * @param multicastInterface Network interface to use for multicasting. Set to null to use default.
-     * @param multicastPort Port for sending and receiving multicast messages
-     * @param multicastAddress Address for sending and listening to multicast messages.
-     * @param logger Instance of Logger used for debugging. May be set to null.
-     * @throws SOAPOverUDPException if an error occured while opening
-     * the sockets or creating child threads.
-     */
-    public SOAPOverUDP(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, Logger logger)
-            throws SOAPOverUDPException {
-        init(multicastInterface, multicastPort, multicastAddress, logger);
-    }
-
     /**
      * Empty constructor for use with newInstance(). Call init() to initialize the
      * new instance.
      */
-    public SOAPOverUDP() {
-
+    public SOAPOverUDPGeneric() {
+        super();
     }
             
     @Override
@@ -134,7 +105,7 @@ public class SOAPOverUDP implements ISOAPTransport {
     public void send(INetworkMessage message, boolean blockUntilSent) throws InterruptedException {
         // Multicast
         if (message.getDstAddress().equals(this.multicastAddress)) { 
-            outMulticastQueue.add(new SOAPNetworkMessage(message, true));
+            outMulticastQueue.add(new SOAPNetworkMessage(soapConfig, message, true));
             if (blockUntilSent)
                 while (!outMulticastQueue.isEmpty())
                     synchronized (multicastSenderThread) {
@@ -142,7 +113,7 @@ public class SOAPOverUDP implements ISOAPTransport {
                     }
         // Unicast
         } else {
-            outUnicastQueue.add(new SOAPNetworkMessage(message, false));
+            outUnicastQueue.add(new SOAPNetworkMessage(soapConfig, message, false));
             if (blockUntilSent)
                 while (!outUnicastQueue.isEmpty())
                     synchronized (unicastSenderThread) {
@@ -190,7 +161,11 @@ public class SOAPOverUDP implements ISOAPTransport {
     /**
      * Start transport layer.
      */
-    public void start() {
+    public void start() throws SOAPOverUDPNotInitializedException {
+        // Check if the class has been initialized
+        if (!isInitialized())
+            throw new SOAPOverUDPNotInitializedException("start() called before init(). SOAPOverUDP is not initialized.");
+
         // Start threads
         multicastReceiverThread.start();
         multicastSenderThread.start();
@@ -207,46 +182,54 @@ public class SOAPOverUDP implements ISOAPTransport {
             } catch (InterruptedException ex) {
                 break;
             }
+
+        running = true;
     }
 
     /**
      * Tell transport layer to stop. Returns immediately. Use 
-     * {@link Thread#isAlive()} to determine when thread has ended.
+     * {@link SOAPOverUDPGeneric#isRunning()} to determine when thread has ended.
      */
     public void done() {
-        // Make sure out queues are empty
-        while (!outUnicastQueue.isEmpty()) {
-            synchronized (unicastSenderThread) {
-                try {
-                    unicastSenderThread.wait();
-                } catch (InterruptedException ex) {
+        if (!isRunning())
+            return;
+        try {
+            // Make sure out queues are empty
+            while (!outUnicastQueue.isEmpty()) {
+                synchronized (unicastSenderThread) {
+                    try {
+                        unicastSenderThread.wait();
+                    } catch (InterruptedException ex) {
+                    }
                 }
             }
-        }
-        while (!outMulticastQueue.isEmpty()) {
-            synchronized (multicastSenderThread) {
-                try {
-                    multicastSenderThread.wait();
-                } catch (InterruptedException ex) {
+            while (!outMulticastQueue.isEmpty()) {
+                synchronized (multicastSenderThread) {
+                    try {
+                        multicastSenderThread.wait();
+                    } catch (InterruptedException ex) {
+                    }
                 }
             }
-        }
-        
-        // Stop child threads
-        multicastReceiverThread.done();
-        multicastSenderThread.done();
-        unicastReceiverThread.done();
-        unicastSenderThread.done();
-        // Wait for childs to complete
-        while (multicastReceiverThread.isRunning() ||
-                multicastSenderThread.isRunning() ||
-                unicastSenderThread.isRunning() ||
-                unicastReceiverThread.isRunning()) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                break;
+
+            // Stop child threads
+            multicastReceiverThread.done();
+            multicastSenderThread.done();
+            unicastReceiverThread.done();
+            unicastSenderThread.done();
+            // Wait for childs to complete
+            while (multicastReceiverThread.isRunning() ||
+                    multicastSenderThread.isRunning() ||
+                    unicastSenderThread.isRunning() ||
+                    unicastReceiverThread.isRunning()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    break;
+                }
             }
+        } finally {
+            running = false;
         }
 
     }
@@ -268,6 +251,9 @@ public class SOAPOverUDP implements ISOAPTransport {
     }
 
     public void init(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, Logger logger) throws SOAPOverUDPException {
+        if (soapConfig == null)
+            throw new SOAPOverUDPException("SOAPOverUDP not configured.");
+
         this.logger = logger;
 
         this.multicastPort = multicastPort;
@@ -320,6 +306,21 @@ public class SOAPOverUDP implements ISOAPTransport {
         } catch (SocketException ex) {
             throw new SOAPOverUDPException("Unable to start unicast receiver thread", ex);
         }
+
+        initialized = true;
     }
-    
+
+
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    public void setConfiguration(SOAPOverUDPConfiguration configuration) {
+        this.soapConfig = configuration;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
 }
