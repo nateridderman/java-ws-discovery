@@ -18,9 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.skjegstad.soapoverudp;
 
-import com.skjegstad.soapoverudp.generic.SOAPOverUDPGeneric;
+import com.skjegstad.soapoverudp.transport.SOAPOverUDPTransport;
 import com.skjegstad.soapoverudp.configurations.SOAPOverUDPConfiguration;
-import com.skjegstad.soapoverudp.interfaces.ISOAPTransport;
+import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDP;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPMessage;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
+import com.skjegstad.soapoverudp.messages.SOAPOverUDPWSA200408Message;
+import javax.xml.soap.SOAPConstants;
 
 /**
  * SOAPOverUDP configured to work as specified in specification draft from 2004.
@@ -28,18 +33,31 @@ import com.skjegstad.soapoverudp.interfaces.ISOAPTransport;
  *
  * @author Magnus Skjegstad
  */
-public class SOAPOverUDPdraft2004 extends SOAPOverUDPGeneric implements ISOAPTransport {
-    public SOAPOverUDPdraft2004() {
+public class SOAPOverUDPdraft2004 extends SOAPOverUDP implements ISOAPOverUDP {
+    public SOAPOverUDPdraft2004(ISOAPOverUDPTransport transportLayer) {
         super();
 
-        SOAPOverUDPConfiguration c = new SOAPOverUDPConfiguration();
+        this.soapConfig = new SOAPOverUDPConfiguration();
 
-        c.setMulticastUDPRepeat(4);
-        c.setUnicastUDPRepeat(2);
-        c.setUDPUpperDelay(500);
-        c.setUDPMaxDelay(250);
-        c.setUDPMinDelay(50);
-       
-        this.setConfiguration(c);
+        soapConfig.setMulticastUDPRepeat(4);
+        soapConfig.setUnicastUDPRepeat(2);
+        soapConfig.setUDPUpperDelay(500);
+        soapConfig.setUDPMaxDelay(250);
+        soapConfig.setUDPMinDelay(50);
+
+        this.setTransport(transportLayer);
+        this.getTransport().setConfiguration(soapConfig);
+    }
+
+    public SOAPOverUDPdraft2004() {
+        this(new SOAPOverUDPTransport());
+    }
+
+    public ISOAPOverUDPMessage createSOAPOverUDPMessageFromXML(String soapAsXML) throws SOAPOverUDPException {
+        return new SOAPOverUDPWSA200408Message(soapAsXML, SOAPConstants.SOAP_1_2_PROTOCOL, encoding);
+    }
+
+    public ISOAPOverUDPMessage createSOAPOverUDPMessage() throws SOAPOverUDPException {
+        return new SOAPOverUDPWSA200408Message(SOAPConstants.SOAP_1_2_PROTOCOL, encoding);
     }
 }

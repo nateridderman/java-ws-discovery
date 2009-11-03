@@ -18,21 +18,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.skjegstad.soapoverudp.messages;
 
-import com.skjegstad.soapoverudp.generic.SOAPOverUDPGeneric;
+import com.skjegstad.soapoverudp.transport.SOAPOverUDPTransport;
 import com.skjegstad.soapoverudp.configurations.SOAPOverUDPConfiguration;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
-import com.skjegstad.soapoverudp.interfaces.INetworkMessage;
-import com.skjegstad.soapoverudp.interfaces.ISOAPNetworkMessage;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPNetworkMessage;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPQueuedNetworkMessage;
 
 /**
- * Extended version of {@link NetworkMessage} that supports the retry and 
+ * Extended version of {@link SOAPOverUDPNetworkMessage} that supports the retry and
  * exponential back-off algorithm suggested in the SOAP-over-UDP specification, 
  * Appendix I: "Example retransmission algorithm".
  * 
  * @author Magnus Skjegstad
  */
-public class SOAPNetworkMessage extends NetworkMessage implements ISOAPNetworkMessage {
+public class SOAPOverUDPQueuedNetworkMessage extends SOAPOverUDPNetworkMessage implements ISOAPOverUDPQueuedNetworkMessage {
     /**
      * Random delay between {@link SOAPOverUDP#UDP_MIN_DELAY} and 
      * {@link SOAPOverUDP#UDP_MAX_DELAY} chosen at startup. T is doubled
@@ -59,13 +59,13 @@ public class SOAPNetworkMessage extends NetworkMessage implements ISOAPNetworkMe
     
     /**
      * Create new <code>SOAPNetworkMessage</code> from existing 
-     * <code>NetworkMessage</code>.
+     * <code>SOAPOverUDPNetworkMessage</code>.
      * 
      * @param nm Original network message.
      * @param multicast True if <code>nm</code> is to be sent multicast. Affects
      * the number of resends. 
      */
-    public SOAPNetworkMessage(SOAPOverUDPConfiguration soapConfig, INetworkMessage nm, boolean multicast) {
+    public SOAPOverUDPQueuedNetworkMessage(SOAPOverUDPConfiguration soapConfig, ISOAPOverUDPNetworkMessage nm, boolean multicast) {
         super(nm.getPayload(), nm.getPayloadLen(), 
                 nm.getSrcAddress(), nm.getSrcPort(), 
                 nm.getDstAddress(), nm.getDstPort());

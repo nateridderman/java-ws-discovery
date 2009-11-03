@@ -1,0 +1,2 @@
+REWRITE_SYSTEM "http://schemas.xmlsoap.org/ws/2004/08/addressing/addressing.xsd" "classpath:wsaddressing200408.xsd"
+REWRITE_SYSTEM "http://www.w3.org/2005/08/addressing" "classpath:wsaddressing200508.xsd"

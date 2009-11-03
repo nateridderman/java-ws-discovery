@@ -18,15 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 package com.skjegstad.soapoverudp.interfaces;
 
-import com.skjegstad.soapoverudp.messages.SOAPNetworkMessage;
 import java.util.concurrent.Delayed;
 
 /**
- * Interface used for SOAP messages. It extends {@link INetworkMessage} with support
+ * Interface used for SOAP messages. It extends {@link ISOAPOverUDPNetworkMessage} with support
  * for the {@link Delayed} interface. Implemented by {@link SOAPNetworkMessage}.
  *
  * @author Magnus Skjegstad
  */
-public interface ISOAPNetworkMessage extends INetworkMessage, Delayed {
+public interface ISOAPOverUDPQueuedNetworkMessage extends ISOAPOverUDPNetworkMessage, Delayed {
 
 }

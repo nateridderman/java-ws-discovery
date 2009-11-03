@@ -1,5 +1,5 @@
 /*
-INetworkMessage.java
+ISOAPOverUDPNetworkMessage.java
 
 Copyright (C) 2008-2009 Magnus Skjegstad
 
@@ -27,7 +27,7 @@ import java.security.NoSuchAlgorithmException;
  *
  * @author Magnus Skjegstad
  */
-public interface INetworkMessage {
+public interface ISOAPOverUDPNetworkMessage {
 
     /**
      * Get destination address.
