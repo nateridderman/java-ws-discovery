@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -501,5 +502,27 @@ public abstract class SOAPOverUDPMessage implements ISOAPOverUDPMessage {
         this.dstPort = dstPort;
     }
 
-    
+    public abstract boolean isReplyToAnonymous();
+
+    public int getReplyPort() {
+        if (isReplyToAnonymous())
+            return getSrcPort();
+        return this.getReplyTo().getAddress().getPort();
+    }
+
+    public InetAddress getReplyAddress() {
+        if (isReplyToAnonymous())
+            return getSrcAddress();
+        try {
+            return InetAddress.getByName(this.getReplyTo().getAddress().getHost());
+        } catch (UnknownHostException ex) {
+            return getSrcAddress();
+        }
+    }
+
+    public String getReplyProto() {
+        if (isReplyToAnonymous())
+            return "soap.udp";
+        return this.getReplyTo().getAddress().getScheme();
+    }
 }
