@@ -1,5 +1,5 @@
 /*
-WsDiscoveryBuilder.java
+WsDiscoveryFactory.java
 
 Copyright (C) 2008-2009 Magnus Skjegstad
 
@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery;
 
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,14 +29,13 @@ import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 
 /** 
  * Methods for creating common WS-Discovery objects.
  *
  * @author Magnus Skjegstad
  */
-public class WsDiscoveryBuilder {
+public class WsDiscoveryFactory {
     /**
      * Creates a WS-Discovery server object. The returned instance must be started 
      * before it can be used. See {@link WsDiscoveryServer}.
@@ -71,7 +71,7 @@ public class WsDiscoveryBuilder {
      * @return A new instance of {@link WsDiscoveryService}
      */
     public static WsDiscoveryService createService(QName portType, String scope, String XAddr) {
-        ScopesType scopes = new ScopesType();
+        WsDiscoveryScopesType scopes = new WsDiscoveryScopesType();
         scopes.getValue().add(scope);
         return new WsDiscoveryService(portType, scopes, XAddr);
     }
@@ -85,7 +85,7 @@ public class WsDiscoveryBuilder {
      * @return WS-Discovery service description.
      */
     public static WsDiscoveryService createService(Service jaxwsservice) {
-        ScopesType scopes = new ScopesType();
+        WsDiscoveryScopesType scopes = new WsDiscoveryScopesType();
         List<String> xaddrs = new ArrayList<String>();
         List<QName> ports = new ArrayList<QName>();       
         
@@ -119,18 +119,17 @@ public class WsDiscoveryBuilder {
     }
     
     /**
-     * Gets the correct MatchBy object from a JAXB ScopesType. If no matcher is specified in 
-     * <code>scopes</code> or if <code>scopes.getMatchBy()</code> is null, 
+     * Gets the correct MatchBy object from a string. If no matcher is specified
      * {@link WsDiscoveryConstants#defaultMatchBy} is returned.
-     * @param scopes ScopesType
-     * @return Matcher specified in <code>scopes</code>.
+     * @param matcher Name of matcher
+     * @return Matcher specified in <code>matcher</code> or {@link WsDiscoveryConstants#defaultMatchBy}.
      */
-    public static MatchBy getMatcher(ScopesType scopes) {
+    public static MatchBy getMatcher(String matcher) {
         MatchBy res = WsDiscoveryConstants.defaultMatchBy;
         
-        if ((scopes != null) && (scopes.getMatchBy() != null))
+        if (matcher != null)
             for (MatchBy m : MatchBy.values())
-                if (m.toString().equals(scopes.getMatchBy())) {
+                if (m.toString().equals(matcher)) {
                     res = m;
                     break;
                 }

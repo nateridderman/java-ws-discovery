@@ -19,8 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.servicedirectory.matcher;
 
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryMatchScope;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 import java.net.URI;
 
 /**
@@ -28,7 +29,7 @@ import java.net.URI;
  * See the WS-Discovery specification or {@link MatchBy} for details.
  * @author Magnus Skjegstad
  */
-public class MatchScopeStrcmp0 implements IMatchScope {
+public class MatchScopeStrcmp0 implements IWsDiscoveryMatchScope {
    /**
      * Match scope against target service using the strcmp0 algorithm.
      * See the WS-Discovery specification or {@link MatchBy} for details.
@@ -36,7 +37,7 @@ public class MatchScopeStrcmp0 implements IMatchScope {
      * @param probeScopes Scopes to probe for.
      * @return True on success, false on failure.
      */
-    public boolean matchScope(WsDiscoveryService target, ScopesType probeScopes) {
+    public boolean matchScope(WsDiscoveryService target, WsDiscoveryScopesType probeScopes) {
         if (probeScopes == null) // The probe didn't include scope
             return true;
         

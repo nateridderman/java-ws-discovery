@@ -18,15 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.ms.wsdiscovery.servicedirectory.matcher;
 
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryMatchScope;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 
 /**
  * Match scope against target service using the LDAP algorithm.
  * See the WS-Discovery specification or {@link MatchBy} for details.     
  * @author Magnus Skjegstad
  */
-public class MatchScopeLDAP implements IMatchScope {
+public class MatchScopeLDAP implements IWsDiscoveryMatchScope {
 
     /**
      * Match scope against target service using the LDAP algorithm.
@@ -35,7 +36,7 @@ public class MatchScopeLDAP implements IMatchScope {
      * @param probeScopes Scopes to probe for.
      * @return True on success, false on failure.
      */
-    public boolean matchScope(WsDiscoveryService target, ScopesType probeScopes) {
+    public boolean matchScope(WsDiscoveryService target, WsDiscoveryScopesType probeScopes) {
         throw new UnsupportedOperationException("Match by LDAP not supported yet.");
     }
 

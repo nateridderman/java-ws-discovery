@@ -1,2 +1,0 @@
-REWRITE_SYSTEM "http://schemas.xmlsoap.org/ws/2004/08/addressing" "classpath:others/addressing.xsd"
-REWRITE_SYSTEM "http://schemas.xmlsoap.org/ws/2005/04/discovery/ws-discovery.xsd" "classpath:ws-discovery.xsd"

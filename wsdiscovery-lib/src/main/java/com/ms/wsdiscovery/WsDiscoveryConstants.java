@@ -19,9 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery;
 
+import com.ms.wsdiscovery.datatypes.WsDiscoveryNamespaces;
 import java.net.InetAddress;
-import com.ms.wsdiscovery.xml.WsdXMLBuilder;
-import com.ms.wsdiscovery.xml.soap.WsdSOAPMessageBuilder;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -30,10 +29,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPConstants;
-import com.ms.wsdiscovery.network.transport.TransportType;
+import com.ms.wsdiscovery.network.transport.SOAPOverUDPTransportType;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
-import com.ms.wsdiscovery.xml.jaxb_generated.AttributedURI;
-import com.ms.wsdiscovery.xml.jaxb_generated.HelloType;
 import java.net.NetworkInterface;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
@@ -47,31 +44,25 @@ import java.util.logging.Handler;
 public class WsDiscoveryConstants {
     /**
      * Select the transport protocol to use when sending SOAP-messages. See 
-     * {@link TransportType} for valid transport types.
+     * {@link SOAPOverUDPTransportType} for valid transport types.
      */
-    public final static TransportType transportType = TransportType.SOAP_OVER_UDP_DRAFT2004;
+    public final static SOAPOverUDPTransportType transportType = SOAPOverUDPTransportType.UNCOMPRESSED;
 
     /**
      * Builder with helpers used for constructing XML
      */
-    public final static WsdXMLBuilder XMLBUILDER = new WsdXMLBuilder();
+    //public final static WsDiscoveryXMLBuilder XMLBUILDER = new WsDiscoveryXMLBuilder();
     
     /**
      * Builder with helpers used for creating SOAP-messages
      */
-    public final static WsdSOAPMessageBuilder SOAPBUILDER = new WsdSOAPMessageBuilder();
+    //public final static WsDiscoverySOAPMessageBuilder SOAPBUILDER = new WsDiscoverySOAPMessageBuilder();
     
     /**
      * WS-Discovery namespace.
      */
-    public final static URI defaultNsDiscovery = 
-            URI.create("http://schemas.xmlsoap.org/ws/2005/04/discovery");
-    
-    /**
-     * WS-Addressing namespace.
-     */
-    public final static URI defaultNsAddressing = 
-            URI.create("http://schemas.xmlsoap.org/ws/2004/08/addressing");
+    public final static WsDiscoveryNamespaces defaultNsDiscovery =
+            WsDiscoveryNamespaces.WS_DISCOVERY_2005_04;
     
     /**
      * SOAP protocol. See {@link SOAPConstants} for valid values. Note that 
@@ -90,7 +81,7 @@ public class WsDiscoveryConstants {
      * Instance name used by JAXB for marshall/unmarshalling.
      */
     public final static String defaultJAXBInstanceName = 
-            HelloType.class.getPackage().getName();
+            com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.HelloType.class.getPackage().getName();
     
     /**
      * When set to true all SOAP-messages will start with a valid XML-header.
@@ -100,8 +91,8 @@ public class WsDiscoveryConstants {
     /**
      * The default recipient used in WS-Addressing.
      */
-    public final static AttributedURI defaultTo = 
-            XMLBUILDER.createAttributedURI("urn:schemas-xmlsoap-org:ws:2005:04:discovery");
+    public final static URI defaultTo =
+            URI.create("urn:schemas-xmlsoap-org:ws:2005:04:discovery");
 
     /**
      * Default match method when receiving or sending Probe-messages. See the 
@@ -114,17 +105,17 @@ public class WsDiscoveryConstants {
      * The relationship type of the suppression message that is sent to clients 
      * when a proxy server announces itself.
      */
-    public final static QName defaultProxyRelatesToRelationship = 
+    public final static String defaultProxyRelatesToRelationship =
             // TODO, schema defines this to be: new QName(defaultNsDiscovery.toString(), "Suppression");
             // .. however, JAXB doesn't seem to like that and leaves the RelationshipType-attribute empty (null).
-            new QName("Suppression");
+            "Suppression";
     
     /**
      * URI used by WS-Addressing when sending messages to anonymous recipients 
      * (wsa:To). In WS-Discovery all multicast messages should be sent to anonymous.
      */
-    public final static AttributedURI anonymousTo = 
-            XMLBUILDER.createAttributedURI(defaultNsAddressing.toString() + "/role/anonymous");
+   // public final static URI anonymousTo =
+    //        URI.create(defaultNsAddressing.toString() + "/role/anonymous");
     
     /**
      * Port used for sending and listening for multicast messages. WS-Discovery 

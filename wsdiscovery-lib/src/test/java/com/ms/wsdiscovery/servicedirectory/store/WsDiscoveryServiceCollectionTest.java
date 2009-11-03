@@ -20,9 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package com.ms.wsdiscovery.servicedirectory.store;
 
 import com.ms.wsdiscovery.WsDiscoveryConstants;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.xml.jaxb_generated.EndpointReferenceType;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 import java.util.UUID;
 import javax.xml.namespace.QName;
 import org.junit.After;
@@ -64,8 +63,8 @@ public class WsDiscoveryServiceCollectionTest {
     public void testIndexOf() {
         System.out.println("indexOf");
 
-        WsDiscoveryService service = new WsDiscoveryService(new QName("a"), new ScopesType(), "xaddr");
-        String endpointReference = service.getEndpointReference();
+        WsDiscoveryService service = new WsDiscoveryService(new QName("a"), new WsDiscoveryScopesType(), "xaddr");
+        String endpointReference = service.getEndpointReference().getAddress().toString();
         WsDiscoveryServiceCollection instance = new WsDiscoveryServiceCollection();
 
         instance.add(service);

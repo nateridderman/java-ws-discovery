@@ -5,9 +5,9 @@
 
 package com.ms.wsdiscovery.servicedirectory.matcher;
 
-import com.ms.wsdiscovery.WsDiscoveryBuilder;
+import com.ms.wsdiscovery.WsDiscoveryFactory;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.xml.namespace.QName;
@@ -47,7 +47,7 @@ public class MatchScopeRFC2396Test {
         servicePortType = new QName("http://localhost/portType", "localPart", "ns");
         serviceScope = "http://www.test.com/a/b";
         serviceXAddr = "http://10.0.0.1:1234/localPart";
-        service = WsDiscoveryBuilder.createService(servicePortType, serviceScope, serviceXAddr);
+        service = WsDiscoveryFactory.createService(servicePortType, serviceScope, serviceXAddr);
     }
 
     @After
@@ -60,7 +60,7 @@ public class MatchScopeRFC2396Test {
     @Test
     public void testMatchScope() {
         System.out.println("matchScope");
-        ScopesType probeScopes = new ScopesType();
+        WsDiscoveryScopesType probeScopes = new WsDiscoveryScopesType();
 
         probeScopes.getValue().add("HTTP://www.test.com/a/");
         probeScopes.getValue().add("http://www.test.com/a/b/");

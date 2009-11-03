@@ -26,17 +26,14 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.xml.namespace.QName;
-import com.ms.wsdiscovery.WsDiscoveryBuilder;
-import com.ms.wsdiscovery.logger.WsdLogger;
+import com.ms.wsdiscovery.WsDiscoveryFactory;
+import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
+import com.ms.wsdiscovery.logger.WsDiscoveryLogger;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 import com.ms.wsdiscovery.servicedirectory.store.WsDiscoveryServiceCollection;
-import com.ms.wsdiscovery.xml.jaxb_generated.ByeType;
-import com.ms.wsdiscovery.xml.jaxb_generated.EndpointReferenceType;
-import com.ms.wsdiscovery.xml.jaxb_generated.ProbeMatchType;
-import com.ms.wsdiscovery.xml.jaxb_generated.ProbeMatchesType;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 
 /**
  * Thread safe directory of {@link WsDiscoveryService} instances. Used by
@@ -51,8 +48,8 @@ import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory {
     private IWsDiscoveryServiceCollection services;
     private String name;
-    private WsdLogger logger = 
-            new WsdLogger(WsDiscoveryServiceDirectory.class.getName());
+    private WsDiscoveryLogger logger =
+            new WsDiscoveryLogger(WsDiscoveryServiceDirectory.class.getName());
     private ReadWriteLock rwl = 
             new ReentrantReadWriteLock(); // multiple read, single write. Read not allowed while writing.
     private Lock r = rwl.readLock();
@@ -65,31 +62,6 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     public WsDiscoveryServiceDirectory(String name) {
         services = new WsDiscoveryServiceCollection();
         this.name = name;
-    }
-    
-    /**
-     * Create a new service directory with service descriptions from a ProbeMatch-message.
-     * @param name Name of service directory.
-     * @param probe Contents of a ProbeMatch-message as {@link ProbeMatchesType}.
-     * @throws WsDiscoveryServiceDirectoryException if unable to store the probe 
-     * matches in the directory.
-     */
-    public WsDiscoveryServiceDirectory(String name, ProbeMatchesType probe) 
-            throws WsDiscoveryServiceDirectoryException {
-        this(name);
-        
-        this.store(probe);        
-    }
-        
-    /**
-     * Create a new service directory with service descriptions from a ProbeMatch-message.
-     * @param probe Contents of a ProbeMatch-message as {@link ProbeMatchesType}.
-     * @throws WsDiscoveryServiceDirectoryException if unable to store the probe 
-     * matches in the directory.
-     */
-    public WsDiscoveryServiceDirectory(ProbeMatchesType probe) 
-            throws WsDiscoveryServiceDirectoryException {
-        this(null, probe);
     }
     
     /**
@@ -136,12 +108,25 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         if (address == null)
             return null;
 
+        return this.findService(URI.create(address));
+    }
+
+    /**
+     * Locate a service in the directory based on the endpoint address.
+     * @param address Endpoint address.
+     * @return Service description or <code>null</code> if not found.
+     */
+    public WsDiscoveryService findService(URI address) {
+        if (address == null)
+            return null;
+
         r.lock();
         try {
             for (WsDiscoveryService s : services)
                 if ((s.getEndpointReference() != null) &&
-                    (s.getEndpointReference().equals(address)))
-                        return s;
+                    (s.getEndpointReference().getAddress() != null) &&
+                    (s.getEndpointReference().getAddress().equals(address)))
+                            return s;
         } finally {
             r.unlock();
         }
@@ -149,15 +134,15 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         return null;
     }
 
-    public WsDiscoveryService findService(EndpointReferenceType endpoint) {
-        return findService(endpoint.getAddress().getValue());
+    public WsDiscoveryService findService(SOAPOverUDPEndpointReferenceType endpoint) {
+        return findService(endpoint.getAddress());
     }
            
     private void add(WsDiscoveryService service) 
             throws WsDiscoveryServiceDirectoryException {
 
         logger.finer("serviceDirectory.add()");
-        logger.fine("Adding service " + service.getEndpointReference());
+        logger.fine("Adding service " + service.getEndpointReference().getAddress().toString());
         w.lock();
         try {
             Boolean res = false;
@@ -179,25 +164,39 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         
         logger.finer("serviceDirectory.update()");
 
-        synchronized (this){ // Synchronize to avoid race cond. between r/w locks. findService read-locks, so we must wait with w lock.
+        if ((service == null) || (service.getEndpointReference() == null)) {
+            logger.finer("Parameter or endpoint reference was (null). Call to update() aborted.");
+            return;
+        }
+  
+
+        synchronized (this) { // Synchronize to avoid race cond. between r/w locks. findService read-locks, so we must wait with w lock.
             foundService = findService(service.getEndpointReference());
-            if (foundService == null)
+            
+            if (foundService == null) {
                 throw new WsDiscoveryServiceDirectoryException("Unable to update service. Service not found.");
+            }
 
             w.lock(); // get write lock
         }
         
-        logger.fine("Updating service " + service.getEndpointReference());
+        try {
+            if (service.getEndpointReference().getAddress() != null) {
+                logger.fine("Updating service @ " + service.getEndpointReference().getAddress().toString());
+            } else {
+                logger.fine("Updating service " + service.getEndpointReference().toString());
+            }
 
-        try {                        
             // Increase metadataversion if hashcode differs
-            if (service.hashCode() != foundService.hashCode())
-                service.setMetadataVersion(foundService.getMetadataVersion()+1);
+            if (service.hashCode() != foundService.hashCode()) {
+                service.setMetadataVersion(foundService.getMetadataVersion() + 1);
+            }
 
             // Update service
-            if (!services.update(service))
+            if (!services.update(service)) {
                 throw new WsDiscoveryServiceDirectoryException("Unable to update service. Update failed.");
-            
+            }
+
         } finally {
             w.unlock();
         }
@@ -225,44 +224,12 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         }
         
     }
-       
-    /**
-     * Store or update all the entries in a {@link ProbeMatchesType} in the service directory. If a service with
-     * the same endpoint reference already exists, the existing service will
-     * be updated.
-     * 
-     * @param probe Probe matches.
-     * @throws WsDiscoveryServiceDirectoryException if store failes.
-     */
-    public void store(ProbeMatchesType probe) 
-            throws WsDiscoveryServiceDirectoryException {
-        // No locking necessary here
-        for (ProbeMatchType p : probe.getProbeMatch())
-            this.store(new WsDiscoveryService(p));
-    }
-    
-    /**
-     * Store a JAXB object in the service directory. The JAXB object must be
-     * recognized by {@link WsDiscoveryService#WsDiscoveryService(java.lang.Object)}.
-     * If a service with
-     * the same endpoint reference already exists, the existing service will
-     * be updated.
-     *
-     * 
-     * @param jaxbobject JAXB object.
-     * @throws WsDiscoveryServiceDirectoryException on failure.
-     */
-    public void store(Object jaxbobject) 
-            throws WsDiscoveryServiceDirectoryException {
-        // No locking necessary here
-        this.store(new WsDiscoveryService(jaxbobject));
-    }
     
     /**
      * Remove service from service directory based on endpoint address.
      * @param address Endpoint address.
      */
-    public void remove(String address) {
+    public void remove(URI address) {
         WsDiscoveryService foundService;
         
         // Synchronize to avoid race cond. when acquiring w-lock, as findservice r-locks.
@@ -279,13 +246,21 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
             w.unlock();
         }
     }
+
+    /**
+     * Remove service from service directory based on endpoint address.
+     * @param address Endpoint address.
+     */
+    public void remove(String address) {
+        remove(URI.create(address));
+    }
     
     /**
      * Remove service from service directory based on endpoint address.
      * @param endpoint Endpoint with address.
      */
-    public void remove(EndpointReferenceType endpoint) {
-        remove(endpoint.getAddress().getValue());
+    public void remove(SOAPOverUDPEndpointReferenceType endpoint) {
+        remove(endpoint.getAddress());
     }
     
     /**
@@ -295,26 +270,19 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     public void remove(WsDiscoveryService service) {
         remove(service.getEndpointReference());
     }
-    
-    /**
-     * Remove service based on endpoint address received in a Bye-message.
-     * @param bye Bye-message with endpoint address to remove.
-     */
-    public void remove(ByeType bye) {
-        remove(bye.getEndpointReference());
-    }        
+      
     
     /**
      * Creates a new service directory containing the services in the directory
      * that matches the parameters. Matching algorithm is specified in <code>probeScopes</code>.
-     * See also {@link ScopesType} and {@link WsDiscoveryBuilder#getMatcher(wsdiscovery.xml.jaxb_generated.ScopesType)}.
+     * See also {@link WsDiscoveryScopesType} and {@link WsDiscoveryFactory#getMatcher()}.
      * @param probeTypes List of probe types to match.
      * @param probeScopes List of scopes to match.
      * @return Service directory with matching services. May contain 0 items, but is never <code>null</code>.
      * @throws WsDiscoveryServiceDirectoryException on failure when creating new service directory.
      */
     public IWsDiscoveryServiceCollection matchBy(List<QName> probeTypes,
-            ScopesType probeScopes) throws WsDiscoveryServiceDirectoryException {
+            WsDiscoveryScopesType probeScopes) throws WsDiscoveryServiceDirectoryException {
         
         IWsDiscoveryServiceCollection d = new WsDiscoveryServiceCollection();
 
@@ -344,9 +312,9 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     public IWsDiscoveryServiceCollection matchBy(List<QName> probeTypes,
             List<URI> scopes, MatchBy matchBy) throws WsDiscoveryServiceDirectoryException {
         
-        ScopesType st = null;
+        WsDiscoveryScopesType st = null;
         if (scopes != null) {
-            st = new ScopesType();
+            st = new WsDiscoveryScopesType();
             for (URI u : scopes)
                 st.getValue().add(u.toString());
             if (matchBy != null)

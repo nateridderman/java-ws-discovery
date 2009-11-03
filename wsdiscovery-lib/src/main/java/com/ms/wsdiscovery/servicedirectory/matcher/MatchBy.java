@@ -18,11 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.ms.wsdiscovery.servicedirectory.matcher;
 
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryMatchScope;
 import java.net.URI;
 import java.util.List;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 
 /**
  * Enum class with the available match algorithms used to match
@@ -76,7 +77,7 @@ public enum MatchBy {
     strcmp0("http://schemas.xmlsoap.org/ws/2005/04/discovery/strcmp0", new MatchScopeStrcmp0());
         
     private final URI matchType;
-    private final IMatchScope serviceMatcher;
+    private final IWsDiscoveryMatchScope serviceMatcher;
     
     @Override
     public String toString() {
@@ -101,7 +102,7 @@ public enum MatchBy {
      * @param probeScopes Scopes to probe for (may be <code>null</code>).
      * @return True if there is a match, false otherwise.
      */
-    public synchronized boolean match(WsDiscoveryService target, List<QName> probeTypes, ScopesType probeScopes) {
+    public synchronized boolean match(WsDiscoveryService target, List<QName> probeTypes, WsDiscoveryScopesType probeScopes) {
         // Match types first. 
         if ((probeTypes != null) && (!target.getPortTypes().containsAll(probeTypes)))
                 return false; 
@@ -110,7 +111,7 @@ public enum MatchBy {
         return serviceMatcher.matchScope(target, probeScopes);
     }
 
-    MatchBy(String matchType, IMatchScope matcher) {
+    MatchBy(String matchType, IWsDiscoveryMatchScope matcher) {
         this.matchType = URI.create(matchType);
         this.serviceMatcher = matcher;
     }

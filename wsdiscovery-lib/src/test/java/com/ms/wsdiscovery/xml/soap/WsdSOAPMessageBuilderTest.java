@@ -5,7 +5,8 @@
 
 package com.ms.wsdiscovery.xml.soap;
 
-import com.ms.wsdiscovery.WsDiscoveryBuilder;
+import com.ms.wsdiscovery.draft2005.WsDiscoveryD2005SOAPMessage;
+import com.ms.wsdiscovery.WsDiscoveryFactory;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.xml.jaxb_generated.ByeType;
 import com.ms.wsdiscovery.xml.jaxb_generated.EndpointReferenceType;
@@ -31,7 +32,7 @@ import static org.junit.Assert.*;
 public class WsdSOAPMessageBuilderTest {
 
     static String wsdString;
-    static WsdSOAPMessageBuilder instance;
+    static WsDiscoverySOAPMessageBuilder instance;
 
     public WsdSOAPMessageBuilderTest() {
     }
@@ -48,7 +49,7 @@ public class WsdSOAPMessageBuilderTest {
                 "<env:Body>"+
                 "<wsd:Probe><wsd:Types xmlns=\"http://calculatorservice.examples.wsdiscovery.ms.com/\">CalculatorService</wsd:Types></wsd:Probe>" +
                 "</env:Body></env:Envelope>";
-        instance = new WsdSOAPMessageBuilder();
+        instance = new WsDiscoverySOAPMessageBuilder();
     }
 
     @AfterClass
@@ -98,8 +99,8 @@ public class WsdSOAPMessageBuilderTest {
     public void testCreateWsdSOAPMessage_String() throws Exception {
         System.out.println("createWsdSOAPMessage");
         String SoapAsXML = wsdString;
-        WsdSOAPMessage expResult = new WsdSOAPMessage(instance.createSOAPMessage(SoapAsXML));
-        WsdSOAPMessage result = instance.createWsdSOAPMessage(SoapAsXML);
+        WsDiscoveryD2005SOAPMessage expResult = new WsDiscoveryD2005SOAPMessage(instance.createSOAPMessage(SoapAsXML));
+        WsDiscoveryD2005SOAPMessage result = instance.createWsdSOAPMessage(SoapAsXML);
         assertEquals(expResult.toString(), result.toString());
     }
 
@@ -110,8 +111,8 @@ public class WsdSOAPMessageBuilderTest {
     public void testCreateWsdSOAPMessage_SOAPMessage() throws Exception {
         System.out.println("createWsdSOAPMessage");
         String SoapAsXML = wsdString;
-        WsdSOAPMessage expResult = new WsdSOAPMessage(instance.createSOAPMessage(SoapAsXML));
-        WsdSOAPMessage result = instance.createWsdSOAPMessage(instance.createSOAPMessage(SoapAsXML));
+        WsDiscoveryD2005SOAPMessage expResult = new WsDiscoveryD2005SOAPMessage(instance.createSOAPMessage(SoapAsXML));
+        WsDiscoveryD2005SOAPMessage result = instance.createWsdSOAPMessage(instance.createSOAPMessage(SoapAsXML));
         assertEquals(expResult.toString(), result.toString());
     }
 
@@ -121,7 +122,7 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageHello_0args() {
         System.out.println("createWsdSOAPMessageHello");
-        WsdSOAPMessage result = instance.createWsdSOAPMessageHello();
+        WsDiscoveryD2005SOAPMessage result = instance.createWsdSOAPMessageHello();
         assertTrue(result.getJAXBBody() instanceof HelloType);
     }
 
@@ -132,8 +133,8 @@ public class WsdSOAPMessageBuilderTest {
     public void testCreateWsdSOAPMessageHello_WsDiscoveryService() {
         System.out.println("createWsdSOAPMessageHello");
         QName sName = new QName("a","b","c");
-        WsDiscoveryService service = WsDiscoveryBuilder.createService(sName, "d", "e");
-        WsdSOAPMessage result = instance.createWsdSOAPMessageHello(service);
+        WsDiscoveryService service = WsDiscoveryFactory.createService(sName, "d", "e");
+        WsDiscoveryD2005SOAPMessage result = instance.createWsdSOAPMessageHello(service);
         assertTrue(result.getJAXBBody() instanceof HelloType);
         HelloType body = (HelloType) result.getJAXBBody();
         assertTrue(body.getTypes().contains(sName));
@@ -148,7 +149,7 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageBye_0args() {
         System.out.println("createWsdSOAPMessageBye");
-        WsdSOAPMessage result = instance.createWsdSOAPMessageBye();
+        WsDiscoveryD2005SOAPMessage result = instance.createWsdSOAPMessageBye();
         assertTrue(result.getJAXBBody() instanceof ByeType);
     }
 
@@ -160,8 +161,8 @@ public class WsdSOAPMessageBuilderTest {
         System.out.println("createWsdSOAPMessageBye");
 
         QName sName = new QName("a","b","c");
-        WsDiscoveryService service = WsDiscoveryBuilder.createService(sName, "d", "e");
-        WsdSOAPMessage result = instance.createWsdSOAPMessageBye(service);
+        WsDiscoveryService service = WsDiscoveryFactory.createService(sName, "d", "e");
+        WsDiscoveryD2005SOAPMessage result = instance.createWsdSOAPMessageBye(service);
         assertTrue(result.getJAXBBody() instanceof ByeType);
         EndpointReferenceType expER = service.createEndpointReferenceObject();
         ByeType body = (ByeType)result.getJAXBBody();
@@ -174,7 +175,7 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageProbe() {
         System.out.println("createWsdSOAPMessageProbe");
-        WsdSOAPMessage<ProbeType> result = instance.createWsdSOAPMessageProbe();
+        WsDiscoveryD2005SOAPMessage<ProbeType> result = instance.createWsdSOAPMessageProbe();
         String firstUuid = result.getWsaMessageId().getValue();
         assertTrue(result.getJAXBBody() instanceof ProbeType);
         result = instance.createWsdSOAPMessageProbe();
@@ -187,7 +188,7 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageProbeMatches() {
         System.out.println("createWsdSOAPMessageProbeMatches");
-        WsdSOAPMessage result = instance.createWsdSOAPMessageProbeMatches();
+        WsDiscoveryD2005SOAPMessage result = instance.createWsdSOAPMessageProbeMatches();
         assertTrue(result.getJAXBBody() instanceof ProbeMatchesType);
     }
 
@@ -197,7 +198,7 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageResolve() {
         System.out.println("createWsdSOAPMessageResolve");
-        WsdSOAPMessage result = instance.createWsdSOAPMessageResolve();
+        WsDiscoveryD2005SOAPMessage result = instance.createWsdSOAPMessageResolve();
         assertTrue(result.getJAXBBody() instanceof ResolveType);
     }
 
@@ -207,8 +208,8 @@ public class WsdSOAPMessageBuilderTest {
     @Test
     public void testCreateWsdSOAPMessageResolveMatches() {
         System.out.println("createWsdSOAPMessageResolveMatches");
-        WsdSOAPMessageBuilder instance = new WsdSOAPMessageBuilder();
-        WsdSOAPMessage result = instance.createWsdSOAPMessageResolveMatches();
+        WsDiscoverySOAPMessageBuilder instance = new WsDiscoverySOAPMessageBuilder();
+        WsDiscoveryD2005SOAPMessage result = instance.createWsdSOAPMessageResolveMatches();
         assertTrue(result.getJAXBBody() instanceof ResolveMatchesType);
     }
 

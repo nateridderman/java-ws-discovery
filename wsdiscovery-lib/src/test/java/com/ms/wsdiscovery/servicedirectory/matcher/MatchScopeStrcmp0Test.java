@@ -5,9 +5,9 @@
 
 package com.ms.wsdiscovery.servicedirectory.matcher;
 
-import com.ms.wsdiscovery.WsDiscoveryBuilder;
+import com.ms.wsdiscovery.WsDiscoveryFactory;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 import javax.xml.namespace.QName;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -45,7 +45,7 @@ public class MatchScopeStrcmp0Test {
         servicePortType = new QName("http://localhost/portType", "localPart", "ns");
         serviceScope = "www.test.com/a/b";
         serviceXAddr = "http://10.0.0.1:1234/localPart";
-        service = WsDiscoveryBuilder.createService(servicePortType, serviceScope, serviceXAddr);
+        service = WsDiscoveryFactory.createService(servicePortType, serviceScope, serviceXAddr);
     }
 
     @After
@@ -59,35 +59,35 @@ public class MatchScopeStrcmp0Test {
     public void testMatchScope() {
         System.out.println("matchScope");
         
-        ScopesType probeScopes = null;
+        WsDiscoveryScopesType probeScopes = null;
 
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add(serviceScope);
 
         boolean expResult = true;
         boolean result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add(serviceScope.toUpperCase());
         expResult = false;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
 
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add("www.test.com/a/");
         expResult = false;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add("www.test.com/aa/");
         expResult = false;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add("http://www.test.com/a/");
         expResult = false;
         result = instance.matchScope(service, probeScopes);

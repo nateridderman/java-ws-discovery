@@ -18,16 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.ms.wsdiscovery.servicedirectory.matcher;
 
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
+import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryMatchScope;
 import java.net.URI;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 
 /**
  * Match scope against target service using the RFC2396 algorithm.
  * See the WS-Discovery specification or {@link MatchBy} for details.
  * @author Magnus Skjegstad
  */
-public class MatchScopeRFC2396 implements IMatchScope {
+public class MatchScopeRFC2396 implements IWsDiscoveryMatchScope {
 
    /**
      * Match scope against target service using the RFC2396 algorithm.
@@ -36,7 +37,7 @@ public class MatchScopeRFC2396 implements IMatchScope {
      * @param probeScopes Scopes to probe for.
      * @return True on success, false on failure.
      */
-    public boolean matchScope(WsDiscoveryService target, ScopesType probeScopes) {
+    public boolean matchScope(WsDiscoveryService target, WsDiscoveryScopesType probeScopes) {
         // All scopes in probe must match target
         if (probeScopes != null)
             for (String probescope : probeScopes.getValue()) {
