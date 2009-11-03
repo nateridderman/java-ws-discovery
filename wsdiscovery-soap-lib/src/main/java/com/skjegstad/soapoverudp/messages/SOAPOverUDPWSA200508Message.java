@@ -30,14 +30,11 @@ import com.skjegstad.soapoverudp.jaxb.wsaddressing200508.ReferenceParametersType
 import com.skjegstad.soapoverudp.jaxb.wsaddressing200508.RelatesToType;
 import java.nio.charset.Charset;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
@@ -48,6 +45,10 @@ import javax.xml.soap.SOAPMessage;
  * @author Magnus Skjegstad
  */
 public class SOAPOverUDPWSA200508Message extends SOAPOverUDPMessage {
+
+    public SOAPOverUDPWSA200508Message() {
+        super();
+    }
 
     public SOAPOverUDPWSA200508Message(SOAPMessage message) throws SOAPOverUDPException {
         super(message);
