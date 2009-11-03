@@ -19,14 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.examples;
 
-import com.ms.wsdiscovery.WsDiscoveryBuilder;
-import com.ms.wsdiscovery.WsDiscoveryConstants;
+import com.ms.wsdiscovery.WsDiscoveryFactory;
 import com.ms.wsdiscovery.WsDiscoveryServer;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
@@ -54,7 +51,7 @@ public class discovery_using_server {
         //   WsDiscoveryConstants.multicastInterface = NetworkInterface.getByInetAddress(InetAddress.getByName("10.0.1.4"));
         
         // Create a new server instance
-        WsDiscoveryServer server = WsDiscoveryBuilder.createServer();
+        WsDiscoveryServer server = WsDiscoveryFactory.createServer();
         
         // Start background threads
         server.start();

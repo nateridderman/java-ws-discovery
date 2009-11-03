@@ -70,8 +70,7 @@
         <module>wsdiscovery-lib</module>
         <module>wsdiscovery-example-ws</module>
         <module>wsdiscovery-examples</module>
-        <module>wsdiscovery-gui</module>        
-    <module>wsdiscovery-gui-2</module>
-  </modules>
+        <module>wsdiscovery-gui-2</module>
+    </modules>
 
 </project>

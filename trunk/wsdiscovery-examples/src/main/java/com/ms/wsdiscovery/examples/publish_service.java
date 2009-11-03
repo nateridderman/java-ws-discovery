@@ -19,15 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.examples;
 
+import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.namespace.QName;
-import com.ms.wsdiscovery.WsDiscoveryBuilder;
+import com.ms.wsdiscovery.WsDiscoveryFactory;
 import com.ms.wsdiscovery.WsDiscoveryServer;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 
 /**
  * How to publish a Web Service with WS-Discovery. See also the example
@@ -38,16 +41,16 @@ import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 public class publish_service {
     public static void main(String[] argv) 
             throws WsDiscoveryServiceDirectoryException, 
-            WsDiscoveryNetworkException, InterruptedException {
+            WsDiscoveryNetworkException, InterruptedException, WsDiscoveryXMLException {
         
-        WsDiscoveryServer server = WsDiscoveryBuilder.createServer();
+        WsDiscoveryServer server = WsDiscoveryFactory.createServer();
         
         System.out.println("Starting WS-Discovery server...");
         server.start();
 
         // Create a dummy service using WsDiscoverBuilder
         WsDiscoveryService service1 = 
-                WsDiscoveryBuilder.createService(
+                WsDiscoveryFactory.createService(
                     new QName("namespace", "myTestService"), // Port type.
                     "http://myscope",                            // Scope.
                     "http://localhost:1234/myTestService");  // Invocation address (XAddrs)
@@ -67,21 +70,21 @@ public class publish_service {
         ports.add(new QName("namespace", "myOtherTestService_type3"));
         
         // And several scopes..
-        ScopesType scopes = new ScopesType();
+        WsDiscoveryScopesType scopes = new WsDiscoveryScopesType();
         scopes.getValue().add("http://myscope");
         scopes.getValue().add("http://other_scope");        
         
         // And multiple invocation addresses
-        List<String> xaddrs = new ArrayList<String>();
-        xaddrs.add("http://localhost:1234");
-        xaddrs.add("http://10.10.10.1:4321/MyTestService");
+        List<String> invocationAddresses = new ArrayList<String>();
+        invocationAddresses.add("http://localhost:1234");
+        invocationAddresses.add("http://10.10.10.1:4321/MyTestService");
         
         // Create service 
         WsDiscoveryService service2 = 
                 new WsDiscoveryService(
                         ports,
                         scopes,
-                        xaddrs);
+                        invocationAddresses);
                                         
         // Register the service in the local service directory        
         System.out.println("Publishing service:\n" + service2.toString());

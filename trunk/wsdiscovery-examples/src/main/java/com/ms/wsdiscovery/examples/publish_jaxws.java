@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package com.ms.wsdiscovery.examples;
 
 import java.io.IOException;
-import com.ms.wsdiscovery.WsDiscoveryBuilder;
+import com.ms.wsdiscovery.WsDiscoveryFactory;
 import com.ms.wsdiscovery.WsDiscoveryServer;
 
 /**
@@ -38,7 +38,7 @@ public class publish_jaxws {
     public static void main(String[] args) throws IOException, Exception {
 
         // Create a WS-Discovery server thread
-        WsDiscoveryServer wsd = WsDiscoveryBuilder.createServer();
+        WsDiscoveryServer wsd = WsDiscoveryFactory.createServer();
 
         wsd.start();
 
