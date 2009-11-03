@@ -31,6 +31,7 @@ import java.util.UUID;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryFactory;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryNamespaces;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
@@ -106,12 +107,16 @@ public class WsDiscoveryService {
      * @param XAddrs Invocation address.
      * @param version Metadata version. 
      */
-    public WsDiscoveryService(SOAPOverUDPEndpointReferenceType endpoint, List<QName> portTypes, WsDiscoveryScopesType scopes, List<String> XAddrs, long version) {
+    public WsDiscoveryService(SOAPOverUDPEndpointReferenceType endpoint,
+            List<QName> portTypes,
+            WsDiscoveryScopesType scopes,
+            List<String> XAddrs,
+            long version) {
         setEndpointReferenceType(endpoint);
         setPortTypes(portTypes);
         setScopesType(scopes);
         setXAddrs(XAddrs);
-        setMetadataVersion(version); 
+        setMetadataVersion(version);
     }
     
     /**
@@ -122,7 +127,9 @@ public class WsDiscoveryService {
      * @param scopes List of scopes the service is in. <code>null</code> matches all scopes.
      * @param XAddrs Invocation address.
      */
-    public WsDiscoveryService(List<QName> portTypes, WsDiscoveryScopesType scopes, List<String> XAddrs) {
+    public WsDiscoveryService(List<QName> portTypes,
+            WsDiscoveryScopesType scopes,
+            List<String> XAddrs) {
         SOAPOverUDPEndpointReferenceType endpoint = new SOAPOverUDPEndpointReferenceType();
         endpoint.setAddress(URI.create("urn:uuid:"+UUID.randomUUID().toString()));
         setEndpointReferenceType(endpoint);
@@ -152,12 +159,13 @@ public class WsDiscoveryService {
      * 
      * @param probeTypes Port types in probe. <code>null</code> is always a match.
      * @param probeScopes Scopes in probe. <code>null</code> is always a match.
+     * @param defaultMatcher is the matching algorithm that is used if MatchBy is unset in probeScopes.
      * @return True if match.
      */
-    public boolean isMatchedBy(List<QName> probeTypes, WsDiscoveryScopesType probeScopes) {
-        MatchBy m = WsDiscoveryConstants.defaultMatchBy;
+    public boolean isMatchedBy(List<QName> probeTypes, WsDiscoveryScopesType probeScopes, MatchBy defaultMatcher) {
+        MatchBy m = defaultMatcher;
         if (probeScopes != null)
-            m = WsDiscoveryFactory.getMatcher(probeScopes.getMatchBy());
+            m = probeScopes.getMatchBy();
 
         if (m == null)
             return false;        
@@ -242,7 +250,7 @@ public class WsDiscoveryService {
             if (scopes.getValue() != null)
                 for (String s : scopes.getValue())
                     this.scopes.add(URI.create(s));
-            scopesMatchBy = WsDiscoveryFactory.getMatcher(scopes.getMatchBy());
+            this.scopesMatchBy = scopes.getMatchBy();
         }
     }
 
@@ -250,8 +258,8 @@ public class WsDiscoveryService {
      * Set scopes.
      * @param scopes List of new scopes.
      */
-    public void setScopes(List<URI> scopes) {
-        WsDiscoveryScopesType scopesType = new WsDiscoveryScopesType();
+    public void setScopes(List<URI> scopes, MatchBy matchingAlgorithm) {
+        WsDiscoveryScopesType scopesType = new WsDiscoveryScopesType(matchingAlgorithm);
         for (URI scope : scopes)
             scopesType.getValue().add(scope.toString());
         setScopesType(scopesType);

@@ -20,8 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package com.ms.wsdiscovery;
 
 import com.ms.wsdiscovery.datatypes.WsDiscoveryNamespaces;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryTransportTypes;
 import java.net.InetAddress;
-import java.net.URI;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Date;
@@ -29,8 +29,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPConstants;
-import com.ms.wsdiscovery.network.transport.SOAPOverUDPTransportType;
-import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 import java.net.NetworkInterface;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
@@ -46,7 +44,7 @@ public class WsDiscoveryConstants {
      * Select the transport protocol to use when sending SOAP-messages. See 
      * {@link SOAPOverUDPTransportType} for valid transport types.
      */
-    public final static SOAPOverUDPTransportType transportType = SOAPOverUDPTransportType.UNCOMPRESSED;
+    public final static WsDiscoveryTransportTypes defaultTransportType = WsDiscoveryTransportTypes.UNCOMPRESSED;
 
     /**
      * Builder with helpers used for constructing XML
@@ -62,7 +60,7 @@ public class WsDiscoveryConstants {
      * WS-Discovery namespace.
      */
     public final static WsDiscoveryNamespaces defaultNsDiscovery =
-            WsDiscoveryNamespaces.WS_DISCOVERY_2005_04;
+            WsDiscoveryNamespaces.WS_DISCOVERY_2009_01;
     
     /**
      * SOAP protocol. See {@link SOAPConstants} for valid values. Note that 
@@ -80,26 +78,26 @@ public class WsDiscoveryConstants {
     /**
      * Instance name used by JAXB for marshall/unmarshalling.
      */
-    public final static String defaultJAXBInstanceName = 
-            com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.HelloType.class.getPackage().getName();
+    //public final static String defaultJAXBInstanceName =
+    //        com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.HelloType.class.getPackage().getName();
     
     /**
      * When set to true all SOAP-messages will start with a valid XML-header.
      */
-    public final static Boolean defaultAddXMLHeaderToSOAP = false;
+    //public final static Boolean defaultAddXMLHeaderToSOAP = false;
 
     /**
      * The default recipient used in WS-Addressing.
      */
-    public final static URI defaultTo =
-            URI.create("urn:schemas-xmlsoap-org:ws:2005:04:discovery");
+    //public final static URI defaultTo =
+    //        URI.create("urn:schemas-xmlsoap-org:ws:2005:04:discovery");
 
     /**
      * Default match method when receiving or sending Probe-messages. See the 
      * WS-Discovery specification and {@link MatchBy} for details. 
      * <code>RFC2396</code> is the default matcher used in the specification.
      */
-    public final static MatchBy defaultMatchBy = MatchBy.RFC2396;
+    //public final static MatchBy defaultMatchBy = MatchBy.RFC2396;
     
     /**
      * The relationship type of the suppression message that is sent to clients 

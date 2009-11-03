@@ -52,14 +52,16 @@ public enum MatchBy {
      * "http://example.com/abc" matches "http://example.com/abc/def" using this rule
      * but "http://example.com/a" does not.
      */
-    RFC2396("http://schemas.xmlsoap.org/ws/2005/04/discovery/rfc2396", new MatchScopeRFC2396()),
+    WSD200504_RFC2396("http://schemas.xmlsoap.org/ws/2005/04/discovery/rfc2396", new MatchScopeRFC2396()),
+    WSD200901_RFC2396("http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01/rfc2396", new MatchScopeRFC2396()),
     /**
      * From the WS-Discovery Specification Draft, 2005:<p>
      * Using a case-insensitive comparison, the scheme of S1 and S2 is "uuid" and each of the 
      * unsigned integer fields in S1 is equal to the corresponding field in S2, or equivalently, the 
      * 128 bits of the in-memory representation of S1 and S2 are the same 128 bit unsigned integer.
      */
-    UUID("http://schemas.xmlsoap.org/ws/2005/04/discovery/uuid", new MatchScopeUUID()),
+    WSD200504_UUID("http://schemas.xmlsoap.org/ws/2005/04/discovery/uuid", new MatchScopeUUID()),
+    WSD200901_UUID("http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01/uuid", new MatchScopeUUID()),
     /**     
      * From the WS-Discovery Specification Draft, 2005:<p>
      * Using case-insensitive comparison, the scheme of S1 and S2 is "ldap" and the
@@ -68,13 +70,17 @@ public enum MatchBy {
      * does not support the variants in an RDNSequence described in Section 4 of
      * RFC 2253.
      */
-    LDAP("http://schemas.xmlsoap.org/ws/2005/04/discovery/ldap", new MatchScopeLDAP()),
+    WSD200504_LDAP("http://schemas.xmlsoap.org/ws/2005/04/discovery/ldap", new MatchScopeLDAP()),
+    WSD200901_LDAP("http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01/ldap", new MatchScopeLDAP()),
     
     /**
      * From the WS-Discovery Specification Draft, 2005:
      * Using a case-sensitive comparison, the string representation of S1 and S2 is the same.
      */
-    strcmp0("http://schemas.xmlsoap.org/ws/2005/04/discovery/strcmp0", new MatchScopeStrcmp0());
+    WSD200504_strcmp0("http://schemas.xmlsoap.org/ws/2005/04/discovery/strcmp0", new MatchScopeStrcmp0()),
+    WSD200901_strcmp0("http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01/strcmp0", new MatchScopeStrcmp0()),
+
+    WSD200901_none("http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01/none", new MatchScopeNone());
         
     private final URI matchType;
     private final IWsDiscoveryMatchScope serviceMatcher;

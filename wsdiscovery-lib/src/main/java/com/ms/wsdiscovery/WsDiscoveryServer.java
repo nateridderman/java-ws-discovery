@@ -23,15 +23,12 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
-import com.ms.wsdiscovery.draft2005.WsDiscoveryD2005DispatchThread;
 import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
 import com.ms.wsdiscovery.interfaces.IWsDiscoveryDispatchThread;
-import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
+import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
@@ -52,8 +49,12 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
      * Constructor
      * @throws WsDiscoveryNetworkException 
      */
-    public WsDiscoveryServer() throws WsDiscoveryNetworkException {
-        dispatchThread = new WsDiscoveryD2005DispatchThread();
+    public WsDiscoveryServer() throws WsDiscoveryException {
+        try {
+            dispatchThread = WsDiscoveryConstants.defaultNsDiscovery.getDispatchThreadInstance();
+        } catch (Exception ex) {
+            throw new WsDiscoveryException("Unable to create WS-Discovery dispatch thread instance.", ex);
+        }
     }
     
     /**

@@ -1,5 +1,5 @@
 /*
-SOAPOverUDPTransportType.java
+WsDiscoveryTransportTypes.java
 
 Copyright (C) 2008-2009 Magnus Skjegstad
 
@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.ms.wsdiscovery.network.transport;
+package com.ms.wsdiscovery.datatypes;
 
 import com.skjegstad.soapoverudp.SOAPOverUDP11;
 import com.skjegstad.soapoverudp.SOAPOverUDPdraft2004;
@@ -31,7 +31,7 @@ import com.skjegstad.soapoverudp.transport.SOAPOverUDPTransportZlib;
  * 
  * @author Magnus Skjegstad
  */
-public enum SOAPOverUDPTransportType {
+public enum WsDiscoveryTransportTypes {
     /**
      * Plain SOAP-over-UDP. See {@link SOAPOverUDPTransport}.
      */
@@ -55,7 +55,7 @@ public enum SOAPOverUDPTransportType {
         return (ISOAPOverUDPTransport)transportLayer.newInstance();
     }
         
-    SOAPOverUDPTransportType(Class layer) {
+    WsDiscoveryTransportTypes(Class layer) {
         transportLayer = layer;
     }
 }
