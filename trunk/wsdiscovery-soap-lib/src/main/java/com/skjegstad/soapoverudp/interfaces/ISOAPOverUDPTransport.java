@@ -23,6 +23,7 @@ import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPNotInitializedException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
 /**
@@ -32,7 +33,7 @@ import java.util.logging.Logger;
  * 
  * @author Magnus Skjegstad
  */
-public interface ISOAPTransport {
+public interface ISOAPOverUDPTransport extends ISOAPOverUDPConfigurable {
     
     /**
      * Receive a packet from the transport layer. Implementer must listen to 
@@ -42,7 +43,7 @@ public interface ISOAPTransport {
      * @return Received packet stored in a {@link NetworkMessage}.
      * @throws java.lang.InterruptedException if interrupted while waiting.
      */
-    INetworkMessage recv(long timeoutInMillis) throws InterruptedException;
+    ISOAPOverUDPNetworkMessage recv(long timeoutInMillis) throws InterruptedException;
     
     /**
      * Receive a packet from the transport layer. Blocks until a packet is 
@@ -50,7 +51,7 @@ public interface ISOAPTransport {
      * 
      * @return Received packet stored in a {@link NetworkMessage}.
      */
-    INetworkMessage recv();
+    ISOAPOverUDPNetworkMessage recv();
 
     /**
      * Send a message to the transport layer. The implementer must support 
@@ -58,7 +59,10 @@ public interface ISOAPTransport {
      * 
      * @param message Message to send.
      */
-    void send(INetworkMessage message);
+
+    void send(ISOAPOverUDPNetworkMessage message, boolean blockUntilSent) throws InterruptedException;
+    void sendStringMulticast(String string, boolean blockUntilSent) throws InterruptedException;
+    void sendStringUnicast(String string, InetAddress destAddress, int destPort, boolean blockUntilSent) throws InterruptedException;
 
     /**
      * Returns the port used for sending and receiving multicasted packets.
@@ -72,10 +76,14 @@ public interface ISOAPTransport {
      */
     int getUnicastPort();
 
+    InetAddress getMulticastAddress();
+
     /**
      * Shuts down the transport layer.
      */
     void done();
+
+    void setEncoding(Charset encoding);
     
     /**
      * Starts the transport threads.
@@ -108,4 +116,5 @@ public interface ISOAPTransport {
      * Returns true after init() has been called successfully.
      */
     boolean isInitialized();
+
 }

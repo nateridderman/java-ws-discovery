@@ -1,5 +1,5 @@
 /*
-NetworkMessage.java
+SOAPOverUDPNetworkMessage.java
 
 Copyright (C) 2008-2009 Magnus Skjegstad
 
@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.skjegstad.soapoverudp.messages;
 
-import com.skjegstad.soapoverudp.interfaces.INetworkMessage;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPNetworkMessage;
 import java.net.InetAddress;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -31,7 +31,7 @@ import java.security.NoSuchAlgorithmException;
  *
  * @author Magnus Skjegstad
  */
-public class NetworkMessage implements INetworkMessage {
+public class SOAPOverUDPNetworkMessage implements ISOAPOverUDPNetworkMessage {
     /**
      * Source and destination address.
      */
@@ -63,7 +63,7 @@ public class NetworkMessage implements INetworkMessage {
      * @param dstAddress Destination address
      * @param dstPort Destination port
      */
-    public NetworkMessage(byte[] payload, int payloadLen, InetAddress srcAddress, int srcPort, InetAddress dstAddress, int dstPort) {
+    public SOAPOverUDPNetworkMessage(byte[] payload, int payloadLen, InetAddress srcAddress, int srcPort, InetAddress dstAddress, int dstPort) {
         this.srcAddress = srcAddress;
         this.srcPort = srcPort;
 
@@ -86,7 +86,7 @@ public class NetworkMessage implements INetworkMessage {
      * @param dstAddress Destination address
      * @param dstPort Destination port
      */
-    public NetworkMessage(byte[] payload, InetAddress srcAddress, int srcPort, InetAddress dstAddress, int dstPort) {
+    public SOAPOverUDPNetworkMessage(byte[] payload, InetAddress srcAddress, int srcPort, InetAddress dstAddress, int dstPort) {
         this(payload, payload.length, srcAddress, srcPort, dstAddress, dstPort);
     }
 

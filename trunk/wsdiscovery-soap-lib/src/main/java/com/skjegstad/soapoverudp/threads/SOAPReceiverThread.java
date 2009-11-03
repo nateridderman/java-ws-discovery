@@ -19,14 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.skjegstad.soapoverudp.threads;
 
-import com.skjegstad.soapoverudp.messages.NetworkMessage;
+import com.skjegstad.soapoverudp.messages.SOAPOverUDPNetworkMessage;
 import java.net.SocketException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.BlockingQueue;
-import com.skjegstad.soapoverudp.interfaces.INetworkMessage;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPNetworkMessage;
 import java.net.InetSocketAddress;
 import java.util.logging.Logger;
 
@@ -46,7 +46,7 @@ public class SOAPReceiverThread extends Thread {
     /**
      * Queue for received messages.
      */
-    protected BlockingQueue<INetworkMessage> queue;
+    protected BlockingQueue<ISOAPOverUDPNetworkMessage> queue;
     
     /**
      * Socket messages are received on.
@@ -62,7 +62,7 @@ public class SOAPReceiverThread extends Thread {
      * @param logger Instance of Logger used for debugging. May be set to null.
      * @throws SocketException 
      */
-    public SOAPReceiverThread(String name, BlockingQueue<INetworkMessage> queue, DatagramSocket socket, Logger logger) throws SocketException {
+    public SOAPReceiverThread(String name, BlockingQueue<ISOAPOverUDPNetworkMessage> queue, DatagramSocket socket, Logger logger) throws SocketException {
         super(name);
         this.queue = queue;        
         this.socket = socket;
@@ -80,7 +80,7 @@ public class SOAPReceiverThread extends Thread {
      * @param logger Instance of Logger used for debugging. May be set to null.
      * @throws SocketException 
      */
-    public SOAPReceiverThread(String name, BlockingQueue<INetworkMessage> queue, int listenport, Logger logger) throws SocketException {
+    public SOAPReceiverThread(String name, BlockingQueue<ISOAPOverUDPNetworkMessage> queue, int listenport, Logger logger) throws SocketException {
         this (name, queue, new DatagramSocket(listenport), logger);
     }
        
@@ -116,7 +116,7 @@ public class SOAPReceiverThread extends Thread {
 
                     InetSocketAddress sender = (InetSocketAddress) packet.getSocketAddress();
                     
-                    INetworkMessage nm = new NetworkMessage(packet.getData(), packet.getLength(),
+                    ISOAPOverUDPNetworkMessage nm = new SOAPOverUDPNetworkMessage(packet.getData(), packet.getLength(),
                                                            sender.getAddress(), sender.getPort(),
                                                            socket.getLocalAddress(), socket.getLocalPort());
 

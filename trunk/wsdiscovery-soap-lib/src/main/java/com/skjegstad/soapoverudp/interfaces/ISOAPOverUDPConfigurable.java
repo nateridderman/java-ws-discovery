@@ -1,5 +1,5 @@
 /*
-ISOAPConfigurable.java
+ISOAPOverUDPConfigurable.java
 
 Copyright (C) 2009 Magnus Skjegstad
 
@@ -25,7 +25,7 @@ import com.skjegstad.soapoverudp.configurations.SOAPOverUDPConfiguration;
  *
  * @author Magnus Skjegstad
  */
-public interface ISOAPConfigurable {
+public interface ISOAPOverUDPConfigurable {
     /**
      * Set SOAPOverUDP configuration.
      *

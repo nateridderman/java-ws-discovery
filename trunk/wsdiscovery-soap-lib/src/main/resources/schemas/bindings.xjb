@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jaxb:bindings
+        version="2.1"
+        xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/jaxb
+        http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd">
+
+    <jaxb:bindings schemaLocation="wsaddressing200408.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="com.skjegstad.soapoverudp.jaxb.wsaddressing200408"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    
+    <jaxb:bindings schemaLocation="wsaddressing200508.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="com.skjegstad.soapoverudp.jaxb.wsaddressing200508"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+
+</jaxb:bindings>

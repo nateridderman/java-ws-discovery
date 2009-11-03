@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.skjegstad.soapoverudp.threads;
 
-import com.skjegstad.soapoverudp.messages.SOAPNetworkMessage;
+import com.skjegstad.soapoverudp.messages.SOAPOverUDPQueuedNetworkMessage;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -47,7 +47,7 @@ public class SOAPSenderThread extends Thread {
      * can be used for retransmission with random delays. {@link SOAPNetworkMessage}
      * is an extension to {@link NetworkMessage} that implements {@link Delayed}.
      */
-    protected DelayQueue<SOAPNetworkMessage> sendQueue;
+    protected DelayQueue<SOAPOverUDPQueuedNetworkMessage> sendQueue;
     
     /**
      * Socket used for sending messages.
@@ -62,7 +62,7 @@ public class SOAPSenderThread extends Thread {
      * @param socket Socket to send on.
      * @param logger Instance of Logger used for debugging. May be set to null.
      */
-    public SOAPSenderThread(String name, DelayQueue<SOAPNetworkMessage> queue, DatagramSocket socket, Logger logger) {
+    public SOAPSenderThread(String name, DelayQueue<SOAPOverUDPQueuedNetworkMessage> queue, DatagramSocket socket, Logger logger) {
         super(name);
         this.sendQueue = queue;
         this.socket = socket;
@@ -78,7 +78,7 @@ public class SOAPSenderThread extends Thread {
      * @param logger Instance of Logger used for debugging. May be set to null.
      * @throws SocketException 
      */
-    public SOAPSenderThread(String name, DelayQueue<SOAPNetworkMessage> queue, Logger logger) throws SocketException {
+    public SOAPSenderThread(String name, DelayQueue<SOAPOverUDPQueuedNetworkMessage> queue, Logger logger) throws SocketException {
         this(name, queue, new DatagramSocket(), logger);
     }
     
@@ -107,7 +107,7 @@ public class SOAPSenderThread extends Thread {
     public void run() {
         threadDone = false;
         
-        SOAPNetworkMessage nm;
+        SOAPOverUDPQueuedNetworkMessage nm;
 
         if (logger != null)
                 synchronized (logger) {
@@ -124,11 +124,11 @@ public class SOAPSenderThread extends Thread {
                     if (nm == null)
                         continue;
 
-                    if (logger != null) {
+                    /*if (logger != null) {
                         synchronized(logger) {
                             logger.finest(this.getName() + ", send: " + nm.toString());
                         }
-                    }
+                    }*/
 
                     DatagramPacket packet = new DatagramPacket(nm.getPayload(), nm.getPayloadLen(), 
                                                                 nm.getDstAddress(), nm.getDstPort());

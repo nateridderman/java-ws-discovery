@@ -16,26 +16,28 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.skjegstad.soapoverudp.generic;
+package com.skjegstad.soapoverudp.transport;
 
 import com.skjegstad.soapoverudp.configurations.SOAPOverUDPConfiguration;
 import com.skjegstad.soapoverudp.threads.SOAPReceiverThread;
 import com.skjegstad.soapoverudp.threads.SOAPSenderThread;
-import com.skjegstad.soapoverudp.messages.SOAPNetworkMessage;
-import com.skjegstad.soapoverudp.interfaces.ISOAPTransport;
+import com.skjegstad.soapoverudp.messages.SOAPOverUDPQueuedNetworkMessage;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.nio.charset.Charset;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import com.skjegstad.soapoverudp.interfaces.INetworkMessage;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPNetworkMessage;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPNotInitializedException;
-import com.skjegstad.soapoverudp.interfaces.ISOAPConfigurable;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPConfigurable;
+import com.skjegstad.soapoverudp.messages.SOAPOverUDPNetworkMessage;
 import java.net.NetworkInterface;
 import java.util.logging.Logger;
 
@@ -45,7 +47,7 @@ import java.util.logging.Logger;
  * 
  * @author Magnus Skjegstad
  */
-public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigurable {
+public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
     /**
      * Instance of Logger used for debug messages.
      */
@@ -61,6 +63,8 @@ public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigu
      */
     protected boolean running = false;
 
+    protected Charset encoding = Charset.defaultCharset();
+
     /**
      * SOAPOverUDP configuration.
      */
@@ -71,9 +75,9 @@ public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigu
     private SOAPReceiverThread unicastReceiverThread; // Thread listening for incoming unicast messages
     private SOAPSenderThread multicastSenderThread; // Thread sending multicast messages
     private SOAPSenderThread unicastSenderThread; // Thread sending unicast messages
-    private LinkedBlockingQueue<INetworkMessage> inQueue = new LinkedBlockingQueue<INetworkMessage>(); // Queue used by the receiver threads
-    private DelayQueue<SOAPNetworkMessage> outUnicastQueue = new DelayQueue<SOAPNetworkMessage>(); // Queue used by unicastSenderThread
-    private DelayQueue<SOAPNetworkMessage> outMulticastQueue = new DelayQueue<SOAPNetworkMessage>(); // Queue used by multicastSenderThread
+    private LinkedBlockingQueue<ISOAPOverUDPNetworkMessage> inQueue = new LinkedBlockingQueue<ISOAPOverUDPNetworkMessage>(); // Queue used by the receiver threads
+    private DelayQueue<SOAPOverUDPQueuedNetworkMessage> outUnicastQueue = new DelayQueue<SOAPOverUDPQueuedNetworkMessage>(); // Queue used by unicastSenderThread
+    private DelayQueue<SOAPOverUDPQueuedNetworkMessage> outMulticastQueue = new DelayQueue<SOAPOverUDPQueuedNetworkMessage>(); // Queue used by multicastSenderThread
     private int multicastPort;
     private InetAddress multicastAddress;
     private int unicastPort;
@@ -82,7 +86,7 @@ public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigu
      * Empty constructor for use with newInstance(). Call init() to initialize the
      * new instance.
      */
-    public SOAPOverUDPGeneric() {
+    public SOAPOverUDPTransport() {
         super();
     }
             
@@ -102,10 +106,10 @@ public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigu
      * @param blockUntilSent When true the method will wait until the send-queue is empty. False returns immediately.
      * @throws java.lang.InterruptedException if interrupted while waiting for the message to be sent.
      */
-    public void send(INetworkMessage message, boolean blockUntilSent) throws InterruptedException {
+    public void send(ISOAPOverUDPNetworkMessage message, boolean blockUntilSent) throws InterruptedException {
         // Multicast
         if (message.getDstAddress().equals(this.multicastAddress)) { 
-            outMulticastQueue.add(new SOAPNetworkMessage(soapConfig, message, true));
+            outMulticastQueue.add(new SOAPOverUDPQueuedNetworkMessage(soapConfig, message, true));
             if (blockUntilSent)
                 while (!outMulticastQueue.isEmpty())
                     synchronized (multicastSenderThread) {
@@ -113,7 +117,7 @@ public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigu
                     }
         // Unicast
         } else {
-            outUnicastQueue.add(new SOAPNetworkMessage(soapConfig, message, false));
+            outUnicastQueue.add(new SOAPOverUDPQueuedNetworkMessage(soapConfig, message, false));
             if (blockUntilSent)
                 while (!outUnicastQueue.isEmpty())
                     synchronized (unicastSenderThread) {
@@ -126,7 +130,7 @@ public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigu
      * 
      * @param message
      */
-    public void send(INetworkMessage message) {
+    public void send(ISOAPOverUDPNetworkMessage message) {
         try {
             send(message, false);
         } catch (InterruptedException ex) {
@@ -141,7 +145,7 @@ public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigu
      * @return SOAP message. <code>null</code> on timeout.
      * @throws java.lang.InterruptedException if interrupted while waiting for data.
      */
-    public INetworkMessage recv(long timeoutInMillis) throws InterruptedException {
+    public ISOAPOverUDPNetworkMessage recv(long timeoutInMillis) throws InterruptedException {
         return inQueue.poll(timeoutInMillis, TimeUnit.MILLISECONDS);
     }
     
@@ -150,7 +154,7 @@ public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigu
      * 
      * @return SOAP message. <code>null</code> if interrupted while waiting.
      */
-    public INetworkMessage recv() {
+    public ISOAPOverUDPNetworkMessage recv() {
         try {
             return inQueue.take();
         } catch (InterruptedException ex) {
@@ -188,7 +192,7 @@ public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigu
 
     /**
      * Tell transport layer to stop. Returns immediately. Use 
-     * {@link SOAPOverUDPGeneric#isRunning()} to determine when thread has ended.
+     * {@link SOAPOverUDPTransport#isRunning()} to determine when thread has ended.
      */
     public void done() {
         if (!isRunning())
@@ -255,6 +259,9 @@ public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigu
             throw new SOAPOverUDPException("SOAPOverUDP not configured.");
 
         this.logger = logger;
+
+        if (this.logger != null)
+            logger.finest("Entering transport.init()");
 
         this.multicastPort = multicastPort;
         this.multicastAddress = multicastAddress;
@@ -323,4 +330,25 @@ public abstract class SOAPOverUDPGeneric implements ISOAPTransport, ISOAPConfigu
         return running;
     }
 
+    public void setEncoding(Charset encoding) {
+        if (logger != null)
+            logger.finer("SOAPOverUDPTransport set encoding to " + encoding.toString());
+        this.encoding = encoding;
+    }
+
+    public void sendStringMulticast(String string, boolean blockUntilSent) throws InterruptedException {
+        this.sendStringUnicast(string, multicastAddress, multicastPort, blockUntilSent);
+    }
+
+    public void sendStringUnicast(String string, InetAddress destAddress, int destPort, boolean blockUntilSent) throws InterruptedException {
+        if (logger != null)
+            logger.finest("sendString: " + string);
+        byte[] payload = string.getBytes(encoding);
+        ISOAPOverUDPNetworkMessage m = new SOAPOverUDPNetworkMessage(payload, null, 0, destAddress, destPort);
+        this.send(m, blockUntilSent);
+    }
+
+    public InetAddress getMulticastAddress() {
+        return multicastAddress;
+    }        
 }

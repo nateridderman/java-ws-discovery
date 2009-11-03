@@ -24,17 +24,17 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <dependencies>	
+    <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.4</version>
             <scope>test</scope>
-        </dependency>       
+        </dependency>
     </dependencies>
 
     <build>
-        <plugins>            
+        <plugins>
             <plugin>
                 <inherited>true</inherited>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -44,7 +44,7 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
-                        <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
@@ -54,6 +54,29 @@
                             <mainClass>fully.qualified.MainClass</mainClass>
                         </manifest>
                     </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!--<generatePackage>com.ms.wsdiscovery.xml.jaxb_generated</generatePackage>-->
+                    <catalog>${basedir}/src/main/resources/schemas/catalog.cat</catalog>
+                    <schemaDirectory>${basedir}/src/main/resources/schemas</schemaDirectory>
+                    <schemaIncludes>
+                        <include>wsaddressing200408.xsd</include>
+                        <include>wsaddressing200508.xsd</include>
+                    </schemaIncludes>
+                    <strict>strict</strict>
+                    <verbose>true</verbose>
+                    <!--<catalogResolver>org.jvnet.jaxb2.maven2.resolver.tools.ClasspathCatalogResolver</catalogResolver>-->
                 </configuration>
             </plugin>
             <plugin>
