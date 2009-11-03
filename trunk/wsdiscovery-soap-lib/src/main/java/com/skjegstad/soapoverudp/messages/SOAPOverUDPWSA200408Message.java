@@ -29,6 +29,7 @@ import com.skjegstad.soapoverudp.jaxb.wsaddressing200408.ReferenceParametersType
 import com.skjegstad.soapoverudp.jaxb.wsaddressing200408.ReferencePropertiesType;
 import com.skjegstad.soapoverudp.jaxb.wsaddressing200408.Relationship;
 import com.skjegstad.soapoverudp.jaxb.wsaddressing200408.ServiceNameType;
+import java.net.InetAddress;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -235,4 +236,12 @@ public class SOAPOverUDPWSA200408Message extends SOAPOverUDPMessage {
             throw new SOAPOverUDPException("Unable to add WS-Addressing to SOAP header.");
         }
      }
+
+    @Override
+    public boolean isReplyToAnonymous() {
+        return ((this.getReplyTo() == null) ||
+                (this.getReplyTo().getAddress() == null) ||
+                (this.getReplyTo().getAddress().equals(
+                    SOAPOverUDPNamespaces.WS_ADDRESSING_2004_08.getAnonymousReplyTo())));
+    }
 }

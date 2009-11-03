@@ -20,6 +20,7 @@ package com.skjegstad.soapoverudp.datatypes;
 
 import com.skjegstad.soapoverudp.*;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
+import java.net.URI;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -33,21 +34,25 @@ import javax.xml.namespace.QName;
 public enum SOAPOverUDPNamespaces {
     WS_ADDRESSING_2004_08 (
             "http://schemas.xmlsoap.org/ws/2004/08/addressing",
+            URI.create("http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"),
             com.skjegstad.soapoverudp.jaxb.wsaddressing200408.EndpointReferenceType.class.getPackage().getName()),
     WS_ADDRESSING_2005_08 (
             "http://www.w3.org/2005/08/addressing",
+            URI.create("http://www.w3.org/2005/08/addressing/role/anonymous"),
             com.skjegstad.soapoverudp.jaxb.wsaddressing200508.EndpointReferenceType.class.getPackage().getName());
 
     private final String namespace;
     private final String contextPath;
+    private final URI anonymousReplyTo;
     
     private JAXBContext jaxbContext = null;
     private Marshaller marshaller = null;
     private Unmarshaller unmarshaller = null;
 
-    SOAPOverUDPNamespaces(String namespace, String contextPath) {
+    SOAPOverUDPNamespaces(String namespace, URI anonymousReplyTo, String contextPath) {
         this.namespace = namespace;
         this.contextPath = contextPath;
+        this.anonymousReplyTo = anonymousReplyTo;
     }
 
     public JAXBContext getJAXBContext() throws SOAPOverUDPException {
@@ -76,4 +81,10 @@ public enum SOAPOverUDPNamespaces {
     public String getContextPath() {
         return contextPath;
     }
+
+    public URI getAnonymousReplyTo() {
+        return anonymousReplyTo;
+    }
+
+    
 }

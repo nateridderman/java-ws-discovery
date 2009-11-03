@@ -79,6 +79,10 @@ public interface ISOAPOverUDPMessage {
     InetAddress getDstAddress();
     void setDstPort(int dstPort);
     int getDstPort();
+    int getReplyPort();
+    InetAddress getReplyAddress();
+    String getReplyProto();
+    boolean isReplyToAnonymous();
     /**
      * Returns a String containing this SOAP message.
      * @param encoding Encoding

@@ -28,8 +28,12 @@ import com.skjegstad.soapoverudp.jaxb.wsaddressing200508.MetadataType;
 import com.skjegstad.soapoverudp.jaxb.wsaddressing200508.ObjectFactory;
 import com.skjegstad.soapoverudp.jaxb.wsaddressing200508.ReferenceParametersType;
 import com.skjegstad.soapoverudp.jaxb.wsaddressing200508.RelatesToType;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -210,5 +214,14 @@ public class SOAPOverUDPWSA200508Message extends SOAPOverUDPMessage {
             throw new SOAPOverUDPException("Unable to add WS-Addressing to SOAP header.");
         }
     }
+
+    public boolean isReplyToAnonymous() {
+        return ((this.getReplyTo() == null) ||
+                (this.getReplyTo().getAddress() == null) ||
+                (this.getReplyTo().getAddress().equals(
+                    SOAPOverUDPNamespaces.WS_ADDRESSING_2005_08.getAnonymousReplyTo())));
+    }
+
+    
         
 }

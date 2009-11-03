@@ -93,7 +93,7 @@ public abstract class SOAPOverUDP implements ISOAPOverUDP {
         transport.sendStringMulticast(soapMessage.toString(false, encoding), true);
     }
 
-    private ISOAPOverUDPMessage _recv(ISOAPOverUDPNetworkMessage m) throws SOAPOverUDPException {
+    protected ISOAPOverUDPMessage _recv(ISOAPOverUDPNetworkMessage m) throws SOAPOverUDPException {
         if (m == null) // this may happen, e.g. when recv() times out
             return null;
         
