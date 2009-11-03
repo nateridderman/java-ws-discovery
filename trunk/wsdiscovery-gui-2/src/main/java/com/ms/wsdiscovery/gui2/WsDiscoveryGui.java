@@ -19,12 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.gui2;
 
-import com.ms.wsdiscovery.WsDiscoveryBuilder;
+import com.ms.wsdiscovery.WsDiscoveryFactory;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.WsDiscoveryServer;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
+import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
 import com.ms.wsdiscovery.gui2.dialogs.WsDiscoveryCustomProbeDialog;
 import com.ms.wsdiscovery.gui2.dialogs.WsDiscoveryServiceDialog;
+import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
@@ -40,6 +42,7 @@ import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.event.ListSelectionEvent;
@@ -250,7 +253,7 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
         String[] row = new String[4];
 
         // UUID
-        row[0] = service.getEndpointReference();
+        row[0] = service.getEndpointReference().getAddress().toString();
 
         // TYPES
         row[1] = "";
@@ -653,7 +656,11 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
                         if (wsdiscovery != null) {
                             if (wsdiscovery.isProxy()) {
                                 log_info("Disabling proxy server");
+                            try {
                                 wsdiscovery.disableProxyMode();
+                            } catch (WsDiscoveryException ex) {
+                                log_fatal(ex.getMessage());
+                            } 
                                 buttonProxyControl.setText("Enable proxy server");
                             } else
                                 try {
@@ -687,9 +694,15 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
                 public void run() {
                     try {
-                        if ((wsdiscovery != null) && (wsdiscovery.isAlive())) {
+                        if ((wsdiscovery != null) && (wsdiscovery.isRunning())) {
                             log_info("Sending probe");
-                            wsdiscovery.probe();
+                            try {
+                                wsdiscovery.probe();
+                            } catch (WsDiscoveryXMLException ex) {
+                                log_fatal(ex.getMessage());
+                            } catch (WsDiscoveryNetworkException ex) {
+                                log_fatal(ex.getMessage());
+                            }
                         }
                     } finally {
                         buttonSendProbe.setEnabled(true);
@@ -719,7 +732,6 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
 
     private void buttonPublishServiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonPublishServiceActionPerformed
         if ((wsdiscovery != null) && (wsdiscovery.isAlive())) {
-
             java.awt.EventQueue.invokeLater(new Runnable() {
                 public void run() {
                     WsDiscoveryServiceDialog dialog = new WsDiscoveryServiceDialog(new javax.swing.JFrame(), true);
@@ -727,14 +739,14 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
                     dialog.setVisible(true);
                     if (!dialog.isCancelled()) {
                         WsDiscoveryService service =
-                            WsDiscoveryBuilder.createService(
+                            WsDiscoveryFactory.createService(
                                 new QName(dialog.getTextPortTypeSchema().getText(), dialog.getTextPortTypeName().getText()),
                                 dialog.getTextScope().getText(),
                                 dialog.getTextXAddr().getText());
                         try {
                             log_info("Publishing service " + dialog.getTextXAddr().getText() + " as endpoint " + service.getEndpointReference());
                             wsdiscovery.publish(service);
-                        } catch (WsDiscoveryServiceDirectoryException ex) {
+                        } catch (WsDiscoveryException ex) {
                             log_fatal(ex.toString());
                             JOptionPane.showMessageDialog(null, ex.getMessage());
                         }
@@ -752,7 +764,11 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
                             if (i > -1) {
                                 String uuid = (String) tableLocalServices.getModel().getValueAt(i, 0);
                                 log_info("Unpublishing " + uuid);
-                                wsdiscovery.unpublish(uuid);
+                                try {
+                                    wsdiscovery.unpublish(uuid);
+                                } catch (WsDiscoveryException ex) {
+                                    log_fatal(ex.getMessage());
+                                }
                             }
                         }});
     }//GEN-LAST:event_buttonRemoveServiceActionPerformed
@@ -780,7 +796,11 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
 
                                 log_info("Sending custom probe (\"" + portType + "\" in scope " + scope + ") using matcher " + matcher.name());
 
-                                wsdiscovery.probe(portType, scope, matcher);
+                                try {
+                                    wsdiscovery.probe(portType, scope, matcher);
+                                } catch (WsDiscoveryException ex) {
+                                    log_fatal(ex.getMessage());
+                                }
                             }
                         }
                     } finally {
