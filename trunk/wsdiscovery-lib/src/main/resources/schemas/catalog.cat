@@ -1,0 +1,4 @@
+REWRITE_SYSTEM "http://schemas.xmlsoap.org/ws/2004/08/addressing/addressing.xsd" "classpath:wsaddressing2004.xsd"
+REWRITE_SYSTEM "http://schemas.xmlsoap.org/ws/2005/04/discovery/ws-discovery.xsd" "classpath:wsdiscovery2005.xsd"
+REWRITE_SYSTEM "http://www.w3.org/2005/08/addressing" "classpath:wsaddressing10.xsd"
+REWRITE_SYSTEM "http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01" "classpath:wsdiscovery11.xsd"

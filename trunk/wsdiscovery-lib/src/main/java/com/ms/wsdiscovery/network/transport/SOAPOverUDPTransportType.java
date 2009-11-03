@@ -1,5 +1,5 @@
 /*
-TransportType.java
+SOAPOverUDPTransportType.java
 
 Copyright (C) 2008-2009 Magnus Skjegstad
 
@@ -20,9 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package com.ms.wsdiscovery.network.transport;
 
 import com.skjegstad.soapoverudp.SOAPOverUDP11;
-import com.skjegstad.soapoverudp.SOAPOverUDP11withZlib;
 import com.skjegstad.soapoverudp.SOAPOverUDPdraft2004;
-import com.skjegstad.soapoverudp.interfaces.ISOAPTransport;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
+import com.skjegstad.soapoverudp.transport.SOAPOverUDPTransport;
+import com.skjegstad.soapoverudp.transport.SOAPOverUDPTransportZlib;
 
 /**
  * Contains supported transport protocols. Transport types must implement 
@@ -30,22 +31,18 @@ import com.skjegstad.soapoverudp.interfaces.ISOAPTransport;
  * 
  * @author Magnus Skjegstad
  */
-public enum TransportType {
+public enum SOAPOverUDPTransportType {
     /**
-     * Plain SOAP-over-UDP 1.1. See {@link SOAPOverUDP11}.
+     * Plain SOAP-over-UDP. See {@link SOAPOverUDPTransport}.
      */
-    SOAP_OVER_UDP_11(SOAPOverUDP11.class),
+    UNCOMPRESSED(SOAPOverUDPTransport.class),
     /**
-     * Compressed version of SOAP-over-UDP 1.1. See {@link SOAPOverUDP11withZlib}.
+     * Compressed version of SOAP-over-UDP. See {@link SOAPOverUDPTransportZlib}.
      */
-    SOAP_OVER_UDP_11_ZLIB(SOAPOverUDP11withZlib.class),
-    /**
-     * Plain SOAP-over-UDP as specified in the 2004 draft. See {@link SOAPOverUDPdraft2004}.
-     */
-    SOAP_OVER_UDP_DRAFT2004(SOAPOverUDPdraft2004.class);
+    COMPRESSED_ZLIB(SOAPOverUDPTransportZlib.class);
     
         
-    private final Class networkLayer;
+    private final Class transportLayer;
     
     /**
      * Get a new instance of this transport type.
@@ -54,11 +51,11 @@ public enum TransportType {
      * @throws java.lang.InstantiationException
      * @throws java.lang.IllegalAccessException
      */
-    public ISOAPTransport newInstance() throws InstantiationException, IllegalAccessException {
-        return (ISOAPTransport)networkLayer.newInstance();
+    public ISOAPOverUDPTransport newInstance() throws InstantiationException, IllegalAccessException {
+        return (ISOAPOverUDPTransport)transportLayer.newInstance();
     }
         
-    TransportType(Class layer) {
-        networkLayer = layer;
+    SOAPOverUDPTransportType(Class layer) {
+        transportLayer = layer;
     }
 }

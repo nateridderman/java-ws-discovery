@@ -29,14 +29,14 @@ import static org.junit.Assert.*;
  */
 public class WsdXMLBuilderTest {
 
-    static WsdXMLBuilder instance;
+    static WsDiscoveryXMLBuilder instance;
 
     public WsdXMLBuilderTest() {
     }
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        instance = new WsdXMLBuilder();
+        instance = new WsDiscoveryXMLBuilder();
         assertNotNull(instance);
     }
 

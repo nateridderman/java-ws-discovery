@@ -17,58 +17,58 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.ms.wsdiscovery.xml.soap;
+package com.ms.wsdiscovery.datatypes;
 
-import com.ms.wsdiscovery.xml.jaxb_generated.AttributedURI;
+import com.ms.wsdiscovery.WsDiscoveryConstants;
+import java.net.URI;
 
 /**
  * Valid JAXB ActionTypes used for WS-Addressing.
  * 
  * @author Magnus Skjegstad
  */
-public enum WsaActionType {
+public enum WsDiscoveryActionTypes {
     /**
      * Hello-message
      */
-    HELLO          ("http://schemas.xmlsoap.org/ws/2005/04/discovery/Hello"),
+    HELLO          (WsDiscoveryConstants.defaultNsDiscovery.getWsDiscoveryNamespace() + "/Hello"),
     /**
      * Bye-message
      */
-    BYE            ("http://schemas.xmlsoap.org/ws/2005/04/discovery/Bye"),
+    BYE            (WsDiscoveryConstants.defaultNsDiscovery.getWsDiscoveryNamespace() + "/Bye"),
     /**
      * Probe-message
      */
-    PROBE          ("http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe"),
+    PROBE          (WsDiscoveryConstants.defaultNsDiscovery.getWsDiscoveryNamespace() + "/Probe"),
     /**
      * ProbeMatches-message
      */
-    PROBEMATCHES   ("http://schemas.xmlsoap.org/ws/2005/04/discovery/ProbeMatches"),
+    PROBEMATCHES   (WsDiscoveryConstants.defaultNsDiscovery.getWsDiscoveryNamespace() + "/ProbeMatches"),
     /**
      * Resolve-message
      */
-    RESOLVE        ("http://schemas.xmlsoap.org/ws/2005/04/discovery/Resolve"),
+    RESOLVE        (WsDiscoveryConstants.defaultNsDiscovery.getWsDiscoveryNamespace() + "/Resolve"),
     /**
      * ResolveMatches-message
      */
-    RESOLVEMATCHES("http://schemas.xmlsoap.org/ws/2005/04/discovery/ResolveMatches");
+    RESOLVEMATCHES(WsDiscoveryConstants.defaultNsDiscovery.getWsDiscoveryNamespace() + "/ResolveMatches");
        
-    private final AttributedURI action;
+    private final URI action;
     
     /**
      * Return the ActionType as an AttributedURI.
      * @return ActionType represented as AttributedURI.
      */
-    public AttributedURI toAttributedURI() {
+    public URI toURI() {
         return action;
     }
        
     @Override
     public String toString() {
-        return action.getValue();
+        return action.toString();
     }
     
-    WsaActionType(String action) {
-        this.action = new AttributedURI();
-        this.action.setValue(action);
+    WsDiscoveryActionTypes(String action) {
+        this.action = URI.create(action);
     }
 }

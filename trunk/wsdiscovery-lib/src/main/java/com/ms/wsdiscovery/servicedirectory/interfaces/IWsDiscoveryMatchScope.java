@@ -16,11 +16,11 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ms.wsdiscovery.servicedirectory.matcher;
+package com.ms.wsdiscovery.servicedirectory.interfaces;
 
 import com.ms.wsdiscovery.WsDiscoveryConstants;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 
 /**
  * Interface implemented by matching algorithms. New algorithms
@@ -31,7 +31,7 @@ import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
  * 
  * @author Magnus Skjegstad
  */
-public interface IMatchScope {
+public interface IWsDiscoveryMatchScope {
     /**
      * Match a target service with a probe.
      * 
@@ -39,5 +39,5 @@ public interface IMatchScope {
      * @param probeScopes Scopes in probe.
      * @return True if there's a match.
      */
-    public boolean matchScope(WsDiscoveryService target, ScopesType probeScopes);
+    public boolean matchScope(WsDiscoveryService target, WsDiscoveryScopesType probeScopes);
 }

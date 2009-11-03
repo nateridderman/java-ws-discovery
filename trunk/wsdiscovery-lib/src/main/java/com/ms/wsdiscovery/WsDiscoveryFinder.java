@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery;
 
+import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
+import com.ms.wsdiscovery.interfaces.IWsDiscoveryServer;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -30,7 +32,6 @@ import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
-import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 
 /**
@@ -46,7 +47,7 @@ public class WsDiscoveryFinder {
     /**
      * The WS-Discovery thread used to discover services.
      */
-    protected WsDiscoveryServer wsd = null;
+    protected IWsDiscoveryServer wsd = null;
     /**
      * When true, the WS-Discovery thread will be stopped before returning a 
      * search result to the caller. If the caller has specified an existing 
@@ -90,7 +91,7 @@ public class WsDiscoveryFinder {
      */
     protected void startServer() throws WsDiscoveryNetworkException {
         if (wsd == null) {
-            wsd = WsDiscoveryBuilder.createServer();
+            wsd = WsDiscoveryFactory.createServer();
             wsd.start();
         }
     }
@@ -105,7 +106,7 @@ public class WsDiscoveryFinder {
         if (wsd != null) {
             try {
                 wsd.done(); 
-                while (wsd.isAlive()) 
+                while (wsd.isRunning())
                     Thread.sleep(100); // Wait for server to stop
             } finally {
                 wsd = null;            
@@ -259,7 +260,7 @@ public class WsDiscoveryFinder {
     /**
      * Find one or more services based on a JAX-WS service description. The 
      * JAX-WS service is converted to {@link WsDiscoveryService} by calling 
-     * {@link WsDiscoveryBuilder#createService(javax.xml.ws.Service)}
+     * {@link WsDiscoveryFactory#createService(javax.xml.ws.Service)}
      * <p>
      * Uses default scope match algorithm.
      * @param service A JAX-WS service to search for. 
@@ -267,17 +268,17 @@ public class WsDiscoveryFinder {
      * @return Found services.
      * @throws InterruptedException Thrown if interrupted while waiting
      * @throws WsDiscoveryException 
-     * @see WsDiscoveryBuilder#createService(javax.xml.ws.Service)
+     * @see WsDiscoveryFactory#createService(javax.xml.ws.Service)
      */
     public IWsDiscoveryServiceCollection find(Service service, int timeoutInMs)
             throws InterruptedException, WsDiscoveryException {
-        return find(WsDiscoveryBuilder.createService(service), timeoutInMs);
+        return find(WsDiscoveryFactory.createService(service), timeoutInMs);
     }
     
     /**
      * Find one or more services based on a JAX-WS service description. The 
      * JAX-WS service is converted to {@link WsDiscoveryService} by calling 
-     * {@link WsDiscoveryBuilder#createService(javax.xml.ws.Service)}
+     * {@link WsDiscoveryFactory#createService(javax.xml.ws.Service)}
      * <p>
      * Uses default scope match algorithm.
      * @param service A JAX-WS service to search for. 
@@ -285,7 +286,7 @@ public class WsDiscoveryFinder {
      * @throws InterruptedException Thrown if interrupted while waiting
      * @throws IOException 
      * @throws Exception 
-     * @see WsDiscoveryBuilder#createService(javax.xml.ws.Service)
+     * @see WsDiscoveryFactory#createService(javax.xml.ws.Service)
      */
     public IWsDiscoveryServiceCollection find(Service service)
             throws InterruptedException, IOException, Exception {
@@ -327,7 +328,8 @@ public class WsDiscoveryFinder {
      * @throws java.lang.InterruptedException if interrupted while waiting.
      */
     public IWsDiscoveryServiceCollection findAll(int timeoutInMs)
-            throws InterruptedException, WsDiscoveryServiceDirectoryException {
+            throws InterruptedException, WsDiscoveryServiceDirectoryException,
+            WsDiscoveryXMLException, WsDiscoveryNetworkException {
         wsd.probe();
         Thread.sleep(timeoutInMs);
         return wsd.getServiceDirectory().matchAll();

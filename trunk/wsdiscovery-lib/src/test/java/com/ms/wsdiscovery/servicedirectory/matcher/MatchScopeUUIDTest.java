@@ -5,9 +5,9 @@
 
 package com.ms.wsdiscovery.servicedirectory.matcher;
 
-import com.ms.wsdiscovery.WsDiscoveryBuilder;
+import com.ms.wsdiscovery.WsDiscoveryFactory;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 import java.util.UUID;
 import javax.xml.namespace.QName;
 import org.junit.After;
@@ -63,39 +63,39 @@ public class MatchScopeUUIDTest {
         servicePortType = new QName("http://localhost/portType", "localPart", "ns");        
         serviceXAddr = "http://10.0.0.1:1234/localPart";
 
-        ScopesType probeScopes = null;
+        WsDiscoveryScopesType probeScopes = null;
 
         boolean expResult;
         boolean result;
         
         ///////////
         serviceScope = randomUUID; // without prefix first
-        service = WsDiscoveryBuilder.createService(servicePortType, serviceScope, serviceXAddr);
+        service = WsDiscoveryFactory.createService(servicePortType, serviceScope, serviceXAddr);
         ///////////
 
         // First, just use uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add(randomUUID);
         expResult = true;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // Try uppercase of uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add(randomUUID.toUpperCase());
         expResult = true;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // Prefix with urn:uuid:
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add("urn:uuid:"+randomUUID);
         expResult = true;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // prefix with uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add("uuid:"+randomUUID);
         expResult = true;
         result = instance.matchScope(service, probeScopes);
@@ -104,32 +104,32 @@ public class MatchScopeUUIDTest {
 
         ///////////
         serviceScope = "uuid:" + randomUUID; // add prefix uuid
-        service = WsDiscoveryBuilder.createService(servicePortType, serviceScope, serviceXAddr);
+        service = WsDiscoveryFactory.createService(servicePortType, serviceScope, serviceXAddr);
         ///////////
 
         // First, just use uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add(randomUUID);
         expResult = true;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // Try uppercase of uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add(randomUUID.toUpperCase());
         expResult = true;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // Prefix with urn:uuid:
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add("urn:uuid:"+randomUUID);
         expResult = true;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // prefix with uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add("uuid:"+randomUUID);
         expResult = true;
         result = instance.matchScope(service, probeScopes);
@@ -137,32 +137,32 @@ public class MatchScopeUUIDTest {
 
         ///////////
         serviceScope = "urn:uuid:" + randomUUID; // add prefix urn:uuid
-        service = WsDiscoveryBuilder.createService(servicePortType, serviceScope, serviceXAddr);
+        service = WsDiscoveryFactory.createService(servicePortType, serviceScope, serviceXAddr);
         ///////////
 
         // First, just use uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add(randomUUID);
         expResult = true;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // Try uppercase of uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add(randomUUID.toUpperCase());
         expResult = true;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // Prefix with urn:uuid:
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add("urn:uuid:"+randomUUID);
         expResult = true;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // prefix with uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add("uuid:"+randomUUID);
         expResult = true;
         result = instance.matchScope(service, probeScopes);
@@ -170,34 +170,34 @@ public class MatchScopeUUIDTest {
 
         ///////////
         serviceScope = "urn:uuid:" + otherUUID; // try with something else 
-        service = WsDiscoveryBuilder.createService(servicePortType, serviceScope, serviceXAddr);
+        service = WsDiscoveryFactory.createService(servicePortType, serviceScope, serviceXAddr);
         ///////////
 
         // All these should be false.
 
         // First, just use uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add(randomUUID);
         expResult = false;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // Try uppercase of uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add(randomUUID.toUpperCase());
         expResult = false;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // Prefix with urn:uuid:
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add("urn:uuid:"+randomUUID);
         expResult = false;
         result = instance.matchScope(service, probeScopes);
         assertEquals(expResult, result);
 
         // prefix with uuid
-        probeScopes = new ScopesType();
+        probeScopes = new WsDiscoveryScopesType();
         probeScopes.getValue().add("uuid:"+randomUUID);
         expResult = false;
         result = instance.matchScope(service, probeScopes);

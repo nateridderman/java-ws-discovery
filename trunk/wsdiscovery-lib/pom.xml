@@ -76,8 +76,15 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <generatePackage>com.ms.wsdiscovery.xml.jaxb_generated</generatePackage>
-                    <catalog>src/main/resources/catalog.cat</catalog>
+                    <!--<generatePackage>com.ms.wsdiscovery.xml.jaxb_generated</generatePackage>-->
+                    <catalog>${basedir}/src/main/resources/schemas/catalog.cat</catalog>
+                    <schemaDirectory>${basedir}/src/main/resources/schemas</schemaDirectory>
+                    <schemaIncludes>
+                        <include>wsdiscovery2005.xsd</include>
+                        <include>wsdiscovery11.xsd</include>
+                    </schemaIncludes>
+                    <strict>strict</strict>
+                    <verbose>true</verbose>
                     <!--<catalogResolver>org.jvnet.jaxb2.maven2.resolver.tools.ClasspathCatalogResolver</catalogResolver>-->
                 </configuration>
             </plugin>

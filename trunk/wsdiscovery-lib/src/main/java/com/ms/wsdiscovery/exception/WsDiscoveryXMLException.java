@@ -16,13 +16,15 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ms.wsdiscovery.xml.exception;
+package com.ms.wsdiscovery.exception;
+
+import com.ms.wsdiscovery.exception.WsDiscoveryException;
 
 /**
  *
  * @author Magnus Skjegstad
  */
-public class WsDiscoveryXMLException extends Exception {
+public class WsDiscoveryXMLException extends WsDiscoveryException {
 
     /**
      * Creates a new instance of <code>WsDiscoveryXMLException</code> without detail message.
@@ -38,4 +40,9 @@ public class WsDiscoveryXMLException extends Exception {
     public WsDiscoveryXMLException(String msg) {
         super(msg);
     }
+
+    public WsDiscoveryXMLException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+
 }

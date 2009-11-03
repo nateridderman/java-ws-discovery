@@ -19,13 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.servicedirectory.interfaces;
 
-import com.ms.wsdiscovery.servicedirectory.*;
+import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
+import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
-import com.ms.wsdiscovery.xml.jaxb_generated.ByeType;
-import com.ms.wsdiscovery.xml.jaxb_generated.EndpointReferenceType;
-import com.ms.wsdiscovery.xml.jaxb_generated.ProbeMatchesType;
-import com.ms.wsdiscovery.xml.jaxb_generated.ScopesType;
 import java.net.URI;
 import java.util.List;
 import javax.xml.namespace.QName;
@@ -41,14 +39,21 @@ public interface IWsDiscoveryServiceDirectory {
      * @param address Endpoint address.
      * @return Service description or <code>null</code> if not found.
      */
-    WsDiscoveryService findService(String address);    
+    WsDiscoveryService findService(String address);
+
+    /**
+     * Locate a service in the directory based on the endpoint address.
+     * @param address Endpoint address.
+     * @return Service description or <code>null</code> if not found.
+     */
+    WsDiscoveryService findService(URI address);
     
     /**
      * Locate a service in the directory based on the endpoint address.
      * @param endpoint Endpoint reference.
      * @return Service description or <code>null</code> if not found.
      */
-    WsDiscoveryService findService(EndpointReferenceType endpoint);
+    WsDiscoveryService findService(SOAPOverUDPEndpointReferenceType endpoint);
     
     /**
      * Get the name of this service directory.
@@ -65,7 +70,7 @@ public interface IWsDiscoveryServiceDirectory {
      * @return Service directory with matching services. May contain 0 items, but is never <code>null</code>.
      * @throws WsDiscoveryServiceDirectoryException on failure when creating new service directory.
      */
-    IWsDiscoveryServiceCollection matchBy(List<QName> probeTypes, ScopesType probeScopes) throws WsDiscoveryServiceDirectoryException;
+    IWsDiscoveryServiceCollection matchBy(List<QName> probeTypes, WsDiscoveryScopesType probeScopes) throws WsDiscoveryServiceDirectoryException;
 
     /**
      * Creates a new service collection containing the services in the directory.
@@ -94,21 +99,21 @@ public interface IWsDiscoveryServiceDirectory {
 
     /**
      * Remove service from service directory based on endpoint address.
+     * @param address Endpoint address.
+     */
+    void remove(URI address);
+
+    /**
+     * Remove service from service directory based on endpoint.
      * @param endpoint Endpoint with address.
      */
-    void remove(EndpointReferenceType endpoint);
+    void remove(SOAPOverUDPEndpointReferenceType endpoint);
 
     /**
      * Remove service from service directory based on endpoint address.
      * @param service Service with endpoint address.
      */
     void remove(WsDiscoveryService service);
-
-    /**
-     * Remove service based on endpoint address received in a Bye-message.
-     * @param bye Bye-message with endpoint address to remove.
-     */
-    void remove(ByeType bye);
 
     /**
      * Number of items in the service directory.
@@ -122,22 +127,6 @@ public interface IWsDiscoveryServiceDirectory {
      * @throws WsDiscoveryServiceDirectoryException
      */
     void store(WsDiscoveryService service) throws WsDiscoveryServiceDirectoryException;
-
-    /**
-     * Store the entries in a {@link ProbeMatchesType} in the service directory.
-     * @param probe Probe matches.
-     * @throws WsDiscoveryServiceDirectoryException if store failes.
-     */
-    void store(ProbeMatchesType probe) throws WsDiscoveryServiceDirectoryException;
-
-    /**
-     * Store a JAXB object in the service directory. The JAXB object must be
-     * recognized by {@link WsDiscoveryService#WsDiscoveryService(java.lang.Object)}.
-     *
-     * @param jaxbobject JAXB object.
-     * @throws WsDiscoveryServiceDirectoryException on failure.
-     */
-    void store(Object jaxbobject) throws WsDiscoveryServiceDirectoryException;
 
     /**
      * Add all entries from another implementation of IWsDiscoveryServiceCollction.

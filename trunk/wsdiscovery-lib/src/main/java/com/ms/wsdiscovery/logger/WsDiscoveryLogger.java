@@ -29,7 +29,7 @@ import java.util.logging.Handler;
  * Contains helper methods for logging debug messages.
  * @author Magnus Skjegstad
  */
-public class WsdLogger {
+public class WsDiscoveryLogger {
     private Logger logger;
     private Handler handler;
     private static ReentrantLock loggerLock = new ReentrantLock();
@@ -40,7 +40,7 @@ public class WsdLogger {
      * @param handler Descendant of java.util.logging.Handler that can handle the log messages.
      * @param level Detail level. See {@link Level}.
      */    
-    public WsdLogger(String name, Level level, Handler handler) {
+    public WsDiscoveryLogger(String name, Level level, Handler handler) {
         loggerLock.lock();
 
         this.handler = handler;        
@@ -66,7 +66,7 @@ public class WsdLogger {
      * @param name Name of instance. Will be prefixed to all log messages.
      * @param level Detail level. See {@link Level}.
      */
-    public WsdLogger(String name, Level level) {
+    public WsDiscoveryLogger(String name, Level level) {
         this(name, level, WsDiscoveryConstants.loggerHandler);
     }
         
@@ -75,7 +75,7 @@ public class WsdLogger {
      * {@link WsDiscoveryConstants#loggerLevel}.
      * @param name Name of instance. Will be prefixed to all log messages. 
      */
-    public WsdLogger (String name) {
+    public WsDiscoveryLogger (String name) {
         this(name, WsDiscoveryConstants.loggerLevel);
     }
     
@@ -125,5 +125,9 @@ public class WsdLogger {
      */
     public synchronized void severe(String message) {
         logger.severe(message);
+    }
+
+    public Logger getLogger() {
+        return logger;
     }
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jaxb:bindings
+        version="2.1"
+        xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/jaxb
+        http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd">
+
+    <jaxb:bindings schemaLocation="wsdiscovery2005.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+
+    <jaxb:bindings schemaLocation="wsdiscovery11.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="com.ms.wsdiscovery.jaxb.standard11.wsdiscovery"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+
+    <jaxb:bindings schemaLocation="http://schemas.xmlsoap.org/ws/2004/08/addressing" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="com.ms.wsdiscovery.jaxb.draft2005.wsaddressing"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    
+    <jaxb:bindings schemaLocation="http://www.w3.org/2006/03/addressing/ws-addr.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="com.ms.wsdiscovery.jaxb.standard11.wsaddressing"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+
+</jaxb:bindings>

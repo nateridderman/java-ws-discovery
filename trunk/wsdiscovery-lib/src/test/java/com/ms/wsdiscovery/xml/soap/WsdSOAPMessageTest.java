@@ -5,8 +5,10 @@
 
 package com.ms.wsdiscovery.xml.soap;
 
+import com.ms.wsdiscovery.draft2005.WsDiscoveryD2005SOAPMessage;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryActionTypes;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
-import com.ms.wsdiscovery.xml.exception.WsDiscoveryXMLException;
+import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
 import com.ms.wsdiscovery.xml.jaxb_generated.AttributedURI;
 import com.ms.wsdiscovery.xml.jaxb_generated.EndpointReferenceType;
 import com.ms.wsdiscovery.xml.jaxb_generated.ProbeType;
@@ -31,7 +33,7 @@ import static org.junit.Assert.*;
 public class WsdSOAPMessageTest {
     
     static String wsdSuppressionString;
-    static WsdSOAPMessageBuilder builder;
+    static WsDiscoverySOAPMessageBuilder builder;
     static String wsdString;
 
     public WsdSOAPMessageTest() {
@@ -82,16 +84,16 @@ public class WsdSOAPMessageTest {
     @Test
     public void testParseSoap() throws Exception {
         System.out.println("parseSoap");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.HELLO, null); // initial values will be overwritten by parseSoap()
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.HELLO, null); // initial values will be overwritten by parseSoap()
 
         // Test probe
         SOAPMessage soap = builder.createSOAPMessage(wsdString);
         instance.parseSoap(soap);
-        assertEquals(instance.getWsaAction().getValue(), WsaActionType.PROBE.toString());
+        assertEquals(instance.getWsaAction().getValue(), WsDiscoveryActionTypes.PROBE.toString());
         assertEquals(instance.getWsaTo().getValue(), "urn:schemas-xmlsoap-org:ws:2005:04:discovery");
         assertEquals(instance.getWsaMessageId().getValue(), "urn:uuid:62e53589-fd2f-4882-b8ad-6b7250a085eb");
-        assertEquals(instance.getWsdSequenceId(), "urn:uuid:ad721ed8-7c22-40fb-84f3-7145a34fd715");
-        assertEquals(instance.getWsdMessageNumber(), 1);
+        assertEquals(instance.getSequenceId(), "urn:uuid:ad721ed8-7c22-40fb-84f3-7145a34fd715");
+        assertEquals(instance.getMessageNumber(), 1);
         assertTrue(instance.getJAXBBody() instanceof ProbeType);
         ProbeType pt = (ProbeType) instance.getJAXBBody(); // We know it is a probe
         assertEquals(pt.getTypes().get(0).getLocalPart(), "CalculatorService");
@@ -100,7 +102,7 @@ public class WsdSOAPMessageTest {
         // Test hello with suppression
         soap = builder.createSOAPMessage(wsdSuppressionString);
         instance.parseSoap(soap);
-        assertEquals(instance.getWsaAction().getValue(), WsaActionType.HELLO.toString());
+        assertEquals(instance.getWsaAction().getValue(), WsDiscoveryActionTypes.HELLO.toString());
         assertEquals(instance.getWsaRelatesTo().getValue(), "urn:uuid:03d2fa70-560c-49fe-8606-c5a14250ed62");
         assertNotNull(instance.getWsaRelatesTo().getRelationshipType());
         assertEquals(instance.getWsaRelatesTo().getRelationshipType().getLocalPart(), "Suppression");
@@ -116,7 +118,7 @@ public class WsdSOAPMessageTest {
         String prefix = "asdf";
         URI uri = new URI("http://www.example.com/ns/a/b/c");
 
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.HELLO, null);
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.HELLO, null);
 
         instance.addNamespace(prefix, uri);
         
@@ -133,7 +135,7 @@ public class WsdSOAPMessageTest {
     public void testGetNamespaces() throws URISyntaxException, WsDiscoveryXMLException {
         System.out.println("getNamespaces");
 
-        WsdSOAPMessage instance = new WsdSOAPMessage(builder.createSOAPMessage(wsdString));
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(builder.createSOAPMessage(wsdString));
 
         assertTrue(instance.getNamespaces().containsKey("env"));
         assertTrue(instance.getNamespaces().containsValue(new URI("http://www.w3.org/2003/05/soap-envelope")));
@@ -152,7 +154,7 @@ public class WsdSOAPMessageTest {
 
         ByteArrayOutputStream res = new ByteArrayOutputStream();
 
-        WsdSOAPMessage instance = new WsdSOAPMessage(builder.createSOAPMessage(wsdString));
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(builder.createSOAPMessage(wsdString));
         SOAPMessage result = instance.toSoap();
         result.writeTo(res);
         
@@ -165,7 +167,7 @@ public class WsdSOAPMessageTest {
     @Test
     public void testGetWsaRelatesTo() {
         System.out.println("getWsaRelatesTo");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.HELLO, null);
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.HELLO, null);
         QName name = new QName("a", "b", "c");
 
         Relationship expResult = new Relationship();
@@ -186,7 +188,7 @@ public class WsdSOAPMessageTest {
     @Test
     public void testSetWsaRelatesTo() {
         System.out.println("setWsaRelatesTo");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.BYE, null);
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.BYE, null);
         QName name = new QName("a", "b", "c");
 
         Relationship expResult = new Relationship();
@@ -206,7 +208,7 @@ public class WsdSOAPMessageTest {
     @Test
     public void testGetWsaReplyTo() {
         System.out.println("getWsaReplyTo");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.BYE, null);
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.BYE, null);
         
         EndpointReferenceType expResult = new EndpointReferenceType();
 
@@ -250,7 +252,7 @@ public class WsdSOAPMessageTest {
     @Test
     public void testSetWsaReplyTo() {
         System.out.println("setWsaReplyTo");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.BYE, null);
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.BYE, null);
 
         EndpointReferenceType expResult = new EndpointReferenceType();
 
@@ -265,7 +267,7 @@ public class WsdSOAPMessageTest {
     @Test
     public void testGetWsaTo() {
         System.out.println("getWsaTo");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.PROBEMATCHES, null);
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.PROBEMATCHES, null);
         AttributedURI expResult = new AttributedURI();
         instance.setWsaTo(expResult);
         AttributedURI result = instance.getWsaTo();
@@ -279,7 +281,7 @@ public class WsdSOAPMessageTest {
     @Test
     public void testSetWsaTo() {
         System.out.println("setWsaTo");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.PROBEMATCHES, null);
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.PROBEMATCHES, null);
         AttributedURI expResult = new AttributedURI();
         instance.setWsaTo(expResult);
         AttributedURI result = instance.getWsaTo();
@@ -292,8 +294,8 @@ public class WsdSOAPMessageTest {
     @Test
     public void testGetWsaAction() {
         System.out.println("getWsaAction");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.RESOLVE, null);
-        AttributedURI expResult = WsaActionType.RESOLVE.toAttributedURI();
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.RESOLVE, null);
+        AttributedURI expResult = WsDiscoveryActionTypes.RESOLVE.toAttributedURI();
         AttributedURI result = instance.getWsaAction();
         assertEquals(expResult, result);
     }
@@ -304,44 +306,44 @@ public class WsdSOAPMessageTest {
     @Test
     public void testGetWsaMessageId() {
         System.out.println("getWsaMessageId");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.RESOLVEMATCHES, null);
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.RESOLVEMATCHES, null);
         AttributedURI expResult = instance.getWsaMessageId();
         assertEquals(expResult.getValue(), instance.wsaMessageId.getValue());
     }
 
     /**
-     * Test of getWsdInstanceId method, of class WsdSOAPMessage.
+     * Test of getInstanceId method, of class WsdSOAPMessage.
      */
     @Test
     public void testGetWsdInstanceId() {
         System.out.println("getWsdInstanceId");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.RESOLVEMATCHES, null);
-        long expResult = instance.wsdInstanceId;
-        long result = instance.getWsdInstanceId();
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.RESOLVEMATCHES, null);
+        long expResult = instance.instanceId;
+        long result = instance.getInstanceId();
         assertEquals(expResult, result);
         assertEquals(WsDiscoveryConstants.instanceId, result);
     }
 
     /**
-     * Test of getWsdMessageNumber method, of class WsdSOAPMessage.
+     * Test of getMessageNumber method, of class WsdSOAPMessage.
      */
     @Test
     public void testGetWsdMessageNumber() {
         System.out.println("getWsdMessageNumber");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.PROBEMATCHES, null);
-        long result = instance.getWsdMessageNumber();
-        assertEquals(result, instance.wsdMessageNumber);
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.PROBEMATCHES, null);
+        long result = instance.getMessageNumber();
+        assertEquals(result, instance.messageNumber);
     }
 
     /**
-     * Test of getWsdSequenceId method, of class WsdSOAPMessage.
+     * Test of getSequenceId method, of class WsdSOAPMessage.
      */
     @Test
     public void testGetWsdSequenceId() {
         System.out.println("getWsdSequenceId");
-        WsdSOAPMessage instance = new WsdSOAPMessage(WsaActionType.PROBE, null);
-        String expResult = instance.getWsdSequenceId();
-        String result = instance.getWsdSequenceId();
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(WsDiscoveryActionTypes.PROBE, null);
+        String expResult = instance.getSequenceId();
+        String result = instance.getSequenceId();
         assertEquals(expResult, result);
         assertEquals(result, "urn:uuid:"+WsDiscoveryConstants.sequenceId);
     }
@@ -352,7 +354,7 @@ public class WsdSOAPMessageTest {
     @Test
     public void testGetJAXBBody() throws WsDiscoveryXMLException {
         System.out.println("getJAXBBody");
-        WsdSOAPMessage instance = new WsdSOAPMessage(builder.createSOAPMessage(wsdString));
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(builder.createSOAPMessage(wsdString));
         Object result = instance.getJAXBBody();
         assertTrue(result instanceof ProbeType);
     }
@@ -364,7 +366,7 @@ public class WsdSOAPMessageTest {
     public void testToString_Charset() throws WsDiscoveryXMLException {
         System.out.println("toString");
         Charset encoding = WsDiscoveryConstants.defaultEncoding;
-        WsdSOAPMessage instance = new WsdSOAPMessage(builder.createSOAPMessage(wsdString));
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(builder.createSOAPMessage(wsdString));
         String expResult = wsdString;
         String result = instance.toString(encoding);
         assertEquals(expResult, result);
@@ -376,7 +378,7 @@ public class WsdSOAPMessageTest {
     @Test
     public void testToString_0args() throws WsDiscoveryXMLException {
         System.out.println("toString");
-        WsdSOAPMessage instance = new WsdSOAPMessage(builder.createSOAPMessage(wsdString));
+        WsDiscoveryD2005SOAPMessage instance = new WsDiscoveryD2005SOAPMessage(builder.createSOAPMessage(wsdString));
         String expResult = wsdString;
         String result = instance.toString();
         assertEquals(expResult, result);
