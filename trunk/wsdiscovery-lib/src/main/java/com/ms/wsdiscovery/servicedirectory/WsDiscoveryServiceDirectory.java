@@ -54,12 +54,13 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
             new ReentrantReadWriteLock(); // multiple read, single write. Read not allowed while writing.
     private Lock r = rwl.readLock();
     private Lock w = rwl.writeLock();
+    private MatchBy defaultMatcher;
            
     /**
      * Create a new service directory.
      * @param name Name of service directory.
      */
-    public WsDiscoveryServiceDirectory(String name) {
+    public WsDiscoveryServiceDirectory(String name, MatchBy defaultMatcher) {
         services = new WsDiscoveryServiceCollection();
         this.name = name;
     }
@@ -67,8 +68,8 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     /**
      * Create a new, empty service directory.
      */
-    public WsDiscoveryServiceDirectory() {
-        this("");
+    public WsDiscoveryServiceDirectory(MatchBy defaultMatcher) {
+        this("", defaultMatcher);
     }
         
     /**
@@ -290,7 +291,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         r.lock();
         try {
             for (WsDiscoveryService s : services)
-                if (s.isMatchedBy(probeTypes, probeScopes))
+                if (s.isMatchedBy(probeTypes, probeScopes, defaultMatcher))
                     if (!d.add(s))
                         throw new WsDiscoveryServiceDirectoryException("Unable to create Service collection for storing matchBy-results.");
         } finally {
@@ -299,26 +300,27 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
 
         return d;        
     }
-    
+
     /**
      * Creates a new service directory containing the services in the directory
      * that matches the parameters. 
      * @param probeTypes List of probe types to match.
      * @param scopes List of scopes to match.
-     * @param matchBy Matching algorithm.
+     * @param matchBy Matching algorithm - must be specified.
      * @return Service directory with matching services. May contain 0 items, but is never <code>null</code>.
      * @throws WsDiscoveryServiceDirectoryException on failure when creating new service directory.
      */
     public IWsDiscoveryServiceCollection matchBy(List<QName> probeTypes,
             List<URI> scopes, MatchBy matchBy) throws WsDiscoveryServiceDirectoryException {
+
+        if (matchBy == null)
+            throw new WsDiscoveryServiceDirectoryException("MatchBy must not be null");
         
         WsDiscoveryScopesType st = null;
         if (scopes != null) {
-            st = new WsDiscoveryScopesType();
+            st = new WsDiscoveryScopesType(matchBy);
             for (URI u : scopes)
                 st.getValue().add(u.toString());
-            if (matchBy != null)
-                st.setMatchBy(matchBy.toString());
         }        
         return matchBy(probeTypes, st);
     }

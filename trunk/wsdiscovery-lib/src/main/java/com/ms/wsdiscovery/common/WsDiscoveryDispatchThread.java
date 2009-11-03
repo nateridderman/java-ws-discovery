@@ -24,7 +24,7 @@ import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
 import com.ms.wsdiscovery.interfaces.IWsDiscoveryDispatchThread;
 import com.ms.wsdiscovery.logger.WsDiscoveryLogger;
-import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
+import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
@@ -54,15 +54,15 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
     protected boolean isProxy = false; // TRUE when functioning as a proxy server
     protected WsDiscoveryService localProxyService = null; // Must be a service description registered in localServices when isProxy is set
     protected boolean isRunning = false;
-    protected IWsDiscoveryServiceDirectory localServices = new WsDiscoveryServiceDirectory(); // Service directory containing published local services
-    protected IWsDiscoveryServiceDirectory serviceDirectory = new WsDiscoveryServiceDirectory(); // Service directory containing discovered services (including local)
+    protected IWsDiscoveryServiceDirectory localServices;  // Service directory containing published local services
+    protected IWsDiscoveryServiceDirectory serviceDirectory;  // Service directory containing discovered services (including local)
     protected WsDiscoveryLogger logger = new WsDiscoveryLogger(this.getName());
     protected ISOAPOverUDP soapOverUDP;
 
     public WsDiscoveryDispatchThread(ISOAPOverUDP soapOverUDP) throws WsDiscoveryNetworkException {
         this.soapOverUDP = soapOverUDP;
         try {
-            this.soapOverUDP.setTransport(WsDiscoveryConstants.transportType.newInstance());
+            this.soapOverUDP.setTransport(WsDiscoveryConstants.defaultTransportType.newInstance());
         } catch (InstantiationException ex) {
             throw new WsDiscoveryNetworkException("Unable to instantiate transport layer", ex);
         } catch (IllegalAccessException ex) {
@@ -177,7 +177,7 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
 
             localProxyService = WsDiscoveryFactory.createService(WsDiscoveryConstants.proxyPortType,
                     WsDiscoveryConstants.proxyScope,
-                    "http://" +
+                    "soap.udp://" +
                     proxyIp.getHostAddress() +
                     ":" +
                     this.soapOverUDP.getTransport().getUnicastPort() +

@@ -16,35 +16,37 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.ms.wsdiscovery.draft2005;
+package com.ms.wsdiscovery.standard11;
 
 import com.ms.wsdiscovery.common.WsDiscoveryDispatchThread;
 import java.net.InetAddress;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryNamespaces;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ByeType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.HelloType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ProbeMatchType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ProbeMatchesType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ProbeType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ResolveMatchType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ResolveMatchesType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ResolveType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ScopesType;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ByeType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.HelloType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ProbeMatchType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ProbeMatchesType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ProbeType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ResolveMatchType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ResolveMatchesType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ResolveType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ScopesType;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
-import com.skjegstad.soapoverudp.SOAPOverUDPdraft2004;
+import com.skjegstad.soapoverudp.SOAPOverUDP11;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPMessage;
@@ -61,8 +63,11 @@ import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPMessage;
  * ProbeMatch-message is received the services are automatically added.
  * @author Magnus Skjegstad
  */
-public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
-    protected final MatchBy defaultMatcher = WsDiscoveryNamespaces.WS_DISCOVERY_2005_04.getDefaultMatcher();
+public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
+    protected URI multicastTo = URI.create("urn:docs-oasis-open-org:ws-dd:ns:discovery:2009:01");
+    protected String proxySuppressionRelationship = "Suppression";
+    protected final MatchBy defaultMatcher = WsDiscoveryNamespaces.WS_DISCOVERY_2009_01.getDefaultMatcher();
+    protected SOAPOverUDPEndpointReferenceType anonymousReplyTo = new SOAPOverUDPEndpointReferenceType("http://www.w3.org/2005/08/addressing/anonymous");
    
     /**
      * Creates a new {@link DispatchThread} instance.
@@ -79,13 +84,12 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException 
      * Thrown when unable to instantiate the transport layer.
      */
-    public WsDiscoveryD2005DispatchThread() throws WsDiscoveryNetworkException {
-        super(new SOAPOverUDPdraft2004());
+    public WsDiscoveryS11DispatchThread() throws WsDiscoveryNetworkException {
+        super(new SOAPOverUDP11());
         localServices = new WsDiscoveryServiceDirectory(defaultMatcher);
         serviceDirectory = new WsDiscoveryServiceDirectory(defaultMatcher);
         this.setDaemon(true);
     }
-
     
     /**
      * <p>
@@ -103,9 +107,9 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param matchBy Match algorithm clients should use when matching scopes. When set to <code>null</code> WsDiscoveryConstants.defaultMatchBy will be assumed. Some clients may not support all matching methods.
      */
     public void sendProbe(List<QName> types, List<URI> scopes, MatchBy matchBy) throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
-        WsDiscoveryD2005SOAPMessage<ProbeType> probe;
+        WsDiscoveryS11SOAPMessage<ProbeType> probe;
         try {
-            probe = WsDiscoveryD2005Utilities.createWsdSOAPMessageProbe();
+            probe = WsDiscoveryS11Utilities.createWsdSOAPMessageProbe();
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryXMLException("Unable to create probe message", ex);
         }
@@ -133,9 +137,11 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
             probe.getJAXBBody().getTypes().addAll(types);
         }
 
+        probe.setReplyTo(anonymousReplyTo);
         // Send packet multicast or to proxy
         if (useProxy) {
             logger.fine("Sending probe unicast to proxy at " + useProxyAddress + ":" + useProxyPort);
+            probe.setTo(remoteProxyService.getEndpointReference().getAddress());
             try {
                 soapOverUDP.send(probe, useProxyAddress, useProxyPort);
             } catch (SOAPOverUDPException ex) {
@@ -143,6 +149,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
             }
         } else {
             logger.fine("Multicasting probe (not using proxy).");
+            probe.setTo(multicastTo);
             try {
                 soapOverUDP.sendMulticast(probe);
             } catch (SOAPOverUDPException ex) {
@@ -164,7 +171,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param m SOAP message
      * @throws WsDiscoveryNetworkException if <code>m</code> is not an instance of HelloType.
      */
-    private void recvHello(WsDiscoveryD2005SOAPMessage m)
+    private void recvHello(WsDiscoveryS11SOAPMessage m)
             throws WsDiscoveryNetworkException {
         logger.finer("recvHello()");
 
@@ -179,10 +186,11 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
 
             // if RelatesTo is set and @Relationship="Suppression", use sender as proxy.
             if (m.getRelatesTo() != null) {
+                // TODO Verify relatesTo
                 logger.finer("relatesTo: " + m.getRelatesTo().toString());
                 if (m.getRelationshipType() != null) {
                     logger.finer("relatesTo.relationshipType: " + m.getRelationshipType());
-                    if (m.getRelationshipType().equals(WsDiscoveryConstants.defaultProxyRelatesToRelationship)) {
+                    if (m.getRelationshipType().equals(proxySuppressionRelationship)) {
                         logger.fine("Received proxy suppression.");
                         try {
                             // Find proxy address from hello body                            
@@ -194,7 +202,12 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
                                 useProxyPort = addr.getPort();
                             }
 
-                            remoteProxyService = WsDiscoveryD2005Utilities.createWsDiscoveryService(hello);
+                            remoteProxyService = WsDiscoveryS11Utilities.createWsDiscoveryService(hello);
+
+                            if (remoteProxyService.getEndpointReference() == null)
+                                throw new WsDiscoveryNetworkException("Received proxy without endpoint reference");
+                            if (remoteProxyService.getEndpointReference().getAddress() == null)
+                                throw new WsDiscoveryNetworkException("Received proxy without endpoint address");
 
                             useProxy = true;
                             logger.fine("Using proxy server at " + useProxyAddress.toString() + ", port " + useProxyPort);
@@ -209,7 +222,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
 
             // Store service information
             try {
-                WsDiscoveryD2005Utilities.storeJAXBObject(serviceDirectory, hello);
+                WsDiscoveryS11Utilities.storeJAXBObject(serviceDirectory, hello);
             } catch (WsDiscoveryServiceDirectoryException ex) {
                 throw new WsDiscoveryNetworkException("Unable to store service received in Hello-message.", ex);
             }
@@ -225,7 +238,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param originalMessage The original SOAPOverUDPNetworkMessage.
      * @throws WsDiscoveryNetworkException if m is not an instance of ProbeMatchesType.
      */
-    private void recvProbeMatches(WsDiscoveryD2005SOAPMessage m)
+    private void recvProbeMatches(WsDiscoveryS11SOAPMessage m)
             throws WsDiscoveryNetworkException {
         logger.finer("recvProbeMatches()");
         if (m.getJAXBBody() instanceof ProbeMatchesType) {
@@ -237,7 +250,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
             }
 
             try {
-                WsDiscoveryD2005Utilities.storeProbesMatch(serviceDirectory, pmt);
+                WsDiscoveryS11Utilities.storeProbesMatch(serviceDirectory, pmt);
             } catch (WsDiscoveryServiceDirectoryException ex) {
                 throw new WsDiscoveryNetworkException("Unable to store remote service.", ex);
             }
@@ -252,14 +265,14 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param originalMessage The original SOAPOverUDPNetworkMessage.
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException if m is not an instance of ResolveMatchesType.
      */
-    private void recvResolveMatches(WsDiscoveryD2005SOAPMessage m)
+    private void recvResolveMatches(WsDiscoveryS11SOAPMessage m)
             throws WsDiscoveryNetworkException {
         logger.finer("recvResolveMatches()");
         if (m.getJAXBBody() instanceof ResolveMatchesType) {
             ResolveMatchesType rmt = (ResolveMatchesType) m.getJAXBBody();
             logger.fine("ResolveMatches received for " + rmt.getResolveMatch().getEndpointReference() + " from " + m.getSrcAddress() + ":" + m.getSrcPort());
             try {
-                WsDiscoveryD2005Utilities.storeJAXBObject(serviceDirectory, rmt);
+                WsDiscoveryS11Utilities.storeJAXBObject(serviceDirectory, rmt);
             } catch (WsDiscoveryServiceDirectoryException ex) {
                 throw new WsDiscoveryNetworkException("Unable to store results from ResolveMatches-message.", ex);
             }
@@ -274,13 +287,13 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param m SOAP message.
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException if m is not an instance of ByeType.
      */
-    private void recvBye(WsDiscoveryD2005SOAPMessage m)
+    private void recvBye(WsDiscoveryS11SOAPMessage m)
             throws WsDiscoveryNetworkException {
         logger.finer("recvBye()");
         if (m.getJAXBBody() instanceof ByeType) {
             ByeType bt = (ByeType) m.getJAXBBody();
             SOAPOverUDPEndpointReferenceType btEndpoint =
-                    WsDiscoveryD2005Utilities.createSOAPOverUDPEndpointReferenceType(bt.getEndpointReference());
+                    WsDiscoveryS11Utilities.createSOAPOverUDPEndpointReferenceType(bt.getEndpointReference());
 
             if ((btEndpoint.getAddress() != null)) {
                 logger.fine("Bye received for " + btEndpoint.getAddress());
@@ -297,7 +310,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
                 }
             }
 
-            WsDiscoveryD2005Utilities.removeServiceBye(serviceDirectory, bt);
+            WsDiscoveryS11Utilities.removeServiceBye(serviceDirectory, bt);
 
         } else {
             throw new WsDiscoveryNetworkException("Message of unknown type passed to recvBye()");
@@ -311,7 +324,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param originalMessage Original message as received from the transport layer.
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException if m is not an instance of ResolveType.
      */
-    private void recvResolve(WsDiscoveryD2005SOAPMessage m)
+    private void recvResolve(WsDiscoveryS11SOAPMessage m)
             throws WsDiscoveryNetworkException, WsDiscoveryXMLException {
         logger.finer("recvResolve()");
         if (m.getJAXBBody() instanceof ResolveType) {
@@ -321,14 +334,13 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
             // See if we have the service
             // If we are running in proxy mode, search local services first, then remote
             SOAPOverUDPEndpointReferenceType resolveEndpoint =
-                    WsDiscoveryD2005Utilities.createSOAPOverUDPEndpointReferenceType(((ResolveType) m.getJAXBBody()).getEndpointReference());
+                    WsDiscoveryS11Utilities.createSOAPOverUDPEndpointReferenceType(((ResolveType) m.getJAXBBody()).getEndpointReference());
             WsDiscoveryService match = localServices.findService(resolveEndpoint);
             if (match != null) {
                 logger.fine("Service found locally. Sending resolve match.");
 
                 // Service found, send resolve match
-                sendResolveMatch(match, m,
-                        m.getSrcAddress(), m.getSrcPort());
+                sendResolveMatch(match, m);
             } else {
                 if (isProxy) { // We are running in proxy mode. Check full service directory                   
                     match = serviceDirectory.findService(resolveEndpoint);
@@ -337,8 +349,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
                     } else {
                         logger.fine("Service not found. Sending empty resolve match in proxy mode.");
                     }
-                    sendResolveMatch(match, m,
-                            m.getSrcAddress(), m.getSrcPort());
+                    sendResolveMatch(match, m);
                 } else // If in normal mode, just log failure.
                 {
                     logger.fine("Service not found locally. No reply sent.");
@@ -356,7 +367,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param originalMessage Original message as received from the transport layer.
      * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException if m is not an instance of ProbeType.
      */
-    private void recvProbe(WsDiscoveryD2005SOAPMessage m)
+    private void recvProbe(WsDiscoveryS11SOAPMessage m)
             throws WsDiscoveryNetworkException {
         logger.finer("recvProbe()");
 
@@ -368,7 +379,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
             IWsDiscoveryServiceCollection totalMatches;
             WsDiscoveryScopesType scopes = null;
             if (probe.getScopes() != null)
-                scopes = WsDiscoveryD2005Utilities.createWsDiscoveryScopesObject(probe.getScopes());
+                scopes = WsDiscoveryS11Utilities.createWsDiscoveryScopesObject(probe.getScopes());
 
             if (!isProxy) { // Not in proxy mode; match local services only                
                 try {
@@ -387,7 +398,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
             if ((totalMatches.size() > 0) || isProxy) { // Proxy MUST reply with match, even if empty
                 logger.fine("ProbeMatches sent with " + totalMatches.size() + " matches to " + m.getSrcAddress() + ":" + m.getSrcPort());
                 try {
-                    sendProbeMatch(totalMatches, m, m.getSrcAddress(), m.getSrcPort());
+                    sendProbeMatch(totalMatches, m);
                 } catch (WsDiscoveryException ex) {
                     throw new WsDiscoveryNetworkException("Unable to send ProbeMatch", ex);
                 }
@@ -416,19 +427,20 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
 
         logger.finer("sendResolve() Sent Resolve for service " + service.getEndpointReference().getAddress());
         // Send resolve package
-        WsDiscoveryD2005SOAPMessage<ResolveType> resolve;
+        WsDiscoveryS11SOAPMessage<ResolveType> resolve;
         try {
-            resolve = WsDiscoveryD2005Utilities.createWsdSOAPMessageResolve();
+            resolve = WsDiscoveryS11Utilities.createWsdSOAPMessageResolve();
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryXMLException("Unable to create resolve message", ex);
         }
 
         resolve.getJAXBBody().setEndpointReference(
-                WsDiscoveryD2005Utilities.createEndpointReferenceTypeObject(service.getEndpointReference()));
+                WsDiscoveryS11Utilities.createEndpointReferenceTypeObject(service.getEndpointReference()));
 
         // Send multicast in normal mode or unicast in proxy mode
         if (useProxy) // Unicast
         {
+            resolve.setTo(remoteProxyService.getEndpointReference().getAddress());
             try {
                 // Unicast
                 soapOverUDP.send(resolve, useProxyAddress, useProxyPort);
@@ -437,6 +449,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
             }
         } else // Multicast
         {
+            resolve.setTo(multicastTo);
             try {
                 // Multicast
                 soapOverUDP.sendMulticast(resolve);
@@ -454,13 +467,13 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param relatesToMessage The message ID of the message we are suppressing.
      * @param originalMessage Original message as received from the transport layer.
      */
-    protected void sendProxyAnnounce(WsDiscoveryD2005SOAPMessage relatesToMessage) throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
+    protected void sendProxyAnnounce(WsDiscoveryS11SOAPMessage relatesToMessage) throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
         logger.finer("sendProxyAnnounce()");
 
         logger.fine("Sending proxy announce to " + relatesToMessage.getSrcAddress() + ":" + relatesToMessage.getSrcPort());
-        WsDiscoveryD2005SOAPMessage<HelloType> proxyAnnounce;
+        WsDiscoveryS11SOAPMessage<HelloType> proxyAnnounce;
         try {
-            proxyAnnounce = WsDiscoveryD2005Utilities.createWsdSOAPMessageHello(localProxyService);
+            proxyAnnounce = WsDiscoveryS11Utilities.createWsdSOAPMessageHello(localProxyService);
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryXMLException("Unable to create proxy announcement (Hello message)", ex);
         }
@@ -481,16 +494,27 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param service Service that says Hello.
      */
     public void sendHello(WsDiscoveryService service)  throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
-        WsDiscoveryD2005SOAPMessage<HelloType> hello;
+        WsDiscoveryS11SOAPMessage<HelloType> hello;
         try {
-            hello = WsDiscoveryD2005Utilities.createWsdSOAPMessageHello(service);
+            hello = WsDiscoveryS11Utilities.createWsdSOAPMessageHello(service);
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryXMLException("Unable to create Hello message", ex);
         }
-        try {
-            soapOverUDP.sendMulticast(hello);
-        } catch (SOAPOverUDPException ex) {
-            throw new WsDiscoveryNetworkException("Unable to send Hello message",ex);
+        if (useProxy) { // managed mode
+            hello.setTo(remoteProxyService.getEndpointReference().getAddress()); // add proxy address as To (MUST)
+            hello.setAddAppSequence(true); // set to false when using http
+            try {
+                soapOverUDP.send(hello, useProxyAddress, useProxyPort); // unicast to proxy
+            } catch (SOAPOverUDPException ex) {
+                throw new WsDiscoveryNetworkException("Unable to send managed Hello message", ex);
+            }
+        } else { // ad hoc mode
+            hello.setTo(multicastTo);
+            try {
+                soapOverUDP.sendMulticast(hello);
+            } catch (SOAPOverUDPException ex) {
+                throw new WsDiscoveryNetworkException("Unable to send ad-hoc Hello message",ex);
+            }
         }
         logger.finer("sendHello() called for service " + service.getEndpointReference().getAddress().toString());
     }
@@ -501,16 +525,27 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param service Service that says Bye.
      */
     public void sendBye(WsDiscoveryService service) throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
-        WsDiscoveryD2005SOAPMessage<ByeType> bye;
+        WsDiscoveryS11SOAPMessage<ByeType> bye;
         try {
-            bye = WsDiscoveryD2005Utilities.createWsdSOAPMessageBye(service);
+            bye = WsDiscoveryS11Utilities.createWsdSOAPMessageBye(service);
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryXMLException("Unable to create Bye message", ex);
         }
-        try {
-            soapOverUDP.sendMulticast(bye);
-        } catch (SOAPOverUDPException ex) {
-            throw new WsDiscoveryNetworkException("Unable to multicast Bye message");
+        if (useProxy) { // managed mode
+            bye.setTo(remoteProxyService.getEndpointReference().getAddress());
+            bye.setAddAppSequence(true); // todo set to false when using http
+            try {
+                soapOverUDP.send(bye, useProxyAddress, useProxyPort);
+            } catch (SOAPOverUDPException ex) {
+                throw new WsDiscoveryNetworkException("Unable to multicast Bye message");
+            }
+        } else { // ad hoc mode
+            bye.setTo(multicastTo);
+            try {
+                soapOverUDP.sendMulticast(bye);
+            } catch (SOAPOverUDPException ex) {
+                throw new WsDiscoveryNetworkException("Unable to multicast Bye message");
+            }
         }
         logger.finer("sendBye() called for service " + service.getEndpointReference().getAddress().toString());
     }
@@ -525,7 +560,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param dstPort Destination port.
      */
     private void sendResolveMatch(WsDiscoveryService matchedService,
-            WsDiscoveryD2005SOAPMessage originalMessage, InetAddress dstAddress, int dstPort) throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
+            WsDiscoveryS11SOAPMessage originalMessage) throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
         
         // Return if less than 10 seconds since we sent a resolve match for this service to the requesting host
         if ((matchedService != null) && (matchedService.getTriedToResolve() != null)) {
@@ -536,9 +571,9 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
         }
 
         // Send resolve match
-        WsDiscoveryD2005SOAPMessage<ResolveMatchesType> m;
+        WsDiscoveryS11SOAPMessage<ResolveMatchesType> m;
         try {
-            m = WsDiscoveryD2005Utilities.createWsdSOAPMessageResolveMatches();
+            m = WsDiscoveryS11Utilities.createWsdSOAPMessageResolveMatches();
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryXMLException("Unable to create ResolveMatches message", ex);
         }
@@ -549,29 +584,33 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
         // Set To to ReplyTo (or keep the default anonymous To)
         if ((originalMessage.getReplyTo() != null) && (originalMessage.getReplyTo().getAddress() != null)) {
             m.setTo(originalMessage.getReplyTo().getAddress());
-        }
+        } else
+            m.setTo(anonymousReplyTo.getAddress());
 
         ResolveMatchType match = null;
         if (matchedService != null) {
             match = new ResolveMatchType();
 
-            match.setEndpointReference(WsDiscoveryD2005Utilities.createEndpointReferenceTypeObject(matchedService.getEndpointReference()));
+            match.setEndpointReference(WsDiscoveryS11Utilities.createEndpointReferenceTypeObject(matchedService.getEndpointReference()));
             match.setMetadataVersion(matchedService.getMetadataVersion());
-            match.setScopes(WsDiscoveryD2005Utilities.createScopesObject(matchedService));
+            match.setScopes(WsDiscoveryS11Utilities.createScopesObject(matchedService));
             match.getTypes().addAll(matchedService.getPortTypes());
             match.getXAddrs().addAll(matchedService.getXAddrs());
 
             m.getJAXBBody().setResolveMatch(match);
         }
         try {
-            // Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
-            soapOverUDP.send(m, dstAddress, dstPort);
+            // Try to send to the port/address set by ReplyTo. If it is not set, we default to srcPort/address
+            int p = originalMessage.getReplyPort();
+            if (p == -1)
+                p = originalMessage.getSrcPort();
+            InetAddress a = originalMessage.getReplyAddress();
+            soapOverUDP.send(m, a, p);
+            // Store time
+            matchedService.setSentResolveMatch(a);
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send ResolveMatch", ex);
         }
-
-        // Store time 
-        matchedService.setSentResolveMatch(dstAddress);
     }
 
     /**
@@ -583,12 +622,12 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * @param dstPort Destination port.
      */
     private void sendProbeMatch(IWsDiscoveryServiceCollection matches,
-            WsDiscoveryD2005SOAPMessage originalMessage, InetAddress dstAddress, int dstPort) throws WsDiscoveryException {
+            WsDiscoveryS11SOAPMessage originalMessage) throws WsDiscoveryException {
 
         // Create probe match
-        WsDiscoveryD2005SOAPMessage<ProbeMatchesType> m;
+        WsDiscoveryS11SOAPMessage<ProbeMatchesType> m;
         try {
-            m = WsDiscoveryD2005Utilities.createWsdSOAPMessageProbeMatches();
+            m = WsDiscoveryS11Utilities.createWsdSOAPMessageProbeMatches();
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryXMLException("Unable to create ProbeMatches message", ex);
         }
@@ -599,14 +638,16 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
         // Set To to ReplyTo, or just leave the anonymous value
         if ((originalMessage.getReplyTo() != null) && (originalMessage.getReplyTo().getAddress() != null)) {
             m.setTo(originalMessage.getReplyTo().getAddress());
-        }
+        } else
+            m.setTo(anonymousReplyTo.getAddress());
+        m.setAddAppSequence(true); // MUST be included in ad-hoc, should not be included in managed (using http)
 
         for (WsDiscoveryService service : matches) {
             ProbeMatchType match = new ProbeMatchType();
 
-            match.setEndpointReference(WsDiscoveryD2005Utilities.createEndpointReferenceTypeObject(service.getEndpointReference()));
+            match.setEndpointReference(WsDiscoveryS11Utilities.createEndpointReferenceTypeObject(service.getEndpointReference()));
             match.setMetadataVersion(service.getMetadataVersion());
-            match.setScopes(WsDiscoveryD2005Utilities.createScopesObject(service));
+            match.setScopes(WsDiscoveryS11Utilities.createScopesObject(service));
             match.getTypes().addAll(service.getPortTypes());
             match.getXAddrs().addAll(service.getXAddrs());
 
@@ -614,7 +655,12 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
         }
         try {
             // Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
-            soapOverUDP.send(m, dstAddress, dstPort);
+            // Try to send to the port/address set by ReplyTo. If it is not set, we default to srcPort/address
+            int p = originalMessage.getReplyPort();
+            if (p == -1)
+                p = originalMessage.getSrcPort();
+            InetAddress a = originalMessage.getReplyAddress();
+            soapOverUDP.send(m, a, p);
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send ProbeMatch",ex);
         }
@@ -627,12 +673,12 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      */
     protected void dispatch() throws InterruptedException, WsDiscoveryException {
 
-        WsDiscoveryD2005SOAPMessage message;
+        WsDiscoveryS11SOAPMessage message;
         try {
             ISOAPOverUDPMessage m = soapOverUDP.recv(1000);
             if (m == null) // recv() timed out
                 return;
-            message = new WsDiscoveryD2005SOAPMessage(m);
+            message = new WsDiscoveryS11SOAPMessage(m);
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to received message from SOAPOverUDP", ex);
         }

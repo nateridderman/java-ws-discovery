@@ -1,5 +1,5 @@
 /*
-WsDiscoveryD2005Utilities.java
+WsDiscoveryS11Utilities.java
 
 Copyright (C) 2009 Magnus Skjegstad
 
@@ -16,7 +16,7 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ms.wsdiscovery.draft2005;
+package com.ms.wsdiscovery.standard11;
 
 import com.ms.wsdiscovery.WsDiscoveryFactory;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryActionTypes;
@@ -24,22 +24,21 @@ import com.ms.wsdiscovery.datatypes.WsDiscoveryNamespaces;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPGenericAnyType;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsaddressing.AttributedQName;
-import com.ms.wsdiscovery.jaxb.draft2005.wsaddressing.AttributedURI;
-import com.ms.wsdiscovery.jaxb.draft2005.wsaddressing.EndpointReferenceType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsaddressing.ReferenceParametersType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsaddressing.ReferencePropertiesType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsaddressing.Relationship;
-import com.ms.wsdiscovery.jaxb.draft2005.wsaddressing.ServiceNameType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ByeType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.HelloType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ProbeMatchType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ProbeMatchesType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ProbeType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ResolveMatchType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ResolveMatchesType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ResolveType;
-import com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ScopesType;
+import com.ms.wsdiscovery.jaxb.standard11.wsaddressing.AttributedQNameType;
+import com.ms.wsdiscovery.jaxb.standard11.wsaddressing.AttributedURIType;
+import com.ms.wsdiscovery.jaxb.standard11.wsaddressing.EndpointReferenceType;
+import com.ms.wsdiscovery.jaxb.standard11.wsaddressing.MetadataType;
+import com.ms.wsdiscovery.jaxb.standard11.wsaddressing.ReferenceParametersType;
+import com.ms.wsdiscovery.jaxb.standard11.wsaddressing.RelatesToType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ByeType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.HelloType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ProbeMatchType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ProbeMatchesType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ProbeType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ResolveMatchType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ResolveMatchesType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ResolveType;
+import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ScopesType;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
@@ -56,12 +55,12 @@ import javax.xml.namespace.QName;
  *
  * @author Magnus Skjegstad
  */
-public class WsDiscoveryD2005Utilities {
-    private static final com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ObjectFactory wsDiscoveryObjectFactory =
-            new com.ms.wsdiscovery.jaxb.draft2005.wsdiscovery.ObjectFactory();
-    private static final com.ms.wsdiscovery.jaxb.draft2005.wsaddressing.ObjectFactory wsAddressingObjectFactory =
-            new com.ms.wsdiscovery.jaxb.draft2005.wsaddressing.ObjectFactory();
-    private static final MatchBy defaultMatcher = WsDiscoveryNamespaces.WS_DISCOVERY_2005_04.getDefaultMatcher();
+public class WsDiscoveryS11Utilities {
+    private static final com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ObjectFactory wsDiscoveryObjectFactory =
+            new com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ObjectFactory();
+    private static final com.ms.wsdiscovery.jaxb.standard11.wsaddressing.ObjectFactory wsAddressingObjectFactory =
+            new com.ms.wsdiscovery.jaxb.standard11.wsaddressing.ObjectFactory();
+    private static final MatchBy defaultMatcher = WsDiscoveryNamespaces.WS_DISCOVERY_2009_01.getDefaultMatcher();
 
     /**
      * Creates a WS-Discovery service description based on a JAXB object. The
@@ -214,7 +213,7 @@ public class WsDiscoveryD2005Utilities {
      */
     public static boolean isServiceMatchedBy(WsDiscoveryService service, ProbeType probe) {
         synchronized (service) {
-            return service.isMatchedBy(probe.getTypes(), createWsDiscoveryScopesObject(probe.getScopes()), WsDiscoveryNamespaces.WS_DISCOVERY_2005_04.getDefaultMatcher());
+            return service.isMatchedBy(probe.getTypes(), createWsDiscoveryScopesObject(probe.getScopes()), defaultMatcher);
         }
     }
 
@@ -223,8 +222,8 @@ public class WsDiscoveryD2005Utilities {
      * @param uri
      * @return Attributed URI.
      */
-    public static AttributedURI createAttributedURI(String uri) {
-        AttributedURI a = new AttributedURI();
+    public static AttributedURIType createAttributedURIType(String uri) {
+        AttributedURIType a = new AttributedURIType();
         a.setValue(uri);
         return a;
     }
@@ -234,19 +233,19 @@ public class WsDiscoveryD2005Utilities {
      * @param name
      * @return Attributed QName.
      */
-    public static AttributedQName createAttributedQName(QName name) {
-        AttributedQName q = new AttributedQName();
+    public static AttributedQNameType createAttributedQNameType(QName name) {
+        AttributedQNameType q = new AttributedQNameType();
         q.setValue(name);
         return q;
     }
 
     /**
-     * Create JAXB RelationshipType from value.
+     * Create JAXB RelatesToType from value.
      * @param value
-     * @return RelationShipType
+     * @return RelatesToType
      */
-    public static Relationship createRelationship(String value) {
-        Relationship r = new Relationship();
+    public static RelatesToType createRelatesTo(String value) {
+        RelatesToType r = new RelatesToType();
         r.setValue(value);
         return r;
     }
@@ -258,7 +257,7 @@ public class WsDiscoveryD2005Utilities {
      */
     public static EndpointReferenceType createEndpointReference(String uri) {
         EndpointReferenceType e = new EndpointReferenceType();
-        e.setAddress(createAttributedURI(uri));
+        e.setAddress(createAttributedURIType(uri));
         return e;
     }
 
@@ -279,7 +278,7 @@ public class WsDiscoveryD2005Utilities {
 
     /**
      * Store a JAXB object in the service directory. The JAXB object must be
-     * recognized by {@link WsDiscoveryD2005Utilities#createWsDiscoveryService(java.lang.Object)}.
+     * recognized by {@link WsDiscoveryS11Utilities#createWsDiscoveryService(java.lang.Object)}.
      * If a service with
      * the same endpoint reference already exists, the existing service will
      * be updated/overwritten.
@@ -316,20 +315,20 @@ public class WsDiscoveryD2005Utilities {
         if (endpointReference.getAddress() != null)
             s.setAddress(URI.create(endpointReference.getAddress().getValue()));
 
-        if (endpointReference.getPortType() != null)
-            s.setPortType(endpointReference.getPortType().getValue());
-
-        if (endpointReference.getServiceName() != null)
-            s.setServiceName(new SOAPOverUDPServiceNameType(endpointReference.getServiceName().getValue(), endpointReference.getServiceName().getPortName()));
+        if (endpointReference.getMetadata() != null) {
+            SOAPOverUDPGenericAnyType metadata = new SOAPOverUDPGenericAnyType(endpointReference.getMetadata().getAny());
+            if (endpointReference.getMetadata().getOtherAttributes() != null)
+                metadata.setOtherAttributes(endpointReference.getMetadata().getOtherAttributes());
+            s.setMetadata(metadata);
+        }
 
         if (endpointReference.getReferenceParameters() != null)
             s.setReferenceParameters(new SOAPOverUDPGenericAnyType(endpointReference.getReferenceParameters().getAny()));
 
-        if (endpointReference.getReferenceProperties() != null)
-            s.setReferenceProperties(new SOAPOverUDPGenericAnyType(endpointReference.getReferenceProperties().getAny()));
-
         if (endpointReference.getOtherAttributes() != null)
             s.setOtherAttributes(endpointReference.getOtherAttributes());
+
+        s.getAny().addAll(endpointReference.getAny());
 
         return s;
     }
@@ -338,8 +337,8 @@ public class WsDiscoveryD2005Utilities {
      * Create a blank WS-Discovery Hello-message.
      * @return Hello-message.
      */
-    public static WsDiscoveryD2005SOAPMessage<HelloType> createWsdSOAPMessageHello() throws SOAPOverUDPException {
-        return new WsDiscoveryD2005SOAPMessage<HelloType>(WsDiscoveryActionTypes.HELLO,
+    public static WsDiscoveryS11SOAPMessage<HelloType> createWsdSOAPMessageHello() throws SOAPOverUDPException {
+        return new WsDiscoveryS11SOAPMessage<HelloType>(WsDiscoveryActionTypes.HELLO,
                 wsDiscoveryObjectFactory.createHello(wsDiscoveryObjectFactory.createHelloType()));
     }
 
@@ -349,8 +348,8 @@ public class WsDiscoveryD2005Utilities {
      * @param service Service to announce in Hello-message.
      * @return Hello-message.
      */
-    public static WsDiscoveryD2005SOAPMessage<HelloType> createWsdSOAPMessageHello(WsDiscoveryService service) throws SOAPOverUDPException {
-        WsDiscoveryD2005SOAPMessage<HelloType> m = createWsdSOAPMessageHello();
+    public static WsDiscoveryS11SOAPMessage<HelloType> createWsdSOAPMessageHello(WsDiscoveryService service) throws SOAPOverUDPException {
+        WsDiscoveryS11SOAPMessage<HelloType> m = createWsdSOAPMessageHello();
         HelloType h = m.getJAXBBody();
 
         h.setEndpointReference(createEndpointReferenceTypeObject(service.getEndpointReference()));
@@ -373,8 +372,8 @@ public class WsDiscoveryD2005Utilities {
      * Create a blank WS-Discovery Bye-message.
      * @return Bye-message.
      */
-    public static WsDiscoveryD2005SOAPMessage<ByeType> createWsdSOAPMessageBye() throws SOAPOverUDPException {
-        return new WsDiscoveryD2005SOAPMessage<ByeType>(WsDiscoveryActionTypes.BYE,
+    public static WsDiscoveryS11SOAPMessage<ByeType> createWsdSOAPMessageBye() throws SOAPOverUDPException {
+        return new WsDiscoveryS11SOAPMessage<ByeType>(WsDiscoveryActionTypes.BYE,
                 wsDiscoveryObjectFactory.createBye(wsDiscoveryObjectFactory.createByeType()));
     }
 
@@ -383,8 +382,8 @@ public class WsDiscoveryD2005Utilities {
      * @param service Service that is about to leave.
      * @return Bye-message.
      */
-    public static WsDiscoveryD2005SOAPMessage<ByeType> createWsdSOAPMessageBye(WsDiscoveryService service) throws SOAPOverUDPException {
-        WsDiscoveryD2005SOAPMessage<ByeType> m = createWsdSOAPMessageBye();
+    public static WsDiscoveryS11SOAPMessage<ByeType> createWsdSOAPMessageBye(WsDiscoveryService service) throws SOAPOverUDPException {
+        WsDiscoveryS11SOAPMessage<ByeType> m = createWsdSOAPMessageBye();
         ByeType b = m.getJAXBBody();
         b.setEndpointReference(createEndpointReferenceTypeObject(service.getEndpointReference()));
         return m;
@@ -394,8 +393,8 @@ public class WsDiscoveryD2005Utilities {
      * Create blank WS-Discovery Probe-message.
      * @return Probe-message.
      */
-    public static WsDiscoveryD2005SOAPMessage<ProbeType> createWsdSOAPMessageProbe() throws SOAPOverUDPException {
-        return new WsDiscoveryD2005SOAPMessage<ProbeType>(WsDiscoveryActionTypes.PROBE,
+    public static WsDiscoveryS11SOAPMessage<ProbeType> createWsdSOAPMessageProbe() throws SOAPOverUDPException {
+        return new WsDiscoveryS11SOAPMessage<ProbeType>(WsDiscoveryActionTypes.PROBE,
                 wsDiscoveryObjectFactory.createProbe(wsDiscoveryObjectFactory.createProbeType()));
     }
 
@@ -403,8 +402,8 @@ public class WsDiscoveryD2005Utilities {
      * Create blank WS-Discovery ProbeMatches-message.
      * @return ProbeMatches-message.
      */
-    public static WsDiscoveryD2005SOAPMessage<ProbeMatchesType> createWsdSOAPMessageProbeMatches() throws SOAPOverUDPException {
-        return new WsDiscoveryD2005SOAPMessage<ProbeMatchesType>(WsDiscoveryActionTypes.PROBEMATCHES,
+    public static WsDiscoveryS11SOAPMessage<ProbeMatchesType> createWsdSOAPMessageProbeMatches() throws SOAPOverUDPException {
+        return new WsDiscoveryS11SOAPMessage<ProbeMatchesType>(WsDiscoveryActionTypes.PROBEMATCHES,
                 wsDiscoveryObjectFactory.createProbeMatches(wsDiscoveryObjectFactory.createProbeMatchesType()));
     }
 
@@ -412,8 +411,8 @@ public class WsDiscoveryD2005Utilities {
      * Create blank WS-Discovery Resolve-message.
      * @return Resolve-message.
      */
-    public static WsDiscoveryD2005SOAPMessage<ResolveType> createWsdSOAPMessageResolve() throws SOAPOverUDPException {
-        return new WsDiscoveryD2005SOAPMessage<ResolveType>(WsDiscoveryActionTypes.RESOLVE,
+    public static WsDiscoveryS11SOAPMessage<ResolveType> createWsdSOAPMessageResolve() throws SOAPOverUDPException {
+        return new WsDiscoveryS11SOAPMessage<ResolveType>(WsDiscoveryActionTypes.RESOLVE,
                 wsDiscoveryObjectFactory.createResolve(wsDiscoveryObjectFactory.createResolveType()));
     }
 
@@ -421,8 +420,8 @@ public class WsDiscoveryD2005Utilities {
      * Create blank WS-Discovery ResolveMatches-message.
      * @return ResolveMatchse-message.
      */
-    public static WsDiscoveryD2005SOAPMessage<ResolveMatchesType> createWsdSOAPMessageResolveMatches() throws SOAPOverUDPException {
-        return new WsDiscoveryD2005SOAPMessage<ResolveMatchesType>(WsDiscoveryActionTypes.RESOLVEMATCHES,
+    public static WsDiscoveryS11SOAPMessage<ResolveMatchesType> createWsdSOAPMessageResolveMatches() throws SOAPOverUDPException {
+        return new WsDiscoveryS11SOAPMessage<ResolveMatchesType>(WsDiscoveryActionTypes.RESOLVEMATCHES,
                 wsDiscoveryObjectFactory.createResolveMatches(wsDiscoveryObjectFactory.createResolveMatchesType()));
     }
 
@@ -431,16 +430,17 @@ public class WsDiscoveryD2005Utilities {
 
                 // Address
                 if (ep.getAddress() != null) {
-                    AttributedURI address = wsAddressingObjectFactory.createAttributedURI();
+                    AttributedURIType address = wsAddressingObjectFactory.createAttributedURIType();
                     address.setValue(ep.getAddress().toString());
                     wsaEndpoint.setAddress(address);
                 }
 
-                // Port type
-                if (ep.getPortType() != null) {
-                    AttributedQName q = wsAddressingObjectFactory.createAttributedQName();
-                    q.setValue(ep.getPortType());
-                    wsaEndpoint.setPortType(q);
+                // Meta data
+                if (ep.getMetadata() != null) {
+                    SOAPOverUDPGenericAnyType metadata = ep.getMetadata();
+                    MetadataType mt = wsAddressingObjectFactory.createMetadataType();
+                    mt.getAny().addAll(metadata.getAny());
+                    wsaEndpoint.setMetadata(mt);
                 }
 
                 // Reference parameters
@@ -448,21 +448,6 @@ public class WsDiscoveryD2005Utilities {
                     ReferenceParametersType r = wsAddressingObjectFactory.createReferenceParametersType();
                     r.getAny().addAll(ep.getReferenceParameters().getAny());
                     wsaEndpoint.setReferenceParameters(r);
-                }
-
-                // Reference properties
-                if (ep.getReferenceProperties() != null) {
-                    ReferencePropertiesType r = wsAddressingObjectFactory.createReferencePropertiesType();
-                    r.getAny().addAll(ep.getReferenceParameters().getAny());
-                    wsaEndpoint.setReferenceProperties(r);
-                }
-
-                // Service name
-                if (ep.getServiceName() != null) {
-                    ServiceNameType s = wsAddressingObjectFactory.createServiceNameType();
-                    s.setPortName(ep.getServiceName().getPortName());
-                    s.setValue(ep.getServiceName().getValue());
-                    wsaEndpoint.setServiceName(s);
                 }
 
                 // Anything else

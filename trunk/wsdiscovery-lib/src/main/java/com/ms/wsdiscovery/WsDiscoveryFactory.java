@@ -19,13 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery;
 
+import com.ms.wsdiscovery.datatypes.WsDiscoveryNamespaces;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
+import com.ms.wsdiscovery.exception.WsDiscoveryException;
+import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
-import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
@@ -43,7 +45,7 @@ public class WsDiscoveryFactory {
      * @return New WS-Discovery object.
      * @throws WsDiscoveryNetworkException
      */
-    public static WsDiscoveryServer createServer() throws WsDiscoveryNetworkException {
+    public static WsDiscoveryServer createServer() throws WsDiscoveryException {
         return new WsDiscoveryServer();
     }
     /**
@@ -51,8 +53,8 @@ public class WsDiscoveryFactory {
      * @param name Name of service directory.
      * @return New, empty service directory.
      */
-    public static WsDiscoveryServiceDirectory createServiceDirectory(String name) {
-        return new WsDiscoveryServiceDirectory(name);
+    public static WsDiscoveryServiceDirectory createServiceDirectory(String name, MatchBy defaultMatcher) {
+        return new WsDiscoveryServiceDirectory(name, defaultMatcher);
     }
     /**
      * Creates a service directory. 
@@ -71,7 +73,7 @@ public class WsDiscoveryFactory {
      * @return A new instance of {@link WsDiscoveryService}
      */
     public static WsDiscoveryService createService(QName portType, String scope, String XAddr) {
-        WsDiscoveryScopesType scopes = new WsDiscoveryScopesType();
+        WsDiscoveryScopesType scopes = new WsDiscoveryScopesType(null);
         scopes.getValue().add(scope);
         return new WsDiscoveryService(portType, scopes, XAddr);
     }
@@ -85,7 +87,7 @@ public class WsDiscoveryFactory {
      * @return WS-Discovery service description.
      */
     public static WsDiscoveryService createService(Service jaxwsservice) {
-        WsDiscoveryScopesType scopes = new WsDiscoveryScopesType();
+        WsDiscoveryScopesType scopes = new WsDiscoveryScopesType(null);
         List<String> xaddrs = new ArrayList<String>();
         List<QName> ports = new ArrayList<QName>();       
         
@@ -114,7 +116,7 @@ public class WsDiscoveryFactory {
      * @return New instance of WsDiscoveryFinder.
      * @throws WsDiscoveryNetworkException 
      */
-    public static WsDiscoveryFinder createFinder() throws WsDiscoveryNetworkException {
+    public static WsDiscoveryFinder createFinder() throws WsDiscoveryException {
         return new WsDiscoveryFinder();
     }
     
@@ -124,12 +126,12 @@ public class WsDiscoveryFactory {
      * @param matcher Name of matcher
      * @return Matcher specified in <code>matcher</code> or {@link WsDiscoveryConstants#defaultMatchBy}.
      */
-    public static MatchBy getMatcher(String matcher) {
-        MatchBy res = WsDiscoveryConstants.defaultMatchBy;
+    public static MatchBy getMatcher(String matcher, MatchBy defaultMatcher) {
+        MatchBy res = defaultMatcher;
         
         if (matcher != null)
             for (MatchBy m : MatchBy.values())
-                if (m.toString().equals(matcher)) {
+                if ((m.toString()).equals(matcher)) {
                     res = m;
                     break;
                 }

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.datatypes;
 
+import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,24 +31,25 @@ import javax.xml.namespace.QName;
  * @author Magnus Skjegstad
  */
 public class WsDiscoveryScopesType {
-    protected String matchBy;
+    protected MatchBy matchBy;
     protected List<String> value;
     protected Map<QName, String> otherAttributes;
 
-    public WsDiscoveryScopesType(String matchBy, List<String> value, Map<QName, String> otherAttributes) {
+    public WsDiscoveryScopesType(MatchBy matchBy, List<String> value, Map<QName, String> otherAttributes) {
         this.matchBy = matchBy;
         this.value = value;
         this.otherAttributes = otherAttributes;
     }
 
-    public WsDiscoveryScopesType() {
+    public WsDiscoveryScopesType(MatchBy matchBy) {
+        this(matchBy, null, null);
     }
 
-    public void setMatchBy(String matchBy) {
+    public void setMatchBy(MatchBy matchBy) {
         this.matchBy = matchBy;
     }
         
-    public String getMatchBy() {
+    public MatchBy getMatchBy() {
         return matchBy;
     }
 

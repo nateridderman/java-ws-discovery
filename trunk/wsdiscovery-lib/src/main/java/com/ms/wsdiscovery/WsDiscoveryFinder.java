@@ -28,7 +28,7 @@ import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
-import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
+import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
@@ -60,7 +60,7 @@ public class WsDiscoveryFinder {
      * Constructor. Creates and starts a WS-Discovery thread.
      * @throws WsDiscoveryNetworkException
      */
-    public WsDiscoveryFinder() throws WsDiscoveryNetworkException {
+    public WsDiscoveryFinder() throws WsDiscoveryException {
         startServer();
         stopServerOnExit = true;
     }
@@ -89,7 +89,7 @@ public class WsDiscoveryFinder {
      * Creates and starts the WS-Discovery thread.
      * @throws WsDiscoveryNetworkException
      */
-    protected void startServer() throws WsDiscoveryNetworkException {
+    protected void startServer() throws WsDiscoveryException {
         if (wsd == null) {
             wsd = WsDiscoveryFactory.createServer();
             wsd.start();
