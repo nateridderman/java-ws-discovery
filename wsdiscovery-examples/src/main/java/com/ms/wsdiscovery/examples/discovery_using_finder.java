@@ -22,7 +22,7 @@ package com.ms.wsdiscovery.examples;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryFinder;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
-import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
+import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 

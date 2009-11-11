@@ -19,16 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.examples;
 
+import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryFactory;
 import com.ms.wsdiscovery.WsDiscoveryServer;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
-import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
+import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 
@@ -41,7 +40,7 @@ import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectory
 public class publish_service {
     public static void main(String[] argv) 
             throws WsDiscoveryServiceDirectoryException, 
-            WsDiscoveryNetworkException, InterruptedException, WsDiscoveryXMLException {
+            WsDiscoveryNetworkException, InterruptedException, WsDiscoveryXMLException, WsDiscoveryException {
         
         WsDiscoveryServer server = WsDiscoveryFactory.createServer();
         
@@ -92,7 +91,7 @@ public class publish_service {
                         
         // Main loop. 
         System.out.println("Running....");
-        while (server.isAlive()) 
+        while (server.isRunning())
             synchronized (server) {
                 server.wait();
             }
