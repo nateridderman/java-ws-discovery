@@ -80,7 +80,7 @@ public class WsDiscoveryS11Utilities {
         WsDiscoveryService service = new WsDiscoveryService();
         if (jaxbbody instanceof HelloType) {
             HelloType m = (HelloType)jaxbbody;
-            service.setEndpointReferenceType(createSOAPOverUDPEndpointReferenceType(m.getEndpointReference()));
+            service.setEndpointReference(createSOAPOverUDPEndpointReferenceType(m.getEndpointReference()));
             service.setPortTypes(m.getTypes());
             service.setScopesType(createWsDiscoveryScopesObject(m.getScopes()));
             service.setXAddrs(m.getXAddrs());
@@ -88,11 +88,11 @@ public class WsDiscoveryS11Utilities {
         } else
         if (jaxbbody instanceof ByeType) {
             ByeType m = (ByeType)jaxbbody;
-            service.setEndpointReferenceType(createSOAPOverUDPEndpointReferenceType(m.getEndpointReference()));
+            service.setEndpointReference(createSOAPOverUDPEndpointReferenceType(m.getEndpointReference()));
         } else
         if (jaxbbody instanceof ProbeMatchType) {
             ProbeMatchType m = (ProbeMatchType)jaxbbody;
-            service.setEndpointReferenceType(createSOAPOverUDPEndpointReferenceType(m.getEndpointReference()));
+            service.setEndpointReference(createSOAPOverUDPEndpointReferenceType(m.getEndpointReference()));
             service.setPortTypes(m.getTypes());
             service.setScopesType(createWsDiscoveryScopesObject(m.getScopes()));
             service.setXAddrs(m.getXAddrs());
@@ -100,7 +100,7 @@ public class WsDiscoveryS11Utilities {
         } else
         if (jaxbbody instanceof ResolveMatchesType) {
             ResolveMatchType m = ((ResolveMatchesType)jaxbbody).getResolveMatch();
-            service.setEndpointReferenceType(createSOAPOverUDPEndpointReferenceType(m.getEndpointReference()));
+            service.setEndpointReference(createSOAPOverUDPEndpointReferenceType(m.getEndpointReference()));
             service.setPortTypes(m.getTypes());
             service.setScopesType(createWsDiscoveryScopesObject(m.getScopes()));
             service.setXAddrs(m.getXAddrs());
@@ -108,7 +108,7 @@ public class WsDiscoveryS11Utilities {
         } else
         if (jaxbbody instanceof ResolveMatchType) {
             ResolveMatchType m = (ResolveMatchType)jaxbbody;
-            service.setEndpointReferenceType(createSOAPOverUDPEndpointReferenceType(m.getEndpointReference()));
+            service.setEndpointReference(createSOAPOverUDPEndpointReferenceType(m.getEndpointReference()));
             service.setPortTypes(m.getTypes());
             service.setScopesType(createWsDiscoveryScopesObject(m.getScopes()));
             service.setXAddrs(m.getXAddrs());
