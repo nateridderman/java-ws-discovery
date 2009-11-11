@@ -19,10 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery;
 
-import com.ms.wsdiscovery.datatypes.WsDiscoveryNamespaces;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
-import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,33 +38,38 @@ import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 public class WsDiscoveryFactory {
     /**
      * Creates a WS-Discovery server object. The returned instance must be started 
-     * before it can be used. See {@link WsDiscoveryServer}.
+     * before it can be used. See {@link WsDiscoveryServer} and {@link WsDiscoveryServer#start()}.
      * 
      * @return New WS-Discovery object.
-     * @throws WsDiscoveryNetworkException
+     * @throws WsDiscoveryException on errors.
      */
     public static WsDiscoveryServer createServer() throws WsDiscoveryException {
         return new WsDiscoveryServer();
     }
     /**
-     * Creates a named service directory.
+     * Creates a named service directory object.
+     * 
      * @param name Name of service directory.
+     * @param defaultMatcher This matcher will be used to match service scope names when no matchers are specified.
+     * 
      * @return New, empty service directory.
      */
     public static WsDiscoveryServiceDirectory createServiceDirectory(String name, MatchBy defaultMatcher) {
         return new WsDiscoveryServiceDirectory(name, defaultMatcher);
     }
     /**
-     * Creates a service directory. 
+     * Creates a new service directory object.
+     *
+     * @param defaultMatcher This matcher will be used to match service scope names when no matchers are specified.
+     * 
      * @return A new, empty service directory.
      */
-    public static WsDiscoveryServiceDirectory createServiceDirectory() {
-        return createServiceDirectory();
+    public static WsDiscoveryServiceDirectory createServiceDirectory(MatchBy defaultMatcher) {
+        return new WsDiscoveryServiceDirectory("", defaultMatcher);
     }
     /**
-     * Creates a new WS-Discovery service description. If you need to create a service 
-     * with more than one portType or scope, create a {@link WsDiscoveryService} instance
-     * manually.
+     * Creates a new WS-Discovery service description with one portType, scope and XAddr. 
+     *
      * @param portType Service portType
      * @param scope Service scope
      * @param XAddr Invocation URI
@@ -80,9 +83,10 @@ public class WsDiscoveryFactory {
     /**
      * Creates a WS-Discovery service description from a JAX-WS service description.
      * <p>
-     * <li>The JAX-WS service name is used as WS-Discovery portType.</li>
-     * <li>The JAX-WS WSDL-location is used as WS-Discovery XAddrs.</li>
-     * <li>The JAX-WS port types are used as WS-Discovery scopes.</li>
+     * <li>WS-Discovery portType-field will be set to the JAX-WS service name</li>
+     * <li>WS-Discovery XAddrs-field (invocation address) will be set to the JAX-WS WSDL-location.</li>
+     * <li>WS-Discovery scopes will be set to the JAX-WS port types.</li>
+     * 
      * @param jaxwsservice JAX-WS service description.
      * @return WS-Discovery service description.
      */
@@ -111,27 +115,30 @@ public class WsDiscoveryFactory {
     }
     
     /**
-     * Creates a new WsDiscoveryFinder instance. WsDiscoverFinder can be used
-     * by clients to discover and search for services.
-     * @return New instance of WsDiscoveryFinder.
-     * @throws WsDiscoveryNetworkException 
+     * Creates a new {@link WsDiscoveryFinder} instance. {@link WsDiscoveryFinder} can be used
+     * by WS-Discovery clients to discover and search for services.
+     * 
+     * @return New instance of {@link WsDiscoveryFinder}.
+     * @throws WsDiscoveryException if an error occured while creating the {@link WsDiscoveryFinder}-object.
      */
     public static WsDiscoveryFinder createFinder() throws WsDiscoveryException {
         return new WsDiscoveryFinder();
     }
     
     /**
-     * Gets the correct MatchBy object from a string. If no matcher is specified
-     * {@link WsDiscoveryConstants#defaultMatchBy} is returned.
-     * @param matcher Name of matcher
-     * @return Matcher specified in <code>matcher</code> or {@link WsDiscoveryConstants#defaultMatchBy}.
+     * Gets the correct MatchBy object from a string. If no matcher is found
+     * the matcher specified in <code>defaultMatcher</code> is returned instead.
+     * 
+     * @param matcherToFind String containing the full name of the matcher.
+     * @param defaultMatcher Matcher that should be returned if the matcher in <code>matcherToFind</code> is not found.
+     * @return A matcher with the same name as <code>matcherToFind</code> or the matcher specified in <code>defaultMatcher</code>.
      */
-    public static MatchBy getMatcher(String matcher, MatchBy defaultMatcher) {
+    public static MatchBy getMatcher(String matcherToFind, MatchBy defaultMatcher) {
         MatchBy res = defaultMatcher;
         
-        if (matcher != null)
+        if (matcherToFind != null)
             for (MatchBy m : MatchBy.values())
-                if ((m.toString()).equals(matcher)) {
+                if ((m.toString()).equals(matcherToFind)) {
                     res = m;
                     break;
                 }

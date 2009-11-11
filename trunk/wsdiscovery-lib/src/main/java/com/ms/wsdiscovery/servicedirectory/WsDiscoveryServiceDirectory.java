@@ -63,6 +63,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     public WsDiscoveryServiceDirectory(String name, MatchBy defaultMatcher) {
         services = new WsDiscoveryServiceCollection();
         this.name = name;
+        this.defaultMatcher = defaultMatcher;
     }
     
     /**
@@ -367,4 +368,14 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
             w.unlock();
         }
     }
+
+    public MatchBy getDefaultMatcher() {
+        return defaultMatcher;
+    }
+
+    public void setDefaultMatcher(MatchBy defaultMatcher) {
+        this.defaultMatcher = defaultMatcher;
+    }
+
+    
 }

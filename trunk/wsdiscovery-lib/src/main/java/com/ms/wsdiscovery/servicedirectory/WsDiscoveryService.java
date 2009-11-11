@@ -29,9 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.xml.namespace.QName;
-import com.ms.wsdiscovery.WsDiscoveryFactory;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
-import com.ms.wsdiscovery.datatypes.WsDiscoveryNamespaces;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
@@ -176,7 +174,7 @@ public class WsDiscoveryService {
     
 
     /**
-     * Stores a copy of an endpoint reference.
+     * Sets the endpoint reference.
      * @param er Endpoint reference.
      */
     public synchronized void setEndpointReferenceType(SOAPOverUDPEndpointReferenceType er) {
@@ -189,6 +187,10 @@ public class WsDiscoveryService {
      */
     public void setEndpointReference(SOAPOverUDPEndpointReferenceType endpointReference) {
         this.endpointReference = endpointReference;
+    }
+
+    public void setEndpointReference(URI endpointReferenceAddress) {
+        this.endpointReference = new SOAPOverUDPEndpointReferenceType(endpointReferenceAddress);
     }
 
     /**
@@ -258,11 +260,19 @@ public class WsDiscoveryService {
      * Set scopes.
      * @param scopes List of new scopes.
      */
-    public void setScopes(List<URI> scopes, MatchBy matchingAlgorithm) {
-        WsDiscoveryScopesType scopesType = new WsDiscoveryScopesType(matchingAlgorithm);
+    public void setScopes(List<URI> scopes, MatchBy matcher) {
+        WsDiscoveryScopesType scopesType = new WsDiscoveryScopesType(matcher);
         for (URI scope : scopes)
             scopesType.getValue().add(scope.toString());
         setScopesType(scopesType);
+    }
+
+    /**
+     * Set scopes.
+     * @param scopes List of new scopes.
+     */
+    public void setScopes(List<URI> scopes) {
+        this.setScopes(scopes, null);
     }
 
     /**

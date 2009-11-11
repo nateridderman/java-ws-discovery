@@ -47,11 +47,11 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
 
     /**
      * Constructor
-     * @throws WsDiscoveryNetworkException 
+     * @throws WsDiscoveryException
      */
     public WsDiscoveryServer() throws WsDiscoveryException {
         try {
-            dispatchThread = WsDiscoveryConstants.defaultNsDiscovery.getDispatchThreadInstance();
+            dispatchThread = WsDiscoveryConstants.defaultNsDiscovery.getNewDispatchThreadInstance();
         } catch (Exception ex) {
             throw new WsDiscoveryException("Unable to create WS-Discovery dispatch thread instance.", ex);
         }
@@ -79,6 +79,8 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
      * Sends an initial Hello-packet and adds the service to the local service directory.
      * @param JAXWSService
      * @throws WsDiscoveryServiceDirectoryException on failure to store service in the service directory.
+     * @throws WsDiscoveryXMLException
+     * @throws WsDiscoveryNetworkException
      */
     public void publish(Service JAXWSService) throws WsDiscoveryServiceDirectoryException, WsDiscoveryXMLException, WsDiscoveryNetworkException {
         publish(WsDiscoveryFactory.createService(JAXWSService));
@@ -88,6 +90,8 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
      * Unpublish a service with the specified endpoint address. Sends a Bye-packet
      * and removes the service from the local service directory.
      * @param address Endpoint address.
+     * @throws WsDiscoveryNetworkException
+     * @throws WsDiscoveryXMLException
      */
     public void unpublish(String address) throws WsDiscoveryNetworkException, WsDiscoveryXMLException {
         unpublish(dispatchThread.getLocalServices().findService(address));
@@ -120,6 +124,8 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
      * <p>
      * Returns immediately. The remote service directory must be checked for
      * new services manually by the caller.  
+     * @throws WsDiscoveryXMLException
+     * @throws WsDiscoveryNetworkException 
      */
     public void probe() throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
         synchronized (this) {
@@ -179,7 +185,9 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
      * local service directory. This service will send suppression messages to
      * clients when they send multicast messages, hopefully forcing them to
      * send unicast directly to the proxy server instead. 
-     * @throws WsDiscoveryException 
+     * @throws WsDiscoveryXMLException 
+     * @throws WsDiscoveryNetworkException
+     * @deprecated
      */
     @Deprecated
     public void enableProxyMode() throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
@@ -197,6 +205,9 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
      * <p>
      * Removes the proxy service from the local service directory and resumes 
      * normal client behaviour. 
+     * @throws WsDiscoveryXMLException 
+     * @throws WsDiscoveryNetworkException
+     * @deprecated
      */
     @Deprecated
     public void disableProxyMode() throws WsDiscoveryXMLException, WsDiscoveryNetworkException{
@@ -221,6 +232,7 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
     
     /**
      * Unpublish all services and stop.
+     * @throws WsDiscoveryException
      */
     @Override
     public void done() throws WsDiscoveryException {
@@ -249,14 +261,26 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
         return dispatchThread.getLocalServices();
     }
 
+    /**
+     *
+     */
     public void start() {
         dispatchThread.start();
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isRunning() {
         return dispatchThread.isRunning();
     }
 
+    /**
+     *
+     * @return
+     * @deprecated
+     */
     @Deprecated
     public boolean isAlive() {
         return this.isRunning();
@@ -270,10 +294,18 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
         return dispatchThread.isProxy();
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isUsingProxy() {
         return dispatchThread.isUsingProxy();
     }
 
+    /**
+     *
+     * @return
+     */
     public InetSocketAddress getProxyServer() {
         return dispatchThread.getProxyServer();
     }

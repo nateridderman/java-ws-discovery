@@ -41,7 +41,6 @@ public enum WsDiscoveryNamespaces {
     private JAXBContext jaxbContext = null;
     private Marshaller marshaller = null;
     private Unmarshaller unmarshaller = null;
-    private IWsDiscoveryDispatchThread dispatchThread = null;
 
     WsDiscoveryNamespaces(String wsdNamespace, String wsaNamespace, String contextPath, Class dispatchThreadClass, MatchBy defaultMatcher) {
         this.wsDiscoveryNamespace = wsdNamespace;
@@ -82,10 +81,8 @@ public enum WsDiscoveryNamespaces {
         return contextPath;
     }
 
-    public IWsDiscoveryDispatchThread getDispatchThreadInstance() throws InstantiationException, IllegalAccessException {
-        if (dispatchThread == null)
-            dispatchThread = (IWsDiscoveryDispatchThread) dispatchThreadClass.newInstance();
-        return dispatchThread;
+    public IWsDiscoveryDispatchThread getNewDispatchThreadInstance() throws InstantiationException, IllegalAccessException {
+        return (IWsDiscoveryDispatchThread) dispatchThreadClass.newInstance();
     }
 
     public MatchBy getDefaultMatcher() {
