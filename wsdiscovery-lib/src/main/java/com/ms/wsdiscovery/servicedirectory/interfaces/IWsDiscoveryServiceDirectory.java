@@ -145,4 +145,7 @@ public interface IWsDiscoveryServiceDirectory {
      * @param addExistingServices when true, already known services will be imported into <code>newServiceCollection</code>.
      */
     void useStorage(IWsDiscoveryServiceCollection newServiceCollection, boolean addExistingServices);
+
+    MatchBy getDefaultMatcher();
+    void setDefaultMatcher(MatchBy defaultMatcher);
 }

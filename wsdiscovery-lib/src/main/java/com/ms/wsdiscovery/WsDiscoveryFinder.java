@@ -40,7 +40,7 @@ import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
  * Unless an existing WS-Discovery thread is provided as a parameter to 
  * the constructor of this class, a new instance of {@link WsDiscoveryServer} is created 
  * and started. 
- * 
+ *
  * @author Magnus Skjegstad
  */
 public class WsDiscoveryFinder {
@@ -57,16 +57,18 @@ public class WsDiscoveryFinder {
     protected boolean stopServerOnExit = false;
 
     /**
-     * Constructor. Creates and starts a WS-Discovery thread.
-     * @throws WsDiscoveryNetworkException
+     * Creates and starts a WS-Discovery thread. The WS-Discovery
+     * server thread will be temrminated when WsDiscoveryFinder() exits.
+     * @throws WsDiscoveryException
      */
     public WsDiscoveryFinder() throws WsDiscoveryException {
         startServer();
         stopServerOnExit = true;
     }
     /**
-     * Constructor. Uses an existing WS-Discovery thread. The thread must 
-     * already be running.
+     * Uses an existing WS-Discovery server thread to locate services. The thread must
+     * already be running and will not be automatically terminated
+     * when WsDiscoveryFinder is stopped.
      * 
      * @param server Existing (running) WS-Discovery thread.
      */
@@ -77,17 +79,19 @@ public class WsDiscoveryFinder {
     
     /**
      * Stops threads before exiting.
-     * @throws InterruptedException 
+     *
+     * @throws InterruptedException if the thread is interrupted while waiting for child threads to terminate.
+     * @throws Throwable if the parent object throws an exception when it is finalized.
      */
     @Override
-    protected void finalize() throws InterruptedException, Throwable {        
+    protected void finalize() throws InterruptedException, Throwable {
         done();
         super.finalize();
     }
    
     /**
      * Creates and starts the WS-Discovery thread.
-     * @throws WsDiscoveryNetworkException
+     * @throws WsDiscoveryException on error.
      */
     protected void startServer() throws WsDiscoveryException {
         if (wsd == null) {
@@ -100,7 +104,7 @@ public class WsDiscoveryFinder {
      * Stops the running WS-Discovery thread.
      * @throws InterruptedException when interrupted while waiting for 
      * server thread to exit.
-     * @throws WsDiscoveryException if an error occures during shutdown of the main thread.
+     * @throws WsDiscoveryException if an error occurs during shutdown of the main thread.
      */
     protected void stopServer() throws InterruptedException, WsDiscoveryException {
         if (wsd != null) {
@@ -115,7 +119,7 @@ public class WsDiscoveryFinder {
     }
     
     /**
-     * Find one or more services.
+     * Find one or more services matching the given parameters.
      * 
      * @param portTypes List of portTypes to search for. <code>null</code> 
      * searches for all portTypes.
@@ -125,7 +129,7 @@ public class WsDiscoveryFinder {
      * scope. <code>null</code> uses the default defined in WsDiscoveryConstants.
      * @param timeoutInMs Time to wait for a match before returning. 
      * @return Found services.
-     * @throws InterruptedException Thrown if interrupted while waiting
+     * @throws InterruptedException if interrupted while waiting for results.
      * @throws WsDiscoveryException on failure.
      */
     public IWsDiscoveryServiceCollection find(List<QName> portTypes, List<URI> scopes,
@@ -174,8 +178,8 @@ public class WsDiscoveryFinder {
      * @param scopes List of scopes to search in. <code>null</code> searches 
      * within all scopes.
      * @return Found services.
-     * @throws InterruptedException Thrown if interrupted while waiting.
-     * @throws WsDiscoveryException 
+     * @throws InterruptedException if interrupted while waiting for results.
+     * @throws WsDiscoveryException on other errors.
      */
     public IWsDiscoveryServiceCollection find(List<QName> portTypes,
             List<URI> scopes) throws InterruptedException, WsDiscoveryException {
@@ -192,8 +196,8 @@ public class WsDiscoveryFinder {
      * all scopes.
      * @param timeoutInMs Time to wait for a match before returning. 
      * @return Found services.
-     * @throws InterruptedException Thrown if interrupted while waiting
-     * @throws WsDiscoveryException 
+     * @throws InterruptedException if interrupted while waiting for results.
+     * @throws WsDiscoveryException on other errors.
      */
     public IWsDiscoveryServiceCollection find(QName portType, URI scope,
             int timeoutInMs) throws InterruptedException, WsDiscoveryException {
@@ -326,6 +330,9 @@ public class WsDiscoveryFinder {
      * @param timeoutInMs Time to wait before returning with result.
      * @return Service collection with all services that was detected.
      * @throws java.lang.InterruptedException if interrupted while waiting.
+     * @throws WsDiscoveryServiceDirectoryException if an error occured in the service directory.
+     * @throws WsDiscoveryXMLException if an XML error occured while sending or receiving SOAP messages.
+     * @throws WsDiscoveryNetworkException if a network exception occured.
      */
     public IWsDiscoveryServiceCollection findAll(int timeoutInMs)
             throws InterruptedException, WsDiscoveryServiceDirectoryException,

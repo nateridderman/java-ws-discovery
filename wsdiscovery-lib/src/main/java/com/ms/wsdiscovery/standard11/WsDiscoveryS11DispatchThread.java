@@ -601,13 +601,9 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         }
         try {
             // Try to send to the port/address set by ReplyTo. If it is not set, we default to srcPort/address
-            int p = originalMessage.getReplyPort();
-            if (p == -1)
-                p = originalMessage.getSrcPort();
-            InetAddress a = originalMessage.getReplyAddress();
-            soapOverUDP.send(m, a, p);
+            soapOverUDP.send(m, originalMessage.getSrcAddress(), originalMessage.getSrcPort());
             // Store time
-            matchedService.setSentResolveMatch(a);
+            matchedService.setSentResolveMatch(originalMessage.getSrcAddress());
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send ResolveMatch", ex);
         }
@@ -654,13 +650,9 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
             m.getJAXBBody().getProbeMatch().add(match);
         }
         try {
-            // Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
+            // TODO Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
             // Try to send to the port/address set by ReplyTo. If it is not set, we default to srcPort/address
-            int p = originalMessage.getReplyPort();
-            if (p == -1)
-                p = originalMessage.getSrcPort();
-            InetAddress a = originalMessage.getReplyAddress();
-            soapOverUDP.send(m, a, p);
+            soapOverUDP.send(m, originalMessage.getSrcAddress(), originalMessage.getSrcPort());
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send ProbeMatch",ex);
         }

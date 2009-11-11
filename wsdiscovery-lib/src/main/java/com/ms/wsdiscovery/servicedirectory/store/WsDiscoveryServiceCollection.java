@@ -38,7 +38,7 @@ public class WsDiscoveryServiceCollection extends ArrayList<WsDiscoveryService> 
      */
     protected int indexOf(String endpointReference) {
         for (int i = 0; i < this.size(); i++)
-            if (this.get(i).getEndpointReference().equals(endpointReference))
+            if (this.get(i).getEndpointReference().getAddress().toString().equals(endpointReference))
                 return i;
         return -1;
 
@@ -59,11 +59,17 @@ public class WsDiscoveryServiceCollection extends ArrayList<WsDiscoveryService> 
         return (indexOf(endpointReference) > -1);
     }
 
+    public boolean contains(WsDiscoveryService service) {
+        return ((service.getEndpointReference() != null) &&
+                (service.getEndpointReference().getAddress() != null) &&
+                (contains(service.getEndpointReference().getAddress().toString())));
+    }
+
     public WsDiscoveryService get(String endpointReference) {
         int i = this.indexOf(endpointReference);
         if (i < 0)
             return null;
         return this.get(i);
     }
-
+        
 }

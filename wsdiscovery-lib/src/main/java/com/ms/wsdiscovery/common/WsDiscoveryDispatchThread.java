@@ -26,7 +26,6 @@ import com.ms.wsdiscovery.interfaces.IWsDiscoveryDispatchThread;
 import com.ms.wsdiscovery.logger.WsDiscoveryLogger;
 import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
-import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
@@ -37,6 +36,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Generic dispatch thread class with methods that are common between 
@@ -69,9 +70,13 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
             throw new WsDiscoveryNetworkException("Illegal Access while instantiating transport layer", ex);
         }
         this.soapOverUDP.setEncoding(WsDiscoveryConstants.defaultEncoding);
+        this.setDaemon(true);
     }
 
     public void done() throws WsDiscoveryException {
+        if (threadDone)
+            return;
+        
         // The exception is actually thrown from descendant WsDiscoveryServer, so this is a bit ugly...
         threadDone = true;
         while (isRunning) {
@@ -81,6 +86,7 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
                 break;
             }
         }
+        logger.finer("Thread " + getName() + " left done().");
     }
 
     public IWsDiscoveryServiceDirectory getLocalServices() {
@@ -134,6 +140,7 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
                 }
             }
         }
+        logger.finer("Thread " + getName() + " completed start().");
     }
 
     public void useServiceStore(IWsDiscoveryServiceCollection newServiceStore) {
@@ -146,7 +153,7 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
      * Create a proxy service description that can be added to the service directory later if
      * proxy mode is enabled on this node.
      */
-    protected void createProxyService() {
+    protected WsDiscoveryService createProxyService() {
         InetAddress proxyIp = null;
         Enumeration<InetAddress> ips = null;
 
@@ -168,14 +175,15 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
                 proxyIp = WsDiscoveryUtilities.getFirstNonLoopbackAddress(true, false);
                 logger.warning("Proxy address guessed as " + proxyIp.toString() + ". Set proxyAddress to override.");
             } catch (SocketException ex) {
-                logger.warning("Unable to enumerate IP address for proxy service.");
+                logger.severe("Unable to enumerate IP address for proxy service.");
             }
         }
 
         if (proxyIp != null) {
-            logger.info("Proxy-service bound to " + proxyIp.getHostAddress() + " on port " + this.soapOverUDP.getTransport().getUnicastPort() + " (not enabled)");
+            logger.info("Proxy-service will be bound to " + proxyIp.getHostAddress() + " on port " + this.soapOverUDP.getTransport().getUnicastPort());
 
-            localProxyService = WsDiscoveryFactory.createService(WsDiscoveryConstants.proxyPortType,
+            WsDiscoveryService s =
+                    WsDiscoveryFactory.createService(WsDiscoveryConstants.proxyPortType,
                     WsDiscoveryConstants.proxyScope,
                     "soap.udp://" +
                     proxyIp.getHostAddress() +
@@ -183,9 +191,12 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
                     this.soapOverUDP.getTransport().getUnicastPort() +
                     "/" +
                     WsDiscoveryConstants.proxyPortType.getLocalPart());
+
+            logger.finer("Proxy service created: " + s);
+            return s;
         } else {
-            logger.warning("Unable to assign IP-address to proxy-service. This thread may not act as a proxy server.");
-            localProxyService = null;
+            logger.severe("Unable to assign IP-address to proxy-service. This thread may not act as a proxy server.");
+            return null;
         }
     }
 
@@ -195,7 +206,9 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
      * use unicast against us instead.
      * @throws WsDiscoveryServiceDirectoryException
      */
-    public void enableProxyAnnouncements() throws WsDiscoveryServiceDirectoryException {
+    public synchronized void enableProxyAnnouncements() throws WsDiscoveryServiceDirectoryException {
+        isProxy = true;
+        /*
         if (isProxy) {
             return; // Already enabled
         }
@@ -205,14 +218,14 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
         }
         localServices.store(localProxyService);
         serviceDirectory.store(localProxyService);
-        // All Hello's should now be answered by multicast suppression messages
+        // All Hello's should now be answered by multicast suppression messages*/
     }
 
     /**
      * Disable proxy announcements.
      */
-    public void disableProxyAnnouncements() throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
-        if (!isProxy) // Not enabled
+    public synchronized void disableProxyAnnouncements() throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
+        /* if (!isProxy) // Not enabled
         {
             return;
         }
@@ -224,7 +237,8 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
             throw new WsDiscoveryNetworkException("Unable to send Bye for proxy server", ex);
         }
         localServices.remove(localProxyService);
-        serviceDirectory.remove(localProxyService);
+        serviceDirectory.remove(localProxyService);*/
+        isProxy = false;
     }
 
 
@@ -251,8 +265,8 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
                 ex.printStackTrace();
                 return;
             }
-            // Create proxy service
-            createProxyService();
+            
+            // Create proxy service            
             isRunning = true;
 
             // Notify waiting threads that we have started.
@@ -261,6 +275,34 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
             }
 
             while (!threadDone) {
+                // Should we enable proxy?
+                if (isProxy && (localProxyService == null)) {
+                    localProxyService = createProxyService();
+                    if (localProxyService != null) {
+                        try {
+                            localServices.store(localProxyService);
+                            serviceDirectory.store(localProxyService);
+                            logger.info("Proxy enabled.");
+                            try {
+                                sendHello(localProxyService);
+                            } catch (WsDiscoveryException ex) {
+                                logger.severe("Unable to announce proxy server in network - Hello message failed: " + ex.getMessage());
+                            }
+                        } catch (WsDiscoveryServiceDirectoryException ex) {
+                            logger.severe("Unable to store Proxy service in service directory. Proxy not enabled.");
+                            isProxy = false;
+                            localProxyService = null;
+                        }                        
+                    }
+                } else
+                // Should we disable proxy?
+                if ((!isProxy) && (localProxyService != null)) {
+                    localServices.remove(localProxyService);
+                    serviceDirectory.remove(localProxyService);
+                    localProxyService = null;
+                    logger.info("Proxy disabled.");
+                }
+
                 try {
                     dispatch();
                     //resolveUnknown(); // Send resolve-packets for services with no xaddrs

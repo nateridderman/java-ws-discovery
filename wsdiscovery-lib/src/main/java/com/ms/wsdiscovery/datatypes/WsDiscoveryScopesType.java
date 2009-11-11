@@ -45,6 +45,10 @@ public class WsDiscoveryScopesType {
         this(matchBy, null, null);
     }
 
+    public WsDiscoveryScopesType() {
+        this(null, null, null);
+    }
+
     public void setMatchBy(MatchBy matchBy) {
         this.matchBy = matchBy;
     }
