@@ -110,7 +110,7 @@ public class WsDiscoveryService {
             WsDiscoveryScopesType scopes,
             List<String> XAddrs,
             long version) {
-        setEndpointReferenceType(endpoint);
+        setEndpointReference(endpoint);
         setPortTypes(portTypes);
         setScopesType(scopes);
         setXAddrs(XAddrs);
@@ -130,7 +130,7 @@ public class WsDiscoveryService {
             List<String> XAddrs) {
         SOAPOverUDPEndpointReferenceType endpoint = new SOAPOverUDPEndpointReferenceType();
         endpoint.setAddress(URI.create("urn:uuid:"+UUID.randomUUID().toString()));
-        setEndpointReferenceType(endpoint);
+        setEndpointReference(endpoint);
         setPortTypes(portTypes);
         setScopesType(scopes);
         setXAddrs(XAddrs);
@@ -169,17 +169,7 @@ public class WsDiscoveryService {
             return false;        
         
         return m.match(this, probeTypes, probeScopes);
-    }
-           
-    
-
-    /**
-     * Sets the endpoint reference.
-     * @param er Endpoint reference.
-     */
-    public synchronized void setEndpointReferenceType(SOAPOverUDPEndpointReferenceType er) {
-        this.endpointReference = (SOAPOverUDPEndpointReferenceType) er.clone();
-    }
+    }              
 
     /**
      * Sets the endpoint reference.
