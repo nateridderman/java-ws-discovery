@@ -35,7 +35,7 @@ public class WsDiscoveryCustomProbeDialog extends javax.swing.JDialog {
     private boolean cancelled = true;
 
     /** Creates new form WsDiscoveryCustomProbe */
-    public WsDiscoveryCustomProbeDialog(java.awt.Frame parent, boolean modal) {
+    public WsDiscoveryCustomProbeDialog(java.awt.Frame parent, boolean modal, MatchBy defaultMatcher) {
         super(parent, modal);
         initComponents();
 
@@ -47,7 +47,7 @@ public class WsDiscoveryCustomProbeDialog extends javax.swing.JDialog {
         for (MatchBy c : MatchBy.values()) {
             ((DefaultComboBoxModel)comboMatchBy.getModel()).addElement(c);
             // Make the default selected
-            if (c.equals(WsDiscoveryConstants.defaultMatchBy))
+            if (c.equals(defaultMatcher))
                 comboMatchBy.setSelectedItem(c);
         }
         
