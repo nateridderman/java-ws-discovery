@@ -26,13 +26,12 @@ import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
 import com.ms.wsdiscovery.gui2.dialogs.WsDiscoveryCustomProbeDialog;
 import com.ms.wsdiscovery.gui2.dialogs.WsDiscoveryServiceDialog;
-import com.ms.wsdiscovery.network.exception.WsDiscoveryNetworkException;
+import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 import java.awt.Color;
-import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
@@ -42,7 +41,6 @@ import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.event.ListSelectionEvent;
@@ -779,7 +777,7 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
                 public void run() {
                     try {
                         if ((wsdiscovery != null) && (wsdiscovery.isAlive())) {
-                            WsDiscoveryCustomProbeDialog dialog = new WsDiscoveryCustomProbeDialog(new javax.swing.JFrame(), true);
+                            WsDiscoveryCustomProbeDialog dialog = new WsDiscoveryCustomProbeDialog(new javax.swing.JFrame(), true, wsdiscovery.getLocalServices().getDefaultMatcher());
                             dialog.setLocationRelativeTo(dialog.getParent());
                             dialog.setVisible(true);
                             if (!dialog.isCancelled()) {
