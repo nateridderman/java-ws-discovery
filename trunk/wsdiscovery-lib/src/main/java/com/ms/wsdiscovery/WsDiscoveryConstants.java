@@ -160,7 +160,7 @@ public class WsDiscoveryConstants {
     /**
      * Log level.
      */
-    public static Level loggerLevel = Level.FINEST;
+    public static Level loggerLevel = Level.FINE;
 
     /**
      * Handler used for logging debug messages. Default is ConsoleHandler().
