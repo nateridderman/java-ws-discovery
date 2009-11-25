@@ -36,7 +36,6 @@ import java.util.concurrent.TimeUnit;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPNetworkMessage;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPNotInitializedException;
-import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPConfigurable;
 import com.skjegstad.soapoverudp.messages.SOAPOverUDPNetworkMessage;
 import java.net.NetworkInterface;
 import java.util.logging.Logger;
