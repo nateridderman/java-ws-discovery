@@ -188,9 +188,7 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
      * send unicast directly to the proxy server instead. 
      * @throws WsDiscoveryXMLException 
      * @throws WsDiscoveryNetworkException
-     * @deprecated
-     */
-    @Deprecated
+     */   
     public void enableProxyMode() throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
         synchronized (this) {
             try {
@@ -208,9 +206,7 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
      * normal client behaviour. 
      * @throws WsDiscoveryXMLException 
      * @throws WsDiscoveryNetworkException
-     * @deprecated
      */
-    @Deprecated
     public void disableProxyMode() throws WsDiscoveryXMLException, WsDiscoveryNetworkException{
         synchronized (this) {
             dispatchThread.disableProxyAnnouncements();
