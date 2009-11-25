@@ -34,6 +34,7 @@ import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectory
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
+import java.net.InetAddress;
 
 /** 
  * WS-Discovery server thread. 
@@ -295,18 +296,42 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
     }
 
     /**
-     *
-     * @return
+     * Returns true when this WS-Discovery instance is using a proxy server.
+     * @return true when a proxy server is used.
      */
     public boolean isUsingProxy() {
         return dispatchThread.isUsingProxy();
     }
 
     /**
-     *
-     * @return
+     * Gets the address and port of the proxy server that is currently in use.
+     * @return address of proxy server.
      */
     public InetSocketAddress getProxyServer() {
         return dispatchThread.getProxyServer();
+    }
+
+    /**
+     * Returns the multicast address used by this WS-Discovery instance.
+     * @return multicast address.
+     */
+    public InetAddress getMulticastAddress() {
+        return dispatchThread.getSOAPOverUDPInstance().getTransport().getMulticastAddress();
+    }
+
+    /**
+     * Returns the multicast port this WS-Discovery instance listens to.
+     * @return multicast port.
+     */
+    public int getMulticastPort() {
+        return dispatchThread.getSOAPOverUDPInstance().getTransport().getMulticastPort();
+    }
+
+    /**
+     * Returns the unicast port this WS-Discovery instance listens to.
+     * @return
+     */
+    public int getUnicastPort() {
+        return dispatchThread.getSOAPOverUDPInstance().getTransport().getUnicastPort();
     }
 }

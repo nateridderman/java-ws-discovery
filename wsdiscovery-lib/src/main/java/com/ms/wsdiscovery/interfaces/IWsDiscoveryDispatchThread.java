@@ -26,6 +26,7 @@ import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectory
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDP;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
@@ -142,6 +143,12 @@ public interface IWsDiscoveryDispatchThread {
     void start();
 
     void useServiceStore(IWsDiscoveryServiceCollection newServiceStore);
-    
+
+    /**
+     * Returns the SOAPOverUDP instance used by this thread.
+     *
+     * @return Instance of SOAPOverUDP.
+     */
+    ISOAPOverUDP getSOAPOverUDPInstance();
 
 }
