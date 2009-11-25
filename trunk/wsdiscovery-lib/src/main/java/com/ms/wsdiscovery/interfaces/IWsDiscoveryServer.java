@@ -26,6 +26,7 @@ import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectory
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
@@ -45,11 +46,11 @@ public interface IWsDiscoveryServer {
      * Removes the proxy service from the local service directory and resumes
      * normal client behaviour.
      */
-    @Deprecated
     void disableProxyMode() throws WsDiscoveryXMLException, WsDiscoveryNetworkException;;
 
     /**
      * Unpublish all services and stop.
+     * @throws WsDiscoveryException on error.
      */
     void done() throws WsDiscoveryException;
 
@@ -81,7 +82,6 @@ public interface IWsDiscoveryServer {
      * clients when they send multicast messages, hopefully forcing them to
      * send unicast directly to the proxy server instead.
      */
-    @Deprecated
     void enableProxyMode() throws WsDiscoveryNetworkException, WsDiscoveryXMLException;
 
     /**
@@ -200,4 +200,22 @@ public interface IWsDiscoveryServer {
      * @return IP address of proxy server.
      */
     public InetSocketAddress getProxyServer();
+
+    /**
+     * Returns the multicast address used by this WS-Discovery instance.
+     * @return multicast address.
+     */
+    public InetAddress getMulticastAddress();
+
+    /**
+     * Returns the multicast port this WS-Discovery instance listens to.
+     * @return multicast port.
+     */
+    public int getMulticastPort();
+
+    /**
+     * Returns the unicast port this WS-Discovery instance listens to.
+     * @return
+     */
+    public int getUnicastPort();
 }

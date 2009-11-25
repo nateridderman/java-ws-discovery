@@ -23,8 +23,6 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryNamespaces;

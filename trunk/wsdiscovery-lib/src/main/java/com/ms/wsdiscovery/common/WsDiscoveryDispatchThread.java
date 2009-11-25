@@ -36,8 +36,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Generic dispatch thread class with methods that are common between 
@@ -321,5 +319,14 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
             }
             threadDone = true;
         }
-    }    
+    }
+
+    /**
+     * Returns the SOAPOverUDP instance used by this thread.
+     *
+     * @return Instance of SOAPOverUDP.
+     */
+    public ISOAPOverUDP getSOAPOverUDPInstance() {
+        return this.soapOverUDP;
+    }
 }
