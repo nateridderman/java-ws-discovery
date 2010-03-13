@@ -1,6 +1,6 @@
 This example creates an instance of WSDiscoveryFinder and tries to locate the JAX-WS Web Service CalculatorService.
  
-For this to work, a CalculatorService must be deployed and published through WS-Discovery (see ...).
+For this to work, a CalculatorService must be deployed and published through WS-Discovery (see [[WsDiscoveryPublishJaxWs]]).
 
 {{{
 public class invoke_jaxws {
