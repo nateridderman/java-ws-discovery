@@ -1,4 +1,4 @@
-A simple example that publishes a JAX-WS Web Service implemented in CalculatorService (com.ms.wsdiscovery.examples.calculatorservice). This example will only publish the Web Service information through WS-Discovery. The actual service must also be deployed for this to work.
+A simple example that publishes a JAX-WS Web Service implemented in CalculatorService (com.ms.wsdiscovery.examples.calculatorservice). This example will only publish the Web Service information through WS-Discovery. The actual service must also be deployed for this to work. See also [WsDiscoveryInvokeJaxWs].
 
 {{{
 public class publish_jaxws {
