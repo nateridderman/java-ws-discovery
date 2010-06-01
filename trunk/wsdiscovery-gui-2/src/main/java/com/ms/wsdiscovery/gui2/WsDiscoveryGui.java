@@ -59,7 +59,7 @@ import javax.xml.namespace.QName;
 public class WsDiscoveryGui extends javax.swing.JFrame {
 
     private int rotationCounter = 0;
-    private String rotor = "/Ñ\\|";
+    private String rotor = "/-\\|";
     private Level logLevel = Level.FINE;
 
 
