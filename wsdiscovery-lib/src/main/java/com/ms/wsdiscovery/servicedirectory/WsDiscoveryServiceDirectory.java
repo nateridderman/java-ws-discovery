@@ -74,8 +74,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     }
         
     /**
-     * Number of items in the service directory.
-     * @return Number of items in the service directory.
+     * {@inheritDoc}
      */
     public int size() {
         r.lock();
@@ -87,8 +86,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     }
         
     /**
-     * Get the name of this service directory.
-     * @return Name of the service directory. 
+     * {@inheritDoc}
      */
     public String getName() {
         /* Since we never write to this value after construction, locking is 
@@ -99,12 +97,22 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         } finally {
             r.unlock();
         }
-    }    
-    
+    }
+
     /**
-     * Locate a service in the directory based on the endpoint address.
-     * @param address Endpoint address.
-     * @return Service description or <code>null</code> if not found.
+     * {@inheritDoc}
+     */
+    public void clear() {
+        w.lock();
+        try {
+            services.clear();
+        } finally {
+            w.unlock();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
      */
     public WsDiscoveryService findService(String address) {
         if (address == null)
@@ -114,9 +122,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     }
 
     /**
-     * Locate a service in the directory based on the endpoint address.
-     * @param address Endpoint address.
-     * @return Service description or <code>null</code> if not found.
+     * {@inheritDoc}
      */
     public WsDiscoveryService findService(URI address) {
         if (address == null)
@@ -136,6 +142,9 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public WsDiscoveryService findService(SOAPOverUDPEndpointReferenceType endpoint) {
         return findService(endpoint.getAddress());
     }
@@ -207,13 +216,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     }
     
     /**
-     * Store a service description in the service directory. If a service with
-     * the same endpoint reference already exists, the existing service will
-     * be updated.
-     * 
-     * @param service Service description.
-     * @throws WsDiscoveryServiceDirectoryException 
-     * @throws WsDiscoveryServiceDescriptionException on failure.
+     * {@inheritDoc}
      */
     public void store(WsDiscoveryService service) 
         throws WsDiscoveryServiceDirectoryException {
@@ -228,8 +231,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     }
     
     /**
-     * Remove service from service directory based on endpoint address.
-     * @param address Endpoint address.
+     * {@inheritDoc}
      */
     public void remove(URI address) {
         WsDiscoveryService foundService;
@@ -250,24 +252,21 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     }
 
     /**
-     * Remove service from service directory based on endpoint address.
-     * @param address Endpoint address.
+     * {@inheritDoc}
      */
     public void remove(String address) {
         remove(URI.create(address));
     }
     
     /**
-     * Remove service from service directory based on endpoint address.
-     * @param endpoint Endpoint with address.
+     * {@inheritDoc}
      */
     public void remove(SOAPOverUDPEndpointReferenceType endpoint) {
         remove(endpoint.getAddress());
     }
     
-    /**
-     * Remove service from service directory based on endpoint address.
-     * @param service Service with endpoint address.
+   /**
+     * {@inheritDoc}
      */
     public void remove(WsDiscoveryService service) {
         remove(service.getEndpointReference());
@@ -275,13 +274,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
       
     
     /**
-     * Creates a new service directory containing the services in the directory
-     * that matches the parameters. Matching algorithm is specified in <code>probeScopes</code>.
-     * See also {@link WsDiscoveryScopesType} and {@link WsDiscoveryFactory#getMatcher()}.
-     * @param probeTypes List of probe types to match.
-     * @param probeScopes List of scopes to match.
-     * @return Service directory with matching services. May contain 0 items, but is never <code>null</code>.
-     * @throws WsDiscoveryServiceDirectoryException on failure when creating new service directory.
+     * {@inheritDoc}
      */
     public IWsDiscoveryServiceCollection matchBy(List<QName> probeTypes,
             WsDiscoveryScopesType probeScopes) throws WsDiscoveryServiceDirectoryException {
@@ -303,13 +296,7 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
     }
 
     /**
-     * Creates a new service directory containing the services in the directory
-     * that matches the parameters. 
-     * @param probeTypes List of probe types to match.
-     * @param scopes List of scopes to match.
-     * @param matchBy Matching algorithm - must be specified.
-     * @return Service directory with matching services. May contain 0 items, but is never <code>null</code>.
-     * @throws WsDiscoveryServiceDirectoryException on failure when creating new service directory.
+     * {@inheritDoc}
      */
     public IWsDiscoveryServiceCollection matchBy(List<QName> probeTypes,
             List<URI> scopes, MatchBy matchBy) throws WsDiscoveryServiceDirectoryException {
@@ -326,14 +313,8 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         return matchBy(probeTypes, st);
     }
 
-    /**
-     * Creates a new service collection containing all the services in the directory.
-     * that matches the parameters.
-     * @param probeTypes List of probe types to match.
-     * @param scopes List of scopes to match.
-     * @param matchBy Matching algorithm.
-     * @return Service directory with matching services. May contain 0 items, but is never <code>null</code>.
-     * @throws WsDiscoveryServiceDirectoryException on failure when creating new service directory.
+   /**
+     * {@inheritDoc}
      */
     public IWsDiscoveryServiceCollection matchAll() throws WsDiscoveryServiceDirectoryException {
         IWsDiscoveryServiceCollection d = new WsDiscoveryServiceCollection();
@@ -351,6 +332,9 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         return d;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void addAll(IWsDiscoveryServiceCollection collection)
             throws WsDiscoveryServiceDirectoryException {
         if (collection != null)
@@ -358,6 +342,9 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
                 store(s);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void useStorage(IWsDiscoveryServiceCollection newServiceCollection, boolean addExistingServices) {
         w.lock();
         try {
@@ -369,10 +356,16 @@ public class WsDiscoveryServiceDirectory implements IWsDiscoveryServiceDirectory
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public MatchBy getDefaultMatcher() {
         return defaultMatcher;
     }
 
+    /**
+     * {@inheritDoc} 
+     */
     public void setDefaultMatcher(MatchBy defaultMatcher) {
         this.defaultMatcher = defaultMatcher;
     }
