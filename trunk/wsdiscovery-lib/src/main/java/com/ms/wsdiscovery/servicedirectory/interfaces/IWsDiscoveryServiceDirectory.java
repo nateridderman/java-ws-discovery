@@ -62,6 +62,11 @@ public interface IWsDiscoveryServiceDirectory {
     String getName();
 
     /**
+     * Remove all services from the service directory.
+     */
+    void clear();
+
+    /**
      * Creates a new service collection containing the services in the directory.
      * that matches the parameters. Matching algorithm is specified in <code>probeScopes</code>.
      * See also {@link ScopesType} and {@link WsDiscoveryBuilder#getMatcher(wsdiscovery.xml.jaxb_generated.ScopesType)}.
