@@ -19,12 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.examples;
 
+import com.ms.wsdiscovery.WsDiscoveryConstants;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryFinder;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
+import java.util.logging.Level;
 
 /**
  * An example demonstrating how to use the WsDiscoveryFinder() to find a specific
@@ -43,6 +45,10 @@ public class discovery_using_finder {
         // Create new finder instance. 
         System.out.println("Creating new finder-instance...");
 
+        // Set the logger level
+        // WsDiscoveryConstants.loggerLevel = Level.FINEST;
+
+        // Create finder instance
         WsDiscoveryFinder finder = new WsDiscoveryFinder();
 
         /**

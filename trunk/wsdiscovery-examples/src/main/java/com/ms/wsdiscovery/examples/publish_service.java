@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.ms.wsdiscovery.examples;
 
+import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import com.ms.wsdiscovery.datatypes.WsDiscoveryScopesType;
 import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryService;
 import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectoryException;
+import java.util.logging.Level;
 
 /**
  * How to publish a Web Service with WS-Discovery. See also the example
@@ -41,7 +43,11 @@ public class publish_service {
     public static void main(String[] argv) 
             throws WsDiscoveryServiceDirectoryException, 
             WsDiscoveryNetworkException, InterruptedException, WsDiscoveryXMLException, WsDiscoveryException {
-        
+
+        // Set the logger level
+        //WsDiscoveryConstants.loggerLevel = Level.FINEST;
+
+        // Create WS-Discovery server instance
         WsDiscoveryServer server = WsDiscoveryFactory.createServer();
         
         System.out.println("Starting WS-Discovery server...");
