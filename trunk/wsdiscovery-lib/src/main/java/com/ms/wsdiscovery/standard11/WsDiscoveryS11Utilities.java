@@ -455,4 +455,8 @@ public class WsDiscoveryS11Utilities {
 
                 return wsaEndpoint;
     }
+
+    public static MatchBy getDefaultMatchBy() {
+        return defaultMatcher;
+    }
 }

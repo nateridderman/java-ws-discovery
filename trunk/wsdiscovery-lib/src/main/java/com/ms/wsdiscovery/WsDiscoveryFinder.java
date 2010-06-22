@@ -141,7 +141,7 @@ public class WsDiscoveryFinder {
                     matchBy(portTypes, scopes, matchBy);
         } catch (WsDiscoveryServiceDirectoryException ex) {
             throw new WsDiscoveryException("An error occured while trying to " +
-                    "search the remote service directory.");
+                    "search the remote service directory.", ex);
         }
 
         if (sd.size() > 0)
@@ -210,7 +210,7 @@ public class WsDiscoveryFinder {
             return find(ports, scopes, null, timeoutInMs);
         }
         
-        return find(ports, null, null, timeoutInMs);
+        return find(ports, null, wsd.getDefaultMatchBy(),timeoutInMs);
     }
     /**
      * Find one or more services.

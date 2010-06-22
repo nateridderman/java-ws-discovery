@@ -23,6 +23,8 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryNamespaces;
@@ -48,6 +50,7 @@ import com.skjegstad.soapoverudp.SOAPOverUDP11;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPMessage;
+import java.net.UnknownHostException;
 
 /** 
  * Worker thread for WS-Discovery. Handles WS-Discovery messages received from 
@@ -135,7 +138,9 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
             probe.getJAXBBody().getTypes().addAll(types);
         }
 
+        // When set to anonymous, the response will be sent to the src ip and port used on transport layer
         probe.setReplyTo(anonymousReplyTo);
+
         // Send packet multicast or to proxy
         if (useProxy) {
             logger.fine("Sending probe unicast to proxy at " + useProxyAddress + ":" + useProxyPort);
@@ -393,8 +398,7 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
                 }
             }
 
-            if ((totalMatches.size() > 0) || isProxy) { // Proxy MUST reply with match, even if empty
-                logger.fine("ProbeMatches sent with " + totalMatches.size() + " matches to " + m.getSrcAddress() + ":" + m.getSrcPort());
+            if ((totalMatches.size() > 0) || isProxy) { // Proxy MUST reply with match, even if empty                
                 try {
                     sendProbeMatch(totalMatches, m);
                 } catch (WsDiscoveryException ex) {
@@ -618,6 +622,7 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
     private void sendProbeMatch(IWsDiscoveryServiceCollection matches,
             WsDiscoveryS11SOAPMessage originalMessage) throws WsDiscoveryException {
 
+        
         // Create probe match
         WsDiscoveryS11SOAPMessage<ProbeMatchesType> m;
         try {
@@ -629,11 +634,28 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         // RelatesTo must contain the original MessageID
         m.setRelatesTo(originalMessage.getMessageId());
 
+        // Where to send reply. Defaults to values from transport layer, but can
+        // we overridden by ReplyTo 
+        InetAddress rtHost = originalMessage.getSrcAddress();
+        int rtPort = originalMessage.getSrcPort();
+
         // Set To to ReplyTo, or just leave the anonymous value
         if ((originalMessage.getReplyTo() != null) && (originalMessage.getReplyTo().getAddress() != null)) {
             m.setTo(originalMessage.getReplyTo().getAddress());
-        } else
-            m.setTo(anonymousReplyTo.getAddress());
+
+            // if not anonymous reply-to, set correct port/host for send()
+            if (!originalMessage.getReplyTo().getAddress().equals(anonymousReplyTo.getAddress())) {
+                try {
+                    rtHost = InetAddress.getByName(originalMessage.getReplyTo().getAddress().getHost());
+                } catch (UnknownHostException ex) {
+                    throw new WsDiscoveryNetworkException("Unable to resolve host name in ReplyTo-field.", ex);
+                }
+                rtPort = originalMessage.getReplyTo().getAddress().getPort();
+            }
+        } else {
+            m.setTo(anonymousReplyTo.getAddress());            
+        }
+
         m.setAddAppSequence(true); // MUST be included in ad-hoc, should not be included in managed (using http)
 
         for (WsDiscoveryService service : matches) {
@@ -647,10 +669,10 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
 
             m.getJAXBBody().getProbeMatch().add(match);
         }
+        
         try {
-            // TODO Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
-            // Try to send to the port/address set by ReplyTo. If it is not set, we default to srcPort/address
-            soapOverUDP.send(m, originalMessage.getSrcAddress(), originalMessage.getSrcPort());
+            logger.fine("ProbeMatches sent with " + matches.size() + " matches to " + rtHost.getHostAddress() + ":" + rtPort);
+            soapOverUDP.send(m, rtHost, rtPort);            
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send ProbeMatch",ex);
         }
@@ -725,6 +747,10 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
             throw new WsDiscoveryNetworkException("Don't know how to handle message with element " + message.getJAXBBody().getClass().getName());
         }
 
+    }
+
+    public MatchBy getDefaultMatchBy() {
+        return WsDiscoveryS11Utilities.getDefaultMatchBy();
     }
 
 

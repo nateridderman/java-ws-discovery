@@ -330,4 +330,8 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
     public int getUnicastPort() {
         return dispatchThread.getSOAPOverUDPInstance().getTransport().getUnicastPort();
     }
+
+    public MatchBy getDefaultMatchBy() {
+        return dispatchThread.getDefaultMatchBy();
+    }
 }
