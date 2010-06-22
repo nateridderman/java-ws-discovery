@@ -151,4 +151,6 @@ public interface IWsDiscoveryDispatchThread {
      */
     ISOAPOverUDP getSOAPOverUDPInstance();
 
+    MatchBy getDefaultMatchBy();
+
 }

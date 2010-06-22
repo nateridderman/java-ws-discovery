@@ -691,5 +691,9 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
 
     }
 
+    public MatchBy getDefaultMatchBy() {
+        return WsDiscoveryD2005Utilities.getDefaultMatchBy();
+    }
+
 
 }

@@ -203,6 +203,14 @@ public class WsDiscoveryD2005Utilities {
         return s;
     }
 
+    /**
+     * Return default MatchBy.
+     * @return
+     */
+    public static MatchBy getDefaultMatchBy() {
+        return defaultMatcher;
+    }
+
 
     /**
      * Decide whether a Probe-packet matches a service.

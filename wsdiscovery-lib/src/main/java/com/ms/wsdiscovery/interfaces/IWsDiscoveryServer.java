@@ -218,4 +218,9 @@ public interface IWsDiscoveryServer {
      * @return
      */
     public int getUnicastPort();
+
+    /**
+     * Returns the matcher that is used to match services by default.
+     */
+    public MatchBy getDefaultMatchBy();
 }
