@@ -41,9 +41,9 @@ import java.net.NetworkInterface;
 import java.util.logging.Logger;
 
 /**
- * Implementation of SOAP-over-UDP for WS-Discovery as specified in 
+ * Implementation of SOAP-over-UDP for WS-Discovery as specified in
  * http://schemas.xmlsoap.org/ws/2004/09/soap-over-udp/.
- * 
+ *
  * @author Magnus Skjegstad
  */
 public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
@@ -51,7 +51,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
      * Instance of Logger used for debug messages.
      */
     protected Logger logger;
-    
+
     /**
      * Set to true after init() has been called.
      */
@@ -68,7 +68,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
      * SOAPOverUDP configuration.
      */
     SOAPOverUDPConfiguration soapConfig = null;
-    
+
     // Threads and stuff
     private SOAPReceiverThread multicastReceiverThread; // Thread listening for incoming multicast messages
     private SOAPReceiverThread unicastReceiverThread; // Thread listening for incoming unicast messages
@@ -80,7 +80,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
     private int multicastPort;
     private InetAddress multicastAddress;
     private int unicastPort;
-    
+
     /**
      * Empty constructor for use with newInstance(). Call init() to initialize the
      * new instance.
@@ -88,26 +88,26 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
     public SOAPOverUDPTransport() {
         super();
     }
-            
+
     @Override
     public void finalize() throws Throwable {
-        try {            
+        try {
             this.done();
         } finally {
             super.finalize();
         }
     }
-    
+
     /**
-     * Put SOAP-message in send queue. 
-     * 
+     * Put SOAP-message in send queue.
+     *
      * @param message SOAP message.
      * @param blockUntilSent When true the method will wait until the send-queue is empty. False returns immediately.
      * @throws java.lang.InterruptedException if interrupted while waiting for the message to be sent.
      */
     public void send(ISOAPOverUDPNetworkMessage message, boolean blockUntilSent) throws InterruptedException {
         // Multicast
-        if (message.getDstAddress().equals(this.multicastAddress)) { 
+        if (message.getDstAddress().equals(this.multicastAddress)) {
             outMulticastQueue.add(new SOAPOverUDPQueuedNetworkMessage(soapConfig, message, true));
             if (blockUntilSent)
                 while (!outMulticastQueue.isEmpty())
@@ -121,25 +121,25 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
                 while (!outUnicastQueue.isEmpty())
                     synchronized (unicastSenderThread) {
                         unicastSenderThread.wait();
-                    }            
+                    }
         }
     }
     /**
      * Put SOAP message in send-queue. Returns immediately.
-     * 
+     *
      * @param message
      */
     public void send(ISOAPOverUDPNetworkMessage message) {
         try {
             send(message, false);
         } catch (InterruptedException ex) {
-            // Will never be thrown, as blockUntilSent is false            
+            // Will never be thrown, as blockUntilSent is false
         }
     }
-    
+
     /**
      * Receive a SOAP message.
-     * 
+     *
      * @param timeoutInMillis Time to wait for a message.
      * @return SOAP message. <code>null</code> on timeout.
      * @throws java.lang.InterruptedException if interrupted while waiting for data.
@@ -147,10 +147,10 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
     public ISOAPOverUDPNetworkMessage recv(long timeoutInMillis) throws InterruptedException {
         return inQueue.poll(timeoutInMillis, TimeUnit.MILLISECONDS);
     }
-    
+
     /**
      * Receive a SOAP message.
-     * 
+     *
      * @return SOAP message. <code>null</code> if interrupted while waiting.
      */
     public ISOAPOverUDPNetworkMessage recv() {
@@ -174,7 +174,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
         multicastSenderThread.start();
         unicastReceiverThread.start();
         unicastSenderThread.start();
-        
+
         // Wait for threads to get into main loop
         while ((!multicastReceiverThread.isRunning()) ||
                (!multicastSenderThread.isRunning()) ||
@@ -190,7 +190,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
     }
 
     /**
-     * Tell transport layer to stop. Returns immediately. Use 
+     * Tell transport layer to stop. Returns immediately. Use
      * {@link SOAPOverUDPTransport#isRunning()} to determine when thread has ended.
      */
     public void done() {
@@ -266,6 +266,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
         this.multicastAddress = multicastAddress;
 
         MulticastSocket multicastReceiveSocket = null;
+        MulticastSocket multicastSendSocket = null;
         DatagramSocket mainSocket = null;
 
         try {
@@ -281,14 +282,24 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
                 throw new SOAPOverUDPException("Unable to bind multicast socket to multicast port.");
             multicastReceiveSocket.joinGroup(multicastAddress);
         } catch (IOException ex) {
-            throw new SOAPOverUDPException("Unable to open multicast socket.", ex);
+            throw new SOAPOverUDPException("Unable to open multicast receive socket.", ex);
+        }
+        
+        try {
+            multicastSendSocket = new MulticastSocket(); // reuse address is called automatically
+            if (multicastInterface != null)
+                multicastSendSocket.setNetworkInterface(multicastInterface);
+            multicastSendSocket.setTimeToLive(1); // suggested by WS-Discovery spec
+        } catch (IOException ex) {
+            throw new SOAPOverUDPException("Unable to open multicast send socket.", ex);
         }
 
         try {
-            mainSocket = new DatagramSocket();
+            mainSocket = new DatagramSocket(null); // binds to any available port
             mainSocket.setReuseAddress(true);
             if (!mainSocket.getReuseAddress())
                 throw new SOAPOverUDPException("Platform doesn't support SO_REUSEADDR");
+            mainSocket.bind(multicastSendSocket.getLocalSocketAddress());
             this.unicastPort = mainSocket.getLocalPort();
            // mainSocket.bind(new InetSocketAddress(multicastPort));
            // if (mainSocket.getLocalPort() != multicastPort)
@@ -296,19 +307,20 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
         } catch (IOException ex) {
             throw new SOAPOverUDPException("Unable to open unicast socket.", ex);
         }
-
+        
         try {
             multicastReceiverThread = new SOAPReceiverThread("multicast_recv", inQueue, multicastReceiveSocket, logger);
         } catch (SocketException ex) {
             throw new SOAPOverUDPException("Unable to start multicast receiver thread", ex);
         }
+        
+        multicastSenderThread = new SOAPSenderThread("multicast_send",
+                        outMulticastQueue, multicastSendSocket, logger);
 
         unicastSenderThread = new SOAPSenderThread("unicast_send",
-                    outUnicastQueue, mainSocket, logger);
-        multicastSenderThread = new SOAPSenderThread("multicast_send",
-                        outMulticastQueue, mainSocket, logger);
+                    outUnicastQueue, mainSocket, logger);        
         try {
-            unicastReceiverThread = new SOAPReceiverThread("unicast_recv", inQueue, multicastSenderThread.getSocket(), logger);
+            unicastReceiverThread = new SOAPReceiverThread("unicast_recv", inQueue, mainSocket, logger);
         } catch (SocketException ex) {
             throw new SOAPOverUDPException("Unable to start unicast receiver thread", ex);
         }
@@ -349,5 +361,5 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
 
     public InetAddress getMulticastAddress() {
         return multicastAddress;
-    }        
+    }
 }
