@@ -110,7 +110,7 @@ public interface ISOAPOverUDPTransport extends ISOAPOverUDPConfigurable {
      * @throws SOAPOverUDPException if an error occured while opening
      * the sockets or creating child threads.
      */
-    void init(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, Logger logger) throws SOAPOverUDPException;
+    void init(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, int multicastTtl, Logger logger) throws SOAPOverUDPException;
 
     /**
      * Returns true after init() has been called successfully.

@@ -64,6 +64,8 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
 
     protected Charset encoding = Charset.defaultCharset();
 
+    protected int multicastTtl;
+
     /**
      * SOAPOverUDP configuration.
      */
@@ -253,7 +255,10 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
         return unicastPort;
     }
 
-    public void init(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, Logger logger) throws SOAPOverUDPException {
+    /**
+     * @inheritDoc
+     */
+    public void init(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, int multicasTtl, Logger logger) throws SOAPOverUDPException {
         if (soapConfig == null)
             throw new SOAPOverUDPException("SOAPOverUDP not configured.");
 
@@ -264,6 +269,10 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
 
         this.multicastPort = multicastPort;
         this.multicastAddress = multicastAddress;
+        if (multicastTtl > 0)
+            this.multicastTtl = multicastTtl;
+        else
+            this.multicastTtl = 1; // recommended by spec
 
         MulticastSocket multicastReceiveSocket = null;
         MulticastSocket multicastSendSocket = null;
@@ -276,7 +285,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
             multicastReceiveSocket.setReuseAddress(true); // Required by spec.
             if (!multicastReceiveSocket.getReuseAddress())
                 throw new SOAPOverUDPException("Platform does not support SO_REUSEADDR");
-            multicastReceiveSocket.setTimeToLive(1); // Suggested by spec
+            multicastReceiveSocket.setTimeToLive(this.multicastTtl); // Suggested by spec
             multicastReceiveSocket.bind(new InetSocketAddress(multicastPort));
             if (multicastReceiveSocket.getLocalPort() != multicastPort)
                 throw new SOAPOverUDPException("Unable to bind multicast socket to multicast port.");
@@ -289,7 +298,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
             multicastSendSocket = new MulticastSocket(); // reuse address is called automatically
             if (multicastInterface != null)
                 multicastSendSocket.setNetworkInterface(multicastInterface);
-            multicastSendSocket.setTimeToLive(1); // suggested by WS-Discovery spec
+            multicastSendSocket.setTimeToLive(this.multicastTtl); // suggested by WS-Discovery spec
         } catch (IOException ex) {
             throw new SOAPOverUDPException("Unable to open multicast send socket.", ex);
         }
