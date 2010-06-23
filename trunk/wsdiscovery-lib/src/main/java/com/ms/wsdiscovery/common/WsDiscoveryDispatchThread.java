@@ -257,7 +257,7 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
         try {
             try {
                 // Attempt to start transport layer
-                this.soapOverUDP.start(WsDiscoveryConstants.multicastInterface, WsDiscoveryConstants.multicastPort, WsDiscoveryConstants.multicastAddress, logger.getLogger());
+                this.soapOverUDP.start(WsDiscoveryConstants.multicastInterface, WsDiscoveryConstants.multicastPort, WsDiscoveryConstants.multicastAddress, WsDiscoveryConstants.multicastTtl, logger.getLogger());
             } catch (SOAPOverUDPException ex) {
                 logger.severe(ex.getMessage());
                 ex.printStackTrace();
