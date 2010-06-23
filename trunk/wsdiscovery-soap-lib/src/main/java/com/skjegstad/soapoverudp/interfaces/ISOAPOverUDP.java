@@ -33,7 +33,7 @@ public interface ISOAPOverUDP {
     public Charset getEncoding();
     public ISOAPOverUDPMessage createSOAPOverUDPMessage() throws SOAPOverUDPException;
     public ISOAPOverUDPMessage createSOAPOverUDPMessageFromXML(String soapAsXML) throws SOAPOverUDPException;
-    public void start(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, Logger logger) throws SOAPOverUDPException;
+    public void start(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, int multicastTtl, Logger logger) throws SOAPOverUDPException;
     public void send(ISOAPOverUDPMessage soapMessage, InetAddress destAddress, int destPort) throws SOAPOverUDPException;
     public void sendBlocking(ISOAPOverUDPMessage soapMessage, InetAddress destAddress, int destPort) throws SOAPOverUDPException, InterruptedException;
     public void sendMulticast(ISOAPOverUDPMessage soapMessage) throws SOAPOverUDPException;

@@ -45,13 +45,13 @@ public abstract class SOAPOverUDP implements ISOAPOverUDP {
     private LinkedList<URI> messagesReceived = new LinkedList<URI>(); // list of received message IDs
     protected Logger logger;
 
-    public void start(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, Logger logger) throws SOAPOverUDPException {
+    public void start(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, int multicastTtl, Logger logger) throws SOAPOverUDPException {
         if (logger != null)
             synchronized (logger) {
                 logger.finer("Starting transport layer...");
             }
         this.logger = logger;
-        transport.init(multicastInterface, multicastPort, multicastAddress, logger);
+        transport.init(multicastInterface, multicastPort, multicastAddress, multicastTtl, logger);
         transport.start();
     }
 
