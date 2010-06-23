@@ -74,7 +74,7 @@ public class WsDiscoveryConstants {
      * encoding.
      */
     public static Charset defaultEncoding = null; // Set later, in static{}.
-    
+       
     /**
      * Instance name used by JAXB for marshall/unmarshalling.
      */
@@ -120,6 +120,13 @@ public class WsDiscoveryConstants {
      * defaults to 3702.
      */
     public static int multicastPort = 3702;
+
+    /**
+     * Default TTL used for SOAP-over-UDP multicast messages. The
+     * specification recommends setting this to 1 to ensure that
+     * multicast traffic is not forwarded to other networks.
+     */
+    public static int multicastTtl = 1; 
 
     /**
      * The address used for the proxy service if it is enabled.
