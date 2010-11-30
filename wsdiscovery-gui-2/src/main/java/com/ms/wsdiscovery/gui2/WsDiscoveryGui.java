@@ -309,6 +309,11 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
             } catch (WsDiscoveryException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage());
                 log_fatal(ex.getMessage());
+                Throwable cause = ex.getCause();
+                while (cause != null) {
+                    log_fatal(cause.getClass() + ": " + ex.getCause().getMessage());
+                    cause = cause.getCause();
+                }
                 log_fine("Stacktrace:");
                 for (StackTraceElement e : ex.getStackTrace())
                     log_fine(e.toString());
