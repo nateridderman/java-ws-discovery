@@ -33,7 +33,7 @@ import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
  * 
  * @author Magnus Skjegstad
  */
-public abstract class SOAPOverUDPTransportZlib extends SOAPOverUDPTransport implements ISOAPOverUDPTransport, ISOAPOverUDPConfigurable {
+public class SOAPOverUDPTransportZlib extends SOAPOverUDPTransport implements ISOAPOverUDPTransport, ISOAPOverUDPConfigurable {
     
     public SOAPOverUDPTransportZlib() {
         super();
@@ -50,9 +50,11 @@ public abstract class SOAPOverUDPTransportZlib extends SOAPOverUDPTransport impl
     public ISOAPOverUDPNetworkMessage recv(long timeoutInMillis) throws InterruptedException {
         ISOAPOverUDPNetworkMessage nm = super.recv(timeoutInMillis);
         
-        String data = decompress(nm.getPayload());
-        nm.setMessage(data, encoding);
-        
+        if (nm != null && nm.getPayload() != null) {
+            String data = decompress(nm.getPayload());
+            nm.setMessage(data, encoding);
+        }
+                
         return nm;
     }
 
@@ -86,6 +88,8 @@ public abstract class SOAPOverUDPTransportZlib extends SOAPOverUDPTransport impl
             int len = decompresser.inflate(data);
             ret = new String(data, 0, len, encoding);
         } catch (DataFormatException ex) {
+            if (logger != null)
+                logger.warning("decompress(): " + ex.getMessage());
             ret = null;
         }
         decompresser.end();
