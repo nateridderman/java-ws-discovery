@@ -94,7 +94,8 @@ public class WsDiscoveryS11Utilities {
             ProbeMatchType m = (ProbeMatchType)jaxbbody;
             service.setEndpointReference(createSOAPOverUDPEndpointReferenceType(m.getEndpointReference()));
             service.setPortTypes(m.getTypes());
-            service.setScopesType(createWsDiscoveryScopesObject(m.getScopes()));
+            if (m.getScopes() != null)
+              service.setScopesType(createWsDiscoveryScopesObject(m.getScopes()));
             service.setXAddrs(m.getXAddrs());
             service.setMetadataVersion(m.getMetadataVersion());
         } else
