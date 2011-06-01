@@ -44,7 +44,7 @@ public class WsDiscoveryConstants {
      * Select the transport protocol to use when sending SOAP-messages. See 
      * {@link SOAPOverUDPTransportType} for valid transport types.
      */
-    public final static WsDiscoveryTransportTypes defaultTransportType = WsDiscoveryTransportTypes.UNCOMPRESSED;
+    public static WsDiscoveryTransportTypes defaultTransportType = WsDiscoveryTransportTypes.UNCOMPRESSED;
 
     /**
      * Builder with helpers used for constructing XML
@@ -59,14 +59,14 @@ public class WsDiscoveryConstants {
     /**
      * WS-Discovery namespace.
      */
-    public final static WsDiscoveryNamespaces defaultNsDiscovery =
+    public static WsDiscoveryNamespaces defaultNsDiscovery =
             WsDiscoveryNamespaces.WS_DISCOVERY_2009_01;
     
     /**
      * SOAP protocol. See {@link SOAPConstants} for valid values. Note that 
      * Windows Vista as of 2008-07-22 only appears to respond to SOAP 1.2.
      */
-    public final static String defaultSoapProtocol = 
+    public static String defaultSoapProtocol = 
             SOAPConstants.SOAP_1_2_PROTOCOL; 
     
     /**
