@@ -25,6 +25,7 @@ import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDP;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPMessage;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
 import com.skjegstad.soapoverudp.messages.SOAPOverUDPWSA200408Message;
+import java.nio.charset.Charset;
 import javax.xml.soap.SOAPConstants;
 
 /**
@@ -34,7 +35,7 @@ import javax.xml.soap.SOAPConstants;
  * @author Magnus Skjegstad
  */
 public class SOAPOverUDPdraft2004 extends SOAPOverUDP implements ISOAPOverUDP {
-    public SOAPOverUDPdraft2004(ISOAPOverUDPTransport transportLayer) {
+    public SOAPOverUDPdraft2004(ISOAPOverUDPTransport transportLayer, Charset encoding) {
         super();
 
         this.soapConfig = new SOAPOverUDPConfiguration();
@@ -47,10 +48,8 @@ public class SOAPOverUDPdraft2004 extends SOAPOverUDP implements ISOAPOverUDP {
 
         this.setTransport(transportLayer);
         this.getTransport().setConfiguration(soapConfig);
-    }
-
-    public SOAPOverUDPdraft2004() {
-        this(new SOAPOverUDPTransport());
+        
+        this.setEncoding(encoding);
     }
 
     public ISOAPOverUDPMessage createSOAPOverUDPMessageFromXML(String soapAsXML) throws SOAPOverUDPException {

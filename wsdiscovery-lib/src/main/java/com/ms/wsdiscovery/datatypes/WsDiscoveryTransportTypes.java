@@ -24,6 +24,7 @@ import com.skjegstad.soapoverudp.SOAPOverUDPdraft2004;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
 import com.skjegstad.soapoverudp.transport.SOAPOverUDPTransport;
 import com.skjegstad.soapoverudp.transport.SOAPOverUDPTransportZlib;
+import com.skjegstad.soapoverudp.transport.SOAPOverUDPTransportEfx;
 
 /**
  * Contains supported transport protocols. Transport types must implement 
@@ -39,7 +40,10 @@ public enum WsDiscoveryTransportTypes {
     /**
      * Compressed version of SOAP-over-UDP. See {@link SOAPOverUDPTransportZlib}.
      */
-    COMPRESSED_ZLIB(SOAPOverUDPTransportZlib.class);
+	COMPRESSED_ZLIB(SOAPOverUDPTransportZlib.class),
+	COMPRESSED_EFX(SOAPOverUDPTransportEfx.class);
+
+
     
         
     private final Class transportLayer;

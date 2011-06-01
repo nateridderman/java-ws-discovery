@@ -6,9 +6,14 @@
 package com.ms.wsdiscovery.datatypes;
 
 import com.ms.wsdiscovery.common.WsDiscoveryUtilities;
+import com.ms.wsdiscovery.draft2005.WsDiscoveryD2005DispatchThread;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
+import com.ms.wsdiscovery.exception.WsDiscoveryNetworkException;
 import com.ms.wsdiscovery.interfaces.IWsDiscoveryDispatchThread;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
+import com.ms.wsdiscovery.standard11.WsDiscoveryS11DispatchThread;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
+import java.nio.charset.Charset;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -83,6 +88,16 @@ public enum WsDiscoveryNamespaces {
 
     public IWsDiscoveryDispatchThread getNewDispatchThreadInstance() throws InstantiationException, IllegalAccessException {
         return (IWsDiscoveryDispatchThread) dispatchThreadClass.newInstance();
+    }
+    
+    public IWsDiscoveryDispatchThread getNewDispatchThreadInstance(ISOAPOverUDPTransport transportType, Charset encoding) throws WsDiscoveryNetworkException, InstantiationException {
+        if (dispatchThreadClass.equals(WsDiscoveryS11DispatchThread.class)) {
+            return new WsDiscoveryS11DispatchThread(transportType, encoding);
+        } else
+        if (dispatchThreadClass.equals(WsDiscoveryD2005DispatchThread.class)) {
+            return new WsDiscoveryD2005DispatchThread(transportType, encoding);
+        } else 
+            throw new InstantiationException("Unknown dispatch thread class");
     }
 
     public MatchBy getDefaultMatcher() {

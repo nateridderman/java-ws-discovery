@@ -58,16 +58,7 @@ public abstract class WsDiscoveryDispatchThread extends Thread implements IWsDis
     protected WsDiscoveryLogger logger = new WsDiscoveryLogger(this.getName());
     protected ISOAPOverUDP soapOverUDP;
 
-    public WsDiscoveryDispatchThread(ISOAPOverUDP soapOverUDP) throws WsDiscoveryNetworkException {
-        this.soapOverUDP = soapOverUDP;
-        try {
-            this.soapOverUDP.setTransport(WsDiscoveryConstants.defaultTransportType.newInstance());
-        } catch (InstantiationException ex) {
-            throw new WsDiscoveryNetworkException("Unable to instantiate transport layer", ex);
-        } catch (IllegalAccessException ex) {
-            throw new WsDiscoveryNetworkException("Illegal Access while instantiating transport layer", ex);
-        }
-        this.soapOverUDP.setEncoding(WsDiscoveryConstants.defaultEncoding);
+    public WsDiscoveryDispatchThread() throws WsDiscoveryNetworkException {
         this.setDaemon(true);
     }
 

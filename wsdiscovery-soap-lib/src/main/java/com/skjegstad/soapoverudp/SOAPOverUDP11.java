@@ -28,6 +28,7 @@ import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
 import com.skjegstad.soapoverudp.messages.SOAPOverUDPWSA200508Message;
 import com.skjegstad.soapoverudp.transport.SOAPOverUDPTransport;
 import java.net.URI;
+import java.nio.charset.Charset;
 import javax.xml.soap.SOAPConstants;
 
 /**
@@ -39,7 +40,7 @@ import javax.xml.soap.SOAPConstants;
 public class SOAPOverUDP11 extends SOAPOverUDP implements ISOAPOverUDP {
     private URI anonymousTo = URI.create(SOAPOverUDPNamespaces.WS_ADDRESSING_2005_08.getNamespace() + "/role/anonymous");
 
-    public SOAPOverUDP11(ISOAPOverUDPTransport transportLayer) {
+    public SOAPOverUDP11(ISOAPOverUDPTransport transportLayer, Charset encoding) {
         soapConfig = new SOAPOverUDPConfiguration();
 
         soapConfig.setMulticastUDPRepeat(2);
@@ -50,12 +51,9 @@ public class SOAPOverUDP11 extends SOAPOverUDP implements ISOAPOverUDP {
 
         this.setTransport(transportLayer);
         this.getTransport().setConfiguration(soapConfig);
+        
+        this.setEncoding(encoding);
     }
-
-    public SOAPOverUDP11() {
-        this(new SOAPOverUDPTransport());
-    }
-
 
     public ISOAPOverUDPMessage createSOAPOverUDPMessageFromXML(String soapAsXML) throws SOAPOverUDPException {
         return new SOAPOverUDPWSA200508Message(soapAsXML, SOAPConstants.SOAP_1_2_PROTOCOL, encoding);
