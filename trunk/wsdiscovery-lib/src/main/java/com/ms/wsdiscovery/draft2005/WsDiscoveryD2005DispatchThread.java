@@ -44,10 +44,13 @@ import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollect
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
+import com.skjegstad.soapoverudp.SOAPOverUDP11;
 import com.skjegstad.soapoverudp.SOAPOverUDPdraft2004;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPMessage;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
+import java.nio.charset.Charset;
 
 /** 
  * Worker thread for WS-Discovery. Handles WS-Discovery messages received from 
@@ -80,9 +83,47 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * Thrown when unable to instantiate the transport layer.
      */
     public WsDiscoveryD2005DispatchThread() throws WsDiscoveryNetworkException {
-        super(new SOAPOverUDPdraft2004());
+        super();
+        
+        try {
+            this.soapOverUDP = new SOAPOverUDPdraft2004(WsDiscoveryConstants.defaultTransportType.newInstance(), 
+                WsDiscoveryConstants.defaultEncoding);
+        } catch (InstantiationException ex) {
+            throw new WsDiscoveryNetworkException("Unable to instantiate transport layer", ex);
+        } catch (IllegalAccessException ex) {
+            throw new WsDiscoveryNetworkException("Illegal Access while instantiating transport layer", ex);
+        }        
+        
         localServices = new WsDiscoveryServiceDirectory(defaultMatcher);
         serviceDirectory = new WsDiscoveryServiceDirectory(defaultMatcher);
+        
+        this.setDaemon(true);
+    }
+    
+    /**
+     * Creates a new {@link DispatchThread} instance.
+     *
+     * A proxy service description will also be created, but it will not be used until
+     * enableProxyAnnouncements() is called. The IP of the proxy service will be
+     * enumerated from the constants given in WsDiscoveryConstants, according to
+     * the following rules:<br>
+     * <li>Try to use proxyAddress</li>
+     * <li>If proxyAddress is null, try to use the first IP mapped to multicastInterface</li>
+     * <li>If multicastInterface is null, use the first non-loopback IP-address returned from NetworkInterface.getNetworkInterfaces().</li>
+     * <br>
+     * 
+     * @throws wsdiscovery.network.exception.WsDiscoveryNetworkException 
+     * Thrown when unable to instantiate the transport layer.
+     */
+    public WsDiscoveryD2005DispatchThread(ISOAPOverUDPTransport transportType, Charset encoding) throws WsDiscoveryNetworkException {
+        super();
+        
+        this.soapOverUDP = new SOAPOverUDPdraft2004(transportType, 
+            encoding);
+        
+        localServices = new WsDiscoveryServiceDirectory(defaultMatcher);
+        serviceDirectory = new WsDiscoveryServiceDirectory(defaultMatcher);
+        
         this.setDaemon(true);
     }
 

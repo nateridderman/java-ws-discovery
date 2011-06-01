@@ -37,6 +37,13 @@
             <version>4.4</version>
             <scope>test</scope>
         </dependency>
+	<dependency>
+      <groupId>com.siemens</groupId>
+      <artifactId>exificient</artifactId>
+      <version>0.7</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/exificient/exificient.jar</systemPath>
+    </dependency>
     </dependencies>
 
     <build>

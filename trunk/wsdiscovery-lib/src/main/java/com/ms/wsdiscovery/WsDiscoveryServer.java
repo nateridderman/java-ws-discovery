@@ -34,6 +34,7 @@ import com.ms.wsdiscovery.servicedirectory.exception.WsDiscoveryServiceDirectory
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceCollection;
 import com.ms.wsdiscovery.servicedirectory.interfaces.IWsDiscoveryServiceDirectory;
 import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
+import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
 import java.net.InetAddress;
 
 /** 
@@ -53,6 +54,18 @@ public class WsDiscoveryServer implements IWsDiscoveryServer {
     public WsDiscoveryServer() throws WsDiscoveryException {
         try {
             dispatchThread = WsDiscoveryConstants.defaultNsDiscovery.getNewDispatchThreadInstance();
+        } catch (Exception ex) {
+            throw new WsDiscoveryException("Unable to create WS-Discovery dispatch thread instance.", ex);
+        }
+    }
+    
+    /**
+     * Constructor
+     * @throws WsDiscoveryException
+     */
+    public WsDiscoveryServer(ISOAPOverUDPTransport transportType) throws WsDiscoveryException {
+        try {
+            dispatchThread = WsDiscoveryConstants.defaultNsDiscovery.getNewDispatchThreadInstance(transportType, WsDiscoveryConstants.defaultEncoding);
         } catch (Exception ex) {
             throw new WsDiscoveryException("Unable to create WS-Discovery dispatch thread instance.", ex);
         }
