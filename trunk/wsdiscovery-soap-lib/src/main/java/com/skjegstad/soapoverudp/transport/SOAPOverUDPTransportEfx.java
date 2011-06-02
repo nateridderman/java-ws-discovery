@@ -34,7 +34,7 @@ import javax.xml.transform.stream.StreamResult;
 /**
  * An implementation of SOAP-over-UDP using EFX-compression.
  *
- * @author
+ * @author Frank T. Johnsen
  */
 public class SOAPOverUDPTransportEfx extends SOAPOverUDPTransport implements ISOAPOverUDPTransport, ISOAPOverUDPConfigurable {
 
@@ -75,7 +75,7 @@ public class SOAPOverUDPTransportEfx extends SOAPOverUDPTransport implements ISO
     public void send(ISOAPOverUDPNetworkMessage message, boolean blockUntilSent)
             throws InterruptedException {
 
-	System.err.println("EFX going to compress:\n---\n"+message.getMessage(encoding)+"\n---\n");
+	//System.err.println("EFX going to compress:\n---\n"+message.getMessage(encoding)+"\n---\n");
         byte[] payload = compress(message.getMessage(encoding));
         ISOAPOverUDPNetworkMessage nm = new SOAPOverUDPNetworkMessage(
                 payload, payload.length,
@@ -90,7 +90,7 @@ public class SOAPOverUDPTransportEfx extends SOAPOverUDPTransport implements ISO
         try {
             s = efx.decompress(message);
 	    s = s.substring(38);
-	    System.err.println("EFX decompressed:\n---\n"+s+"\n---\n");
+	    //System.err.println("EFX decompressed:\n---\n"+s+"\n---\n");
         } catch (EfficientXMLException ex) {
             Logger.getLogger(SOAPOverUDPTransportEfx.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println("FATAL: " + ex.getMessage());
@@ -112,11 +112,6 @@ public class SOAPOverUDPTransportEfx extends SOAPOverUDPTransport implements ISO
     }
 }
 
-/**
- *
- * @author Frank T. Johnsen
- */
-
 class EfficientXMLException extends Exception {
     public EfficientXMLException() {
         super();
@@ -135,10 +130,6 @@ class EfficientXMLException extends Exception {
     }
 }
 
-/**
- *
- * @author Frank T. Johnsen
- */
 class EfficientXML {
             
     // decompress a byte array to an xml document using schema (or not)

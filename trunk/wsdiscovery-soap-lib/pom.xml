@@ -37,13 +37,25 @@
             <version>4.4</version>
             <scope>test</scope>
         </dependency>
-	<dependency>
-      <groupId>com.siemens</groupId>
-      <artifactId>exificient</artifactId>
-      <version>0.7</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/exificient/exificient.jar</systemPath>
-    </dependency>
+		<!-- EXIFicient -->
+		<dependency>
+			<groupId>com.siemens.ct.exi</groupId>
+			<artifactId>exificient</artifactId>
+			<version>0.7</version>
+		</dependency>
+
+		<!-- EXIFicient is not a Maven project, requires Xerces. -->
+		<dependency>
+		    <groupId>xerces</groupId>
+		    <artifactId>xercesImpl</artifactId>
+		    <version>xerces-exificient</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>xml-apis</groupId>
+		    <artifactId>xml-apis</artifactId>
+		    <version>apis-exificient</version>
+		</dependency>
     </dependencies>
 
     <build>
