@@ -36,17 +36,15 @@ public enum WsDiscoveryTransportTypes {
     /**
      * Plain SOAP-over-UDP. See {@link SOAPOverUDPTransport}.
      */
-    UNCOMPRESSED(SOAPOverUDPTransport.class),
+    UNCOMPRESSED(SOAPOverUDPTransport.class, "Uncompressed"),
     /**
      * Compressed version of SOAP-over-UDP. See {@link SOAPOverUDPTransportZlib}.
      */
-	COMPRESSED_ZLIB(SOAPOverUDPTransportZlib.class),
-	COMPRESSED_EFX(SOAPOverUDPTransportEfx.class);
+    COMPRESSED_ZLIB(SOAPOverUDPTransportZlib.class, "ZLIB"),
+    COMPRESSED_EFX(SOAPOverUDPTransportEfx.class, "EFX");
 
-
-    
-        
     private final Class transportLayer;
+    private final String friendlyName;
     
     /**
      * Get a new instance of this transport type.
@@ -58,8 +56,13 @@ public enum WsDiscoveryTransportTypes {
     public ISOAPOverUDPTransport newInstance() throws InstantiationException, IllegalAccessException {
         return (ISOAPOverUDPTransport)transportLayer.newInstance();
     }
+
+    public String getFriendlyName() {
+        return friendlyName;
+    }        
         
-    WsDiscoveryTransportTypes(Class layer) {
-        transportLayer = layer;
+    WsDiscoveryTransportTypes(Class layer, String friendlyName) {
+        this.transportLayer = layer;
+        this.friendlyName = friendlyName;
     }
 }
