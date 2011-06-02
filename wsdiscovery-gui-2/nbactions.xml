@@ -8,7 +8,7 @@
             </goals>
             <properties>
                 <exec.classpathScope>runtime</exec.classpathScope>
-                <exec.args>-classpath %classpath com.ms.wsdiscovery.gui2.WsDiscoveryGui</exec.args>
+                <exec.args>-Dip=10.0.1.55 -Dcompression=COMPRESSED_EFX -cp lib/exificient/exificient.jar -classpath %classpath com.ms.wsdiscovery.gui2.WsDiscoveryGui</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
@@ -20,9 +20,21 @@
             </goals>
             <properties>
                 <exec.classpathScope>runtime</exec.classpathScope>
-                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.ms.wsdiscovery.gui2.WsDiscoveryGui</exec.args>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -Dip=10.0.1.55 -Dcompression=COMPRESSED_EFX -cp lib/exificient/exificient.jar -classpath %classpath com.ms.wsdiscovery.gui2.WsDiscoveryGui</exec.args>
                 <jpda.listen>true</jpda.listen>
                 <exec.executable>java</exec.executable>
+            </properties>
+        </action>
+        <action>
+            <actionName>profile</actionName>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.1.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.args>${profiler.args} -Dip=10.0.1.55 -Dcompression=COMPRESSED_EFX -cp lib/exificient/exificient.jar -classpath %classpath com.ms.wsdiscovery.gui2.WsDiscoveryGui</exec.args>
+                <profiler.action>profile</profiler.action>
+                <exec.executable>${profiler.java}</exec.executable>
             </properties>
         </action>
     </actions>

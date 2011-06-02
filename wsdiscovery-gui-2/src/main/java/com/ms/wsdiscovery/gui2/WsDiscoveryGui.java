@@ -1,7 +1,7 @@
 /*
 WsDiscoveryGui.java
 
-Copyright (C) 2008-2009 Magnus Skjegstad
+Copyright (C) 2008-2011 Magnus Skjegstad
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -22,6 +22,7 @@ package com.ms.wsdiscovery.gui2;
 import com.ms.wsdiscovery.WsDiscoveryFactory;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.WsDiscoveryServer;
+import com.ms.wsdiscovery.datatypes.WsDiscoveryTransportTypes;
 import com.ms.wsdiscovery.exception.WsDiscoveryException;
 import com.ms.wsdiscovery.exception.WsDiscoveryXMLException;
 import com.ms.wsdiscovery.gui2.dialogs.WsDiscoveryCustomProbeDialog;
@@ -34,9 +35,16 @@ import com.ms.wsdiscovery.servicedirectory.matcher.MatchBy;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -809,10 +817,125 @@ public class WsDiscoveryGui extends javax.swing.JFrame {
                 }});
     }//GEN-LAST:event_buttonSendCustomProbeActionPerformed
 
+    public static void showHelp(String message, boolean exit) {
+        System.out.println("WsDiscoveryGui 2 (c) Magnus Skjegstad\n");
+        if (message != null)
+            System.out.println(message + "\n");        
+        
+        System.out.println(
+                "Available parameters:\n" +
+                        "\tip OR if        The IP of the node OR the network interface name (see list below).\n" +
+                        "\tcompression     The compression type to use for SOAP messages. Default is none.\n" +
+                        "\n" +
+                        "On the command line, the parameters must be given before the Java-class name, using -D.\nAll parameters are case-sensitive.\n"
+        );
+        
+        System.out.println("\nValid compression types:");
+        for (WsDiscoveryTransportTypes t : WsDiscoveryTransportTypes.values()) {
+            System.out.println("\t" + t.name());
+        }
+        
+        System.out.println("\nValid network interfaces:");
+        try {
+            Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+            while (e.hasMoreElements()) {
+                NetworkInterface n = e.nextElement();
+                String ips = "";
+                for (InterfaceAddress ia : n.getInterfaceAddresses()) {
+                    ips += "\t\t" + ia.getAddress().toString();
+                    if (ia.getAddress() instanceof Inet6Address)
+                        ips += " (IPv6)";
+                    ips += "\n";
+                }
+                System.out.println("\t" + n.getDisplayName());
+                System.out.print(ips);
+            }
+        } catch (SocketException ex) {
+            System.out.println("Unable to enumerate network interfaces. Got socket exception.");
+            ex.printStackTrace(System.err);
+        }
+        
+        if (exit)
+            System.exit(-1);
+    }
+    
+    public static NetworkInterface determineNetworkInterface(String ni, String ip) {
+        NetworkInterface res = null;
+
+        // ni takes presidence
+        if (ni != null && !ni.trim().equals("")) {
+            try {
+                res = NetworkInterface.getByName(ni);
+            } catch (SocketException ex) {
+                ex.printStackTrace();
+                System.exit(-1);
+            }
+            if (res == null)
+                showHelp("# FATAL: Network interface \"" + ni + "\" not found.", true);
+
+            return res;
+        } else
+        // if ni is null or blank, try to enumerate and determin by ip
+        if (ip != null && !ip.trim().equals("")) {
+            try {
+                InetAddress ipaddr = InetAddress.getByName(ip);
+                Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+                while (e.hasMoreElements() && res == null) {
+                    NetworkInterface n = e.nextElement();
+                    for (InterfaceAddress ia : n.getInterfaceAddresses()) {
+                        if (ia.getAddress().equals(ipaddr)) {
+                            System.out.println("# INFO: IP " + ip + " determined to match interface " + n.getDisplayName());
+                            res = n;
+                            break;
+                        }
+                    }
+                }
+            } catch (UnknownHostException ex) {
+                System.out.println("# FATAL: Invalid IP address: " + ip);
+                ex.printStackTrace();
+                System.exit(-1);
+            } catch (SocketException ex) {
+                System.out.println("# FATAL: Unable to enumerate network interfaces. Got socket exception.");
+                ex.printStackTrace();
+                System.exit(-1);
+            }
+
+            if (res != null)
+                return res;
+            else
+                showHelp("# FATAL: Could not find network interface having IP-address " + ip, true);
+        }
+
+        showHelp("# FATAL: Unable to determine network interface. Please provide interface name or IP.", true);
+
+        // if we get here, all failed
+        return null;
+
+    }
+    
+    public static String getDefaultProperty(String property, String def, String defaultExplanation) {
+        String s = System.getProperty(property);
+        if (s == null) {
+            System.out.println("# Property " + property + " is undefined. Using default value: " + def + " (" + defaultExplanation + ")");
+            s = def;
+        }
+        return s;
+    }
+    
     /**
     * @param args the command line arguments
     */
     public static void main(String args[]) {
+        showHelp(null, false);
+        
+        WsDiscoveryConstants.defaultTransportType = WsDiscoveryTransportTypes.valueOf(getDefaultProperty("compression", "UNCOMPRESSED", "No compression"));
+        System.out.println("# Compression set to " + WsDiscoveryConstants.defaultTransportType.name());
+        
+        if (System.getProperty("ip") != null || System.getProperty("if") != null) {
+            WsDiscoveryConstants.multicastInterface = determineNetworkInterface(System.getProperty("if"), System.getProperty("ip"));
+            System.out.println("# Using network interface " + WsDiscoveryConstants.multicastInterface.getDisplayName());
+        }
+        
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 final WsDiscoveryGui dialog = new WsDiscoveryGui();
