@@ -42,7 +42,6 @@ public class SOAPOverUDPTransportEfx extends SOAPOverUDPTransport implements ISO
 
     public SOAPOverUDPTransportEfx() {
         super();
-        efx = new EfficientXML();
     }
 
     /**
@@ -88,13 +87,14 @@ public class SOAPOverUDPTransportEfx extends SOAPOverUDPTransport implements ISO
     protected String decompress(byte[] message) {
         String s = null;
         try {
+            efx = new EfficientXML();
             s = efx.decompress(message);
 	    s = s.substring(38);
 	    //System.err.println("EFX decompressed:\n---\n"+s+"\n---\n");
         } catch (EfficientXMLException ex) {
-            Logger.getLogger(SOAPOverUDPTransportEfx.class.getName()).log(Level.SEVERE, null, ex);
-            System.err.println("FATAL: " + ex.getMessage());
-            System.exit(0);
+		if (logger != null)
+                logger.warning("decompress(): " + ex.getMessage());
+            s = null;
         }
         return s;
     }
@@ -102,11 +102,12 @@ public class SOAPOverUDPTransportEfx extends SOAPOverUDPTransport implements ISO
     protected byte[] compress(String message) {
         byte[] b = null;
         try {
+            efx = new EfficientXML();
             b = efx.compress(message);
         } catch (EfficientXMLException ex) {
-            Logger.getLogger(SOAPOverUDPTransportEfx.class.getName()).log(Level.SEVERE, null, ex);
-            System.err.println("FATAL: " + ex.getMessage());
-            System.exit(0);
+		if (logger != null)
+                logger.warning("decompress(): " + ex.getMessage());
+            b = null;
         }
         return b;
     }
