@@ -319,7 +319,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
         unicastSenderThread = new SOAPSenderThread("unicast_send",
                     outUnicastQueue, mainSocket, logger);
         multicastSenderThread = new SOAPSenderThread("multicast_send",
-                        outMulticastQueue, multicastReceiveSocket, logger);
+                        outMulticastQueue, mainSocket, logger);
         try {
             unicastReceiverThread = new SOAPReceiverThread("unicast_recv", inQueue, multicastSenderThread.getSocket(), logger);
         } catch (SocketException ex) {
