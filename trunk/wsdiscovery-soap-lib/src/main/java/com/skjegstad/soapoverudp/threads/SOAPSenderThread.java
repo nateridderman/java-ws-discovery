@@ -132,7 +132,7 @@ public class SOAPSenderThread extends Thread {
 
                     DatagramPacket packet = new DatagramPacket(nm.getPayload(), nm.getPayloadLen(), 
                                                                 nm.getDstAddress(), nm.getDstPort());
-
+                    
                     socket.send(packet);                    
 
                     // Adjust internal values according to SOAP-over-UDP retry/back-off algo.
