@@ -294,7 +294,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
 
         try {
             mainSocket = new DatagramSocket();
-            mainSocket.setReuseAddress(true);
+            mainSocket.setReuseAddress(true);            
             if (!mainSocket.getReuseAddress())
                 throw new SOAPOverUDPException("Platform doesn't support SO_REUSEADDR");
             this.unicastPort = mainSocket.getLocalPort();
@@ -319,7 +319,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
         unicastSenderThread = new SOAPSenderThread("unicast_send",
                     outUnicastQueue, mainSocket, logger);
         multicastSenderThread = new SOAPSenderThread("multicast_send",
-                        outMulticastQueue, mainSocket, logger);
+                        outMulticastQueue, multicastReceiveSocket, logger);
         try {
             unicastReceiverThread = new SOAPReceiverThread("unicast_recv", inQueue, multicastSenderThread.getSocket(), logger);
         } catch (SocketException ex) {
