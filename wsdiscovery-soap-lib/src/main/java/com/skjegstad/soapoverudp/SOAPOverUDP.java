@@ -42,7 +42,7 @@ public abstract class SOAPOverUDP implements ISOAPOverUDP {
     protected ISOAPOverUDPTransport transport;
     protected Charset encoding = Charset.defaultCharset();
     protected SOAPOverUDPConfiguration soapConfig;
-    private LinkedList<URI> messagesReceived = new LinkedList<URI>(); // list of received message IDs
+    private final LinkedList<URI> messagesReceived = new LinkedList<URI>(); // list of received message IDs
     protected Logger logger;
 
     public void start(NetworkInterface multicastInterface, int multicastPort, InetAddress multicastAddress, int multicastTtl, Logger logger) throws SOAPOverUDPException {
@@ -161,11 +161,13 @@ public abstract class SOAPOverUDP implements ISOAPOverUDP {
         }
         // TODO Use ringbuffer instead?
         // trim at 1000 entries
-        while (messagesReceived.size() > 1000) {
-            messagesReceived.removeFirst();
+        synchronized(messagesReceived) {
+            while (messagesReceived.size() > 1000) {
+                messagesReceived.removeFirst();
+            }
+            // add to end
+            messagesReceived.add(soap.getMessageId());
         }
-        // add to end
-        messagesReceived.add(soap.getMessageId());
     }
 
     /**
@@ -179,13 +181,15 @@ public abstract class SOAPOverUDP implements ISOAPOverUDP {
             throw new SOAPOverUDPException("Message ID was null.");
         }
 
-        for (URI a : messagesReceived) {
-            try {
-                if (a.equals(soap.getMessageId())) {
-                    return true;
+        synchronized(messagesReceived) {
+            for (URI a : messagesReceived) {
+                try {
+                    if (a.equals(soap.getMessageId())) {
+                        return true;
+                    }
+                } catch (NullPointerException ex) {
+                    logger.finer("isAlreadyReceived() got null pointer exception");
                 }
-            } catch (NullPointerException ex) {
-                logger.finer("isAlreadyReceived() got null pointer exception");
             }
         }
         return false;
