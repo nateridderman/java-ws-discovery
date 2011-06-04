@@ -524,7 +524,7 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         proxyAnnounce.setRelationshipType(WsDiscoveryConstants.defaultProxyRelatesToRelationship);
         
         try {
-            soapOverUDP.send(proxyAnnounce, relatesToMessage.getSrcAddress(), relatesToMessage.getSrcPort());
+            soapOverUDP.send(proxyAnnounce, relatesToMessage.getReplyAddress(), relatesToMessage.getReplyPort());
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send proxy announcement (Hello message)", ex);
         }
@@ -643,7 +643,7 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         }
         try {
             // Try to send to the port/address set by ReplyTo. If it is not set, we default to srcPort/address
-            soapOverUDP.send(m, originalMessage.getSrcAddress(), originalMessage.getSrcPort());
+            soapOverUDP.send(m, originalMessage.getReplyAddress(), originalMessage.getReplyPort());
             // Store time
             matchedService.setSentResolveMatch(originalMessage.getSrcAddress());
         } catch (SOAPOverUDPException ex) {
@@ -673,29 +673,7 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
 
         // RelatesTo must contain the original MessageID
         m.setRelatesTo(originalMessage.getMessageId());
-
-        // Where to send reply. Defaults to values from transport layer, but can
-        // we overridden by ReplyTo 
-        InetAddress rtHost = originalMessage.getSrcAddress();
-        int rtPort = originalMessage.getSrcPort();
-
-        // Set To to ReplyTo, or just leave the anonymous value
-        if ((originalMessage.getReplyTo() != null) && (originalMessage.getReplyTo().getAddress() != null)) {
-            m.setTo(originalMessage.getReplyTo().getAddress());
-
-            // if not anonymous reply-to, set correct port/host for send()
-            if (!originalMessage.getReplyTo().getAddress().equals(anonymousReplyTo.getAddress())) {
-                try {
-                    rtHost = InetAddress.getByName(originalMessage.getReplyTo().getAddress().getHost());
-                } catch (UnknownHostException ex) {
-                    throw new WsDiscoveryNetworkException("Unable to resolve host name in ReplyTo-field.", ex);
-                }
-                rtPort = originalMessage.getReplyTo().getAddress().getPort();
-            }
-        } else {
-            m.setTo(anonymousReplyTo.getAddress());            
-        }
-
+       
         m.setAddAppSequence(true); // MUST be included in ad-hoc, should not be included in managed (using http)
 
         for (WsDiscoveryService service : matches) {
@@ -711,8 +689,8 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         }
         
         try {
-            logger.fine("ProbeMatches sent with " + matches.size() + " matches to " + rtHost.getHostAddress() + ":" + rtPort);
-            soapOverUDP.send(m, rtHost, rtPort);            
+            logger.fine("ProbeMatches sent with " + matches.size() + " matches to " + m.getReplyAddress().getHostAddress() + ":" + m.getReplyPort());
+            soapOverUDP.send(m, m.getReplyAddress(), m.getReplyPort());            
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send ProbeMatch",ex);
         }

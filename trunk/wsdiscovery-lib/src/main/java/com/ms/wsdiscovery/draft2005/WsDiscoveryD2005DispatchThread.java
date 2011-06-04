@@ -368,8 +368,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
                 logger.fine("Service found locally. Sending resolve match.");
 
                 // Service found, send resolve match
-                sendResolveMatch(match, m,
-                        m.getSrcAddress(), m.getSrcPort());
+                sendResolveMatch(match, m);
             } else {
                 if (isProxy) { // We are running in proxy mode. Check full service directory                   
                     match = serviceDirectory.findService(resolveEndpoint);
@@ -378,8 +377,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
                     } else {
                         logger.fine("Service not found. Sending empty resolve match in proxy mode.");
                     }
-                    sendResolveMatch(match, m,
-                            m.getSrcAddress(), m.getSrcPort());
+                    sendResolveMatch(match, m);
                 } else // If in normal mode, just log failure.
                 {
                     logger.fine("Service not found locally. No reply sent.");
@@ -426,9 +424,8 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
             }
 
             if ((totalMatches.size() > 0) || isProxy) { // Proxy MUST reply with match, even if empty
-                logger.fine("ProbeMatches sent with " + totalMatches.size() + " matches to " + m.getSrcAddress() + ":" + m.getSrcPort());
                 try {
-                    sendProbeMatch(totalMatches, m, m.getSrcAddress(), m.getSrcPort());
+                    sendProbeMatch(totalMatches, m);
                 } catch (WsDiscoveryException ex) {
                     throw new WsDiscoveryNetworkException("Unable to send ProbeMatch", ex);
                 }
@@ -562,11 +559,9 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * 
      * @param matchedService The service that matched the Resolve - may be null.
      * @param originalMessage Original message as received from transport layer.
-     * @param dstAddress Destination address.
-     * @param dstPort Destination port.
      */
     private void sendResolveMatch(WsDiscoveryService matchedService,
-            WsDiscoveryD2005SOAPMessage originalMessage, InetAddress dstAddress, int dstPort) throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
+            WsDiscoveryD2005SOAPMessage originalMessage) throws WsDiscoveryXMLException, WsDiscoveryNetworkException {
         
         // Return if less than 10 seconds since we sent a resolve match for this service to the requesting host
         if ((matchedService != null) && (matchedService.getTriedToResolve() != null)) {
@@ -591,7 +586,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
         if ((originalMessage.getReplyTo() != null) && (originalMessage.getReplyTo().getAddress() != null)) {
             m.setTo(originalMessage.getReplyTo().getAddress());
         }
-
+        
         ResolveMatchType match = null;
         if (matchedService != null) {
             match = new ResolveMatchType();
@@ -603,16 +598,16 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
             match.getXAddrs().addAll(matchedService.getXAddrs());
 
             m.getJAXBBody().setResolveMatch(match);
-        }
+        }                
         try {
             // Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
-            soapOverUDP.send(m, dstAddress, dstPort);
+            soapOverUDP.send(m, m.getReplyAddress(), m.getReplyPort());
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send ResolveMatch", ex);
         }
 
         // Store time 
-        matchedService.setSentResolveMatch(dstAddress);
+        matchedService.setSentResolveMatch(m.getReplyAddress());
     }
 
     /**
@@ -620,11 +615,9 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
      * 
      * @param matches Services to include in ProbeMatch.
      * @param originalMessage Original message as received from transport layer.
-     * @param dstAddress Destination address.
-     * @param dstPort Destination port.
      */
     private void sendProbeMatch(IWsDiscoveryServiceCollection matches,
-            WsDiscoveryD2005SOAPMessage originalMessage, InetAddress dstAddress, int dstPort) throws WsDiscoveryException {
+            WsDiscoveryD2005SOAPMessage originalMessage) throws WsDiscoveryException {
 
         // Create probe match
         WsDiscoveryD2005SOAPMessage<ProbeMatchesType> m;
@@ -654,8 +647,9 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
             m.getJAXBBody().getProbeMatch().add(match);
         }
         try {
+            logger.fine("ProbeMatches sent with " + matches.size() + " matches to " + m.getReplyAddress() + ":" + m.getReplyPort());
             // Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
-            soapOverUDP.send(m, dstAddress, dstPort);
+            soapOverUDP.send(m, m.getReplyAddress(), m.getReplyPort());
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send ProbeMatch",ex);
         }
