@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
  *
  * @author Magnus Skjegstad
  */
-public enum SOAPOverUDPNamespaces {
+public enum SOAPOverUDPWsAddressingNamespaces {
     WS_ADDRESSING_2004_08 (
             "http://schemas.xmlsoap.org/ws/2004/08/addressing",
             URI.create("http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"),
@@ -49,7 +49,7 @@ public enum SOAPOverUDPNamespaces {
     private Marshaller marshaller = null;
     private Unmarshaller unmarshaller = null;
 
-    SOAPOverUDPNamespaces(String namespace, URI anonymousReplyTo, String contextPath) {
+    SOAPOverUDPWsAddressingNamespaces(String namespace, URI anonymousReplyTo, String contextPath) {
         this.namespace = namespace;
         this.contextPath = contextPath;
         this.anonymousReplyTo = anonymousReplyTo;

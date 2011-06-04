@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.skjegstad.soapoverudp.messages;
 
-import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPNamespaces;
+import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPWsAddressingNamespaces;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
 import com.skjegstad.soapoverudp.jaxb.wsaddressing200508.AttributedURIType;
@@ -68,7 +68,7 @@ public class SOAPOverUDPWSA200508Message extends SOAPOverUDPMessage {
 
     private void removeWSAHeader() throws SOAPOverUDPException {
         JAXBElement j = null;
-        Unmarshaller u = SOAPOverUDPNamespaces.WS_ADDRESSING_2005_08.getUnmarshaller();
+        Unmarshaller u = SOAPOverUDPWsAddressingNamespaces.WS_ADDRESSING_2005_08.getUnmarshaller();
         SOAPHeader header;
         try {
             header = soapMessage.getSOAPHeader();
@@ -118,8 +118,8 @@ public class SOAPOverUDPWSA200508Message extends SOAPOverUDPMessage {
         removeWSAHeader();
 
         // Instantiate JAXB marshaller
-        String namespace = SOAPOverUDPNamespaces.WS_ADDRESSING_2005_08.getNamespace();
-        Marshaller m = SOAPOverUDPNamespaces.WS_ADDRESSING_2005_08.getMarshaller();
+        String namespace = SOAPOverUDPWsAddressingNamespaces.WS_ADDRESSING_2005_08.getNamespace();
+        Marshaller m = SOAPOverUDPWsAddressingNamespaces.WS_ADDRESSING_2005_08.getMarshaller();
         SOAPHeader header;
         try {
             header = soapMessage.getSOAPHeader();
@@ -219,7 +219,7 @@ public class SOAPOverUDPWSA200508Message extends SOAPOverUDPMessage {
         return ((this.getReplyTo() == null) ||
                 (this.getReplyTo().getAddress() == null) ||
                 (this.getReplyTo().getAddress().equals(
-                    SOAPOverUDPNamespaces.WS_ADDRESSING_2005_08.getAnonymousReplyTo())));
+                    SOAPOverUDPWsAddressingNamespaces.WS_ADDRESSING_2005_08.getAnonymousReplyTo())));
     }
 
     

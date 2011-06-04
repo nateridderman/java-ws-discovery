@@ -77,6 +77,7 @@ public interface ISOAPOverUDPTransport extends ISOAPOverUDPConfigurable {
     int getUnicastPort();
 
     InetAddress getMulticastAddress();
+    InetAddress getUnicastAddress();
 
     /**
      * Shuts down the transport layer.

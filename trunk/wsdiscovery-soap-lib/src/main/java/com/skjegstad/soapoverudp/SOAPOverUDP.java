@@ -77,7 +77,7 @@ public abstract class SOAPOverUDP implements ISOAPOverUDP {
 
     public void sendMulticast(ISOAPOverUDPMessage soapMessage) throws SOAPOverUDPException {
         if (soapMessage == null)
-            throw new SOAPOverUDPException("SOAPOverUDP message is null");
+            throw new SOAPOverUDPException("SOAPOverUDP message is null");  
         registerReceived(soapMessage);
         try {
             transport.sendStringMulticast(soapMessage.toString(false, encoding), false);
@@ -88,7 +88,7 @@ public abstract class SOAPOverUDP implements ISOAPOverUDP {
 
     public void sendMulticastBlocking(ISOAPOverUDPMessage soapMessage) throws SOAPOverUDPException, InterruptedException {
         if (soapMessage == null)
-            throw new SOAPOverUDPException("SOAPOverUDP message is null");
+            throw new SOAPOverUDPException("SOAPOverUDP message is null");     
         registerReceived(soapMessage);
         transport.sendStringMulticast(soapMessage.toString(false, encoding), true);
     }

@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.skjegstad.soapoverudp;
 
-import com.skjegstad.soapoverudp.transport.SOAPOverUDPTransport;
 import com.skjegstad.soapoverudp.configurations.SOAPOverUDPConfiguration;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDP;
