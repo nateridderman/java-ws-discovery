@@ -126,6 +126,8 @@ public class SOAPReceiverThread extends Thread {
                     synchronized(this) {
                         notifyAll();
                     }                
+                } catch (SocketTimeoutException ex) {
+                    continue;
                 } catch (Exception ex) {
                     if (logger != null) {
                         synchronized (logger) {
