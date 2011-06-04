@@ -135,9 +135,9 @@ public class WsDiscoveryS11SOAPMessage<E> extends SOAPOverUDPWSA200508Message im
         this.setAction(message.getAction());
         this.setRelationshipType(message.getRelationshipType());
         this.setDstAddress(message.getDstAddress());
-        this.setSrcAddress(message.getSrcAddress());
-        this.setSrcPort(message.getSrcPort());
         this.setDstPort(message.getDstPort());
+        this.setSrcAddress(message.getSrcAddress());
+        this.setSrcPort(message.getSrcPort());        
         this.setMessageId(message.getMessageId());
         this.setReplyTo(message.getReplyTo());
         this.setTo(message.getTo());

@@ -47,7 +47,9 @@ import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ResolveType;
 import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ScopesType;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
 import com.skjegstad.soapoverudp.SOAPOverUDP11;
+import com.skjegstad.soapoverudp.SOAPOverUDPUtilities;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
+import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPWsAddressingNamespaces;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPMessage;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
@@ -70,8 +72,7 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
     protected URI multicastTo = URI.create("urn:docs-oasis-open-org:ws-dd:ns:discovery:2009:01");
     protected String proxySuppressionRelationship = "Suppression";
     protected final MatchBy defaultMatcher = WsDiscoveryNamespaces.WS_DISCOVERY_2009_01.getDefaultMatcher();
-    protected SOAPOverUDPEndpointReferenceType anonymousReplyTo = new SOAPOverUDPEndpointReferenceType("http://www.w3.org/2005/08/addressing/anonymous");
-   
+    
     /**
      * Creates a new {@link DispatchThread} instance.
      *
@@ -177,9 +178,6 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         if (types != null) {
             probe.getJAXBBody().getTypes().addAll(types);
         }
-
-        // When set to anonymous, the response will be sent to the src ip and port used on transport layer
-        probe.setReplyTo(anonymousReplyTo);
 
         // Send packet multicast or to proxy
         if (useProxy) {
@@ -627,7 +625,7 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         if ((originalMessage.getReplyTo() != null) && (originalMessage.getReplyTo().getAddress() != null)) {
             m.setTo(originalMessage.getReplyTo().getAddress());
         } else
-            m.setTo(anonymousReplyTo.getAddress());
+            m.setTo(SOAPOverUDPWsAddressingNamespaces.WS_ADDRESSING_2005_08.getAnonymousReplyTo());
 
         ResolveMatchType match = null;
         if (matchedService != null) {
@@ -661,7 +659,6 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
      */
     private void sendProbeMatch(IWsDiscoveryServiceCollection matches,
             WsDiscoveryS11SOAPMessage originalMessage) throws WsDiscoveryException {
-
         
         // Create probe match
         WsDiscoveryS11SOAPMessage<ProbeMatchesType> m;
@@ -689,8 +686,8 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         }
         
         try {
-            logger.fine("ProbeMatches sent with " + matches.size() + " matches to " + m.getReplyAddress().getHostAddress() + ":" + m.getReplyPort());
-            soapOverUDP.send(m, m.getReplyAddress(), m.getReplyPort());            
+            logger.fine("ProbeMatches sent with " + matches.size() + " matches to " + originalMessage.getReplyAddress() + ":" + originalMessage.getReplyPort());
+            soapOverUDP.send(m, originalMessage.getReplyAddress(), originalMessage.getReplyPort());            
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send ProbeMatch",ex);
         }
