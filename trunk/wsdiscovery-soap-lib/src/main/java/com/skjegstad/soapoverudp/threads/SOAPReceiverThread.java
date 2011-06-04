@@ -126,17 +126,15 @@ public class SOAPReceiverThread extends Thread {
                     synchronized(this) {
                         notifyAll();
                     }                
-                } catch (SocketTimeoutException ex) {
-                    continue;
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     if (logger != null) {
                         synchronized (logger) {
                             logger.severe(ex.getMessage());
                         }
                     } else {
-                        ex.printStackTrace();
+                        ex.printStackTrace(System.err);
                     }
-                    break;
+                    continue; // always continue, in case things improve
                 }
             }
         } finally {   
