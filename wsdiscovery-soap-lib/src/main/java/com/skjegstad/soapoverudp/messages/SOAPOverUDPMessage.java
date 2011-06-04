@@ -34,15 +34,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
@@ -507,7 +504,11 @@ public abstract class SOAPOverUDPMessage implements ISOAPOverUDPMessage {
     public int getReplyPort() {
         if (isReplyToAnonymous())
             return getSrcPort();
-        return this.getReplyTo().getAddress().getPort();
+        try {
+            return this.getReplyTo().getAddress().getPort();
+        } catch (Exception ex) {
+            return getSrcPort();
+        }
     }
 
     public InetAddress getReplyAddress() {
