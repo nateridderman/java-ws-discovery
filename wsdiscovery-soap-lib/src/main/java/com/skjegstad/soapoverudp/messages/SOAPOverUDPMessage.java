@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package com.skjegstad.soapoverudp.messages;
 
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPMessage;
-import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPNamespaces;
+import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPWsAddressingNamespaces;
 import com.skjegstad.soapoverudp.SOAPOverUDPUtilities;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
@@ -190,10 +190,10 @@ public abstract class SOAPOverUDPMessage implements ISOAPOverUDPMessage {
      * @throws SOAPOverUDPException on error.
      */
     protected void readWSAHeader() throws SOAPOverUDPException {
-        if (this.getHeaderNamespaceByURI(SOAPOverUDPNamespaces.WS_ADDRESSING_2005_08.getNamespace()) != null)
+        if (this.getHeaderNamespaceByURI(SOAPOverUDPWsAddressingNamespaces.WS_ADDRESSING_2005_08.getNamespace()) != null)
             readWSA200508Header();
         else
-        if (this.getHeaderNamespaceByURI(SOAPOverUDPNamespaces.WS_ADDRESSING_2004_08.getNamespace()) != null)
+        if (this.getHeaderNamespaceByURI(SOAPOverUDPWsAddressingNamespaces.WS_ADDRESSING_2004_08.getNamespace()) != null)
             readWSA200408Header();
         else
             throw new SOAPOverUDPException("WS-Addressing not found in header.");
@@ -207,7 +207,7 @@ public abstract class SOAPOverUDPMessage implements ISOAPOverUDPMessage {
      */
     private void readWSA200408Header() throws SOAPOverUDPException {
         JAXBElement j = null;
-        Unmarshaller u = SOAPOverUDPNamespaces.WS_ADDRESSING_2004_08.getUnmarshaller();
+        Unmarshaller u = SOAPOverUDPWsAddressingNamespaces.WS_ADDRESSING_2004_08.getUnmarshaller();
 
         SOAPHeader header;
         try {
@@ -268,7 +268,7 @@ public abstract class SOAPOverUDPMessage implements ISOAPOverUDPMessage {
      */
     private void readWSA200508Header() throws SOAPOverUDPException {
         JAXBElement j = null;
-        Unmarshaller u = SOAPOverUDPNamespaces.WS_ADDRESSING_2005_08.getUnmarshaller();
+        Unmarshaller u = SOAPOverUDPWsAddressingNamespaces.WS_ADDRESSING_2005_08.getUnmarshaller();
 
         SOAPHeader header;
         try {
