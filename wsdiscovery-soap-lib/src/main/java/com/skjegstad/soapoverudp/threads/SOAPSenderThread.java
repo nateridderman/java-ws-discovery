@@ -145,25 +145,25 @@ public class SOAPSenderThread extends Thread {
                     synchronized(this) {
                         notifyAll();
                     }
-
-                } catch (IOException ex) {
-                    if (logger != null) {
-                        synchronized (logger) {
-                            logger.severe(ex.getMessage());
-                        }
-                    } else {
-                        ex.printStackTrace();
-                    }
-                    threadDone = true;
+                 
                 } catch (InterruptedException ex) {
                     if (logger != null) {
                         synchronized (logger) {
                             logger.severe(ex.getMessage());
                         }
                     } else {
-                        ex.printStackTrace();
+                        ex.printStackTrace(System.err);
                     }
                     threadDone = true;
+                } catch (Exception ex) { // Other exceptions. Do not exit.
+                    if (logger != null) {
+                        synchronized (logger) {
+                            logger.severe(ex.getMessage());
+                        }
+                    } else {
+                        ex.printStackTrace(System.err);
+                    }
+                    threadDone = false;
                 }
             }
         } finally {        
