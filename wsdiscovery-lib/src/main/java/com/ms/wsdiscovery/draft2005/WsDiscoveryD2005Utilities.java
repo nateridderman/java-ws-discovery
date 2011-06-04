@@ -77,7 +77,7 @@ public class WsDiscoveryD2005Utilities {
      * @param jaxbbody JAXB object.
      * @throws WsDiscoveryServiceDirectoryException
      */
-    public static WsDiscoveryService createWsDiscoveryService(Object jaxbbody) throws WsDiscoveryServiceDirectoryException {
+    private static WsDiscoveryService createWsDiscoveryService(Object jaxbbody) throws WsDiscoveryServiceDirectoryException {
         WsDiscoveryService service = new WsDiscoveryService();
         if (jaxbbody instanceof HelloType) {
             HelloType m = (HelloType)jaxbbody;

@@ -601,7 +601,7 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
         }                
         try {
             // Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
-            soapOverUDP.send(m, m.getReplyAddress(), m.getReplyPort());
+            soapOverUDP.send(m, originalMessage.getReplyAddress(), originalMessage.getReplyPort());
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send ResolveMatch", ex);
         }
@@ -647,9 +647,9 @@ public class WsDiscoveryD2005DispatchThread extends WsDiscoveryDispatchThread {
             m.getJAXBBody().getProbeMatch().add(match);
         }
         try {
-            logger.fine("ProbeMatches sent with " + matches.size() + " matches to " + m.getReplyAddress() + ":" + m.getReplyPort());
+            logger.fine("ProbeMatches sent with " + matches.size() + " matches to " + originalMessage.getReplyAddress() + ":" + originalMessage.getReplyPort());
             // Send match to dstaddress and dstport (this is the source address and port of the host that sent the resolve-packet)
-            soapOverUDP.send(m, m.getReplyAddress(), m.getReplyPort());
+            soapOverUDP.send(m, originalMessage.getReplyAddress(), originalMessage.getReplyPort());
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryNetworkException("Unable to send ProbeMatch",ex);
         }
