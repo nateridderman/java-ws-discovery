@@ -248,15 +248,17 @@ public class WsDiscoveryS11SOAPMessage<E> extends SOAPOverUDPWSA200508Message im
             } catch (JAXBException ex) {
                 throw new WsDiscoveryXMLException("Unable to unmarshal WS-Discovery header element " + headerElement.getTagName(), ex);
             }
-
-            String tag = j.getName().getLocalPart();
-            if (j.getValue().getClass().equals(AppSequenceType.class)) {
-                AppSequenceType a = (AppSequenceType)j.getValue();
-                if (tag.equals("AppSequence")) {
-                    instanceId = a.getInstanceId();
-                    messageNumber = a.getMessageNumber();
-                    sequenceId = a.getSequenceId();
-                }
+            
+            if (j != null && j.getName() != null) {
+              String tag = j.getName().getLocalPart();
+              if (j.getValue().getClass().equals(AppSequenceType.class)) {
+                  AppSequenceType a = (AppSequenceType)j.getValue();
+                  if (tag.equals("AppSequence")) {
+                      instanceId = a.getInstanceId();
+                      messageNumber = a.getMessageNumber();
+                      sequenceId = a.getSequenceId();
+                  }
+              }
             }
         }
     }
