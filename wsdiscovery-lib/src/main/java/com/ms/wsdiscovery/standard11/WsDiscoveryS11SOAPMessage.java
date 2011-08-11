@@ -174,12 +174,17 @@ public class WsDiscoveryS11SOAPMessage<E> extends SOAPOverUDPWSA200508Message im
                 throw new WsDiscoveryException("An unexpected error occured while unmarshalling header element " + headerElement.getTagName(), ex);
             }
 
-            String tag = j.getName().getLocalPart();
+            try {
+              String tag = j.getName().getLocalPart();
 
-            if (j.getValue().getClass().equals(AppSequenceType.class)) {
-                if (tag.equalsIgnoreCase("AppSequence")) {
-                    headerElement.detachNode(); // detach this node
-                }
+              if (j.getValue().getClass().equals(AppSequenceType.class)) {
+                  if (tag.equalsIgnoreCase("AppSequence")) {
+                      headerElement.detachNode(); // detach this node
+                  }
+              }
+            } catch (Exception ex) {               
+               throw new WsDiscoveryException("Got unexpected exception while extracting name tag from " +
+                headerElement.getTagName() + (j==null ? " (j was null)" : ""), ex);
             }
         }
     }
@@ -249,7 +254,7 @@ public class WsDiscoveryS11SOAPMessage<E> extends SOAPOverUDPWSA200508Message im
                 throw new WsDiscoveryXMLException("Unable to unmarshal WS-Discovery header element " + headerElement.getTagName(), ex);
             }
             
-            if (j != null && j.getName() != null) {
+            try {
               String tag = j.getName().getLocalPart();
               if (j.getValue().getClass().equals(AppSequenceType.class)) {
                   AppSequenceType a = (AppSequenceType)j.getValue();
@@ -259,6 +264,9 @@ public class WsDiscoveryS11SOAPMessage<E> extends SOAPOverUDPWSA200508Message im
                       sequenceId = a.getSequenceId();
                   }
               }
+            } catch (Exception ex) {               
+               throw new WsDiscoveryException("Got unexpected exception while extracting name tag from " +
+                headerElement.getTagName() + (j==null ? " (j was null)" : ""), ex);
             }
         }
     }
