@@ -542,7 +542,7 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         }
         if (useProxy) { // managed mode
             hello.setTo(remoteProxyService.getEndpointReference().getAddress()); // add proxy address as To (MUST)
-            hello.setAddAppSequence(true); // set to false when using http
+            hello.setAddAppSequence(false); // SHOULD be false in managed mode
             try {
                 soapOverUDP.send(hello, useProxyAddress, useProxyPort); // unicast to proxy
             } catch (SOAPOverUDPException ex) {
@@ -550,6 +550,7 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
             }
         } else { // ad hoc mode
             hello.setTo(multicastTo);
+            hello.setAddAppSequence(true); // MUST be true in ad-hoc mode
             try {
                 soapOverUDP.sendMulticast(hello);
             } catch (SOAPOverUDPException ex) {
@@ -573,18 +574,19 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         }
         if (useProxy) { // managed mode
             bye.setTo(remoteProxyService.getEndpointReference().getAddress());
-            bye.setAddAppSequence(true); // todo set to false when using http
+            bye.setAddAppSequence(false); // SHOULD be false in managed mode
             try {
                 soapOverUDP.send(bye, useProxyAddress, useProxyPort);
             } catch (SOAPOverUDPException ex) {
-                throw new WsDiscoveryNetworkException("Unable to multicast Bye message");
+                throw new WsDiscoveryNetworkException("Unable to multicast Bye message in managed mode");
             }
         } else { // ad hoc mode
             bye.setTo(multicastTo);
+            bye.setAddAppSequence(true); // MUST be true in ad-hoc mode
             try {
                 soapOverUDP.sendMulticast(bye);
             } catch (SOAPOverUDPException ex) {
-                throw new WsDiscoveryNetworkException("Unable to multicast Bye message");
+                throw new WsDiscoveryNetworkException("Unable to multicast Bye message in ad-hoc mode");
             }
         }
         logger.finer("sendBye() called for service " + service.getEndpointReference().getAddress().toString());
@@ -617,6 +619,8 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         } catch (SOAPOverUDPException ex) {
             throw new WsDiscoveryXMLException("Unable to create ResolveMatches message", ex);
         }
+        
+        m.setAddAppSequence(!useProxy); // SHOULD be false in managed mode
 
         // RelatesTo must contain the original MessageID
         m.setRelatesTo(originalMessage.getMessageId());
@@ -671,7 +675,7 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
         // RelatesTo must contain the original MessageID
         m.setRelatesTo(originalMessage.getMessageId());
        
-        m.setAddAppSequence(true); // MUST be included in ad-hoc, should not be included in managed (using http)
+        m.setAddAppSequence(!useProxy); // MUST be included in ad-hoc, SHOULD not be included in managed (using http)
 
         for (WsDiscoveryService service : matches) {
             ProbeMatchType match = new ProbeMatchType();
