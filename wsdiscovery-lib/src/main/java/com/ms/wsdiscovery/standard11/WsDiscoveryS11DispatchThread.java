@@ -23,8 +23,6 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import com.ms.wsdiscovery.WsDiscoveryConstants;
 import com.ms.wsdiscovery.datatypes.WsDiscoveryNamespaces;
@@ -47,13 +45,11 @@ import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ResolveType;
 import com.ms.wsdiscovery.jaxb.standard11.wsdiscovery.ScopesType;
 import com.ms.wsdiscovery.servicedirectory.WsDiscoveryServiceDirectory;
 import com.skjegstad.soapoverudp.SOAPOverUDP11;
-import com.skjegstad.soapoverudp.SOAPOverUDPUtilities;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPEndpointReferenceType;
 import com.skjegstad.soapoverudp.datatypes.SOAPOverUDPWsAddressingNamespaces;
 import com.skjegstad.soapoverudp.exceptions.SOAPOverUDPException;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPMessage;
 import com.skjegstad.soapoverudp.interfaces.ISOAPOverUDPTransport;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 
 /** 
