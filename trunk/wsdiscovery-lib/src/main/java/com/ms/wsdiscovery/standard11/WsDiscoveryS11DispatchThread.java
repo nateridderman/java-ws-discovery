@@ -707,7 +707,7 @@ public class WsDiscoveryS11DispatchThread extends WsDiscoveryDispatchThread {
                 return;
             message = new WsDiscoveryS11SOAPMessage(m);
         } catch (SOAPOverUDPException ex) {
-            throw new WsDiscoveryNetworkException("Unable to received message from SOAPOverUDP", ex);
+            throw new WsDiscoveryNetworkException("Unable to receive message from SOAPOverUDP", ex);
         }
 
         if (message == null) {
