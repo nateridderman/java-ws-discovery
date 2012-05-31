@@ -108,7 +108,7 @@ public class SOAPOverUDPTransport implements ISOAPOverUDPTransport {
      * @throws java.lang.InterruptedException if interrupted while waiting for the message to be sent.
      */
     public void send(ISOAPOverUDPNetworkMessage message, boolean blockUntilSent) throws InterruptedException {
-        outQueue.add(new SOAPOverUDPQueuedNetworkMessage(soapConfig, message, false));
+        outQueue.add(new SOAPOverUDPQueuedNetworkMessage(soapConfig, message, message.getDstAddress().equals(this.multicastAddress)));
             if (blockUntilSent)
                 while (!outQueue.isEmpty())
                     synchronized (senderThread) {
